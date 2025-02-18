@@ -13,6 +13,13 @@ class GUNFIREPARAGON_API AFPSGameMode : public AGameMode
 	GENERATED_BODY()
 
 public:
+	
+	AFPSGameMode();
 	virtual void StartPlay() override;
+	void OnBossDefeated();
+	void OnPlayerDead();
+	void EndGame(bool bPlayWin);
+	void ReturnToMainMenu();
+	void StartNewStage(int32 Stage);
 
 };
