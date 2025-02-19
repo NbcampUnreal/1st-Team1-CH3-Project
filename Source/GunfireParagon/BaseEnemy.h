@@ -4,12 +4,7 @@
 #include "GameFramework/Character.h"
 #include "BaseEnemy.generated.h"
 
-UENUM(BlueprintType)
-enum class EEnemyAttackType : uint8
-{
-	Melee UMETA(DisplayName = "Melee"),
-	Range UMETA(DisplayName = "Range"),
-};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 
 UCLASS()
 class GUNFIREPARAGON_API ABaseEnemy : public ACharacter
@@ -19,7 +14,7 @@ class GUNFIREPARAGON_API ABaseEnemy : public ACharacter
 public:
 	ABaseEnemy();
 
-	virtual void Attack(EEnemyAttackType AttackType);
+	virtual void Attack();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void StartAttack();
@@ -31,6 +26,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void EndSkill();
 
+	UPROPERTY(BlueprintAssignable, Category = "Combat")
+	FOnAttackEndDelegate OnAttackEnd;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float AttackRange;
+
 protected:
 	virtual float TakeDamage(
 		float DamageAmount,
@@ -41,16 +42,18 @@ protected:
 	virtual void PerformMeleeAttack() PURE_VIRTUAL(ABaseEnemy::PerformMeleeAttack, );
 	virtual void PerformRangeAttack() PURE_VIRTUAL(ABaseEnemy::PerformRangeAttack, );
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	TArray<EEnemyAttackType> AttackTypes;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsAttacking;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")	
 	bool bIsUsingSkill;
 
-	float CurrentHealth;
-	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float Damage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float CurrentHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float MaxHealth;
 	
 	void OnDeath();
 

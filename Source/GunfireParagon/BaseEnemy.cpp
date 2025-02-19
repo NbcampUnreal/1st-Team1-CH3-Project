@@ -2,7 +2,6 @@
 #include "BaseEnemyAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/DamageEvents.h"
-#include "Kismet/GameplayStatics.h"
 
 ABaseEnemy::ABaseEnemy()
 {
@@ -22,28 +21,20 @@ ABaseEnemy::ABaseEnemy()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
+	Damage = 20.0f;
+	AttackRange = 200.0f;
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
-	Damage = 20.0f;
+
 	bIsAttacking = false;
 	bIsUsingSkill = false;
 }
 
-void ABaseEnemy::Attack(EEnemyAttackType AttackType)
+void ABaseEnemy::Attack()
 {
 	if (!bIsAttacking)
 	{
 		StartAttack();
-
-		if (AttackType == EEnemyAttackType::Melee)
-		{
-			PerformMeleeAttack();
-		}
-
-		else if (AttackType == EEnemyAttackType::Range)
-		{
-			PerformRangeAttack();
-		}
 	}
 }
 
@@ -55,6 +46,9 @@ void ABaseEnemy::StartAttack()
 void ABaseEnemy::EndAttack()
 {
 	bIsAttacking = false;
+
+	OnAttackEnd.Broadcast();
+	OnAttackEnd.Clear();
 }
 
 void ABaseEnemy::UseSkill()

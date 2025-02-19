@@ -38,18 +38,22 @@ void ABaseEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	if (BehaviorTree)
+	{
+		RunBehaviorTree(BehaviorTree);
+	}
+
 	if (BlackboardData)
 	{
+		ABaseEnemy* ControlledEnemy = Cast<ABaseEnemy>(InPawn);
+		if (!ControlledEnemy) return;
+
 		if (UseBlackboard(BlackboardData, BlackboardComponent))
 		{
 			BlackboardComponent = GetBlackboardComponent();
 			BlackboardComponent->SetValueAsVector("SpawnLocation", InPawn->GetActorLocation());
+			BlackboardComponent->SetValueAsFloat("AttackRange", ControlledEnemy->AttackRange);
 		}
-	}
-
-	if (BehaviorTree)
-	{
-		RunBehaviorTree(BehaviorTree);
 	}
 }
 
