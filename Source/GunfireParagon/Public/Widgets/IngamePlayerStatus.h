@@ -19,6 +19,8 @@ class GUNFIREPARAGON_API UIngamePlayerStatus : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void NativeConstruct() override;
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -48,4 +50,12 @@ public:
 	int32 CurrentShield;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
 	int32 MaxShield;
+
+	UFUNCTION(BlueprintCallable, Category="UI")
+	void UpdatePlayerState();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetCurrentHP(int32 UpdateHP, int32 UpdateMaxHP);
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetCurrentShield(int32 UpdateShield, int32 UpdateMaxShield);
 };

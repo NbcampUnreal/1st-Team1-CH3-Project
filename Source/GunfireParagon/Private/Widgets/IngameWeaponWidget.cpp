@@ -4,3 +4,28 @@
 #include "Widgets/IngameWeaponWidget.h"
 #include "Components\Image.h"
 #include "Components\TextBlock.h"
+
+void UIngameWeaponWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	UpdateWeaponState();
+}
+
+void UIngameWeaponWidget::UpdateWeaponState()
+{
+	if (AmmoTextBlock)
+	{
+		//Setter
+		CurrentAmmo = FMath::Clamp(CurrentAmmo, 0, MaxAmmo);
+
+		FString AmmoString = FString::Printf(TEXT("%d / %d"), CurrentAmmo, MaxAmmo);
+		AmmoTextBlock->SetText(FText::FromString(AmmoString));
+	}
+
+	if (GrenadeTextBlock)
+	{
+		FString GrenadeString = FString::Printf(TEXT("%d"), CurrentGrenade);
+		GrenadeTextBlock->SetText(FText::FromString(GrenadeString));
+	}
+}
