@@ -14,6 +14,7 @@ class GUNFIREPARAGON_API UFPSGameInstance : public UGameInstance
 	
 public:
 	UFPSGameInstance();
+	virtual void Init() override;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;
@@ -21,8 +22,21 @@ public:
 	float ExperiencePoints;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
 	float PlayerHealth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
-	int32 CurrentLevelIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
+	int32 CurrentStageIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
+	TArray<FName> StageMapNames;
+
+	UFUNCTION(BlueprintCallable)
+	void StartGame();
+	UFUNCTION(BlueprintCallable)
+	void LoadNextStage();
+	UFUNCTION(BlueprintCallable)
+	void GotoMainMenu();
+
+
+
+
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PassiveInventory")
 	// TArray<FPassiveInventory> PlayerPassiveInventory;
 

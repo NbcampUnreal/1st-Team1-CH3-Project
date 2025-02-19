@@ -3,11 +3,12 @@
 
 #include "FPSGameState.h"
 #include "FPSGameMode.h"
+#include "FPSGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 AFPSGameState::AFPSGameState()
 {
-	CurrentStage = 1;
+	CurrentStageIndex = 1;
 	RemainingEnemies = 0;
 }
 
@@ -16,28 +17,16 @@ void AFPSGameState::OnEnemyKilled()
 {
 	RemainingEnemies--;
 	UE_LOG(LogTemp, Warning, TEXT("Remaining Enemies : %d"), RemainingEnemies);
-
+	
 	if (RemainingEnemies <= 0)
 	{
-		AdvancedToNextStage();
+		if (AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			if (FPSGameMode)
+			{
+				FPSGameMode->OnStageClear();
+			}
+		}
 	}
 }
 
-void AFPSGameState::AdvancedToNextStage()
-{
-	AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(this));
-	if (!GameMode) return;
-
-	if (CurrentStage < 10)
-	{
-		CurrentStage++;
-		UE_LOG(LogTemp, Warning, TEXT("Advance to stage : %d"), CurrentStage);
-		// UGameplayStatics::OpenLevel(this, *Nextlevel); 다음 레벨 만들고 더 설정해야 할듯
-		GameMode->StartNewStage(CurrentStage);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Boss Defeated, Call GameMode OnBossDefeated(EndGame()) function"));
-		GameMode->OnBossDefeated();
-	}
-}

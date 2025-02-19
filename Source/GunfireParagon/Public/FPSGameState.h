@@ -15,10 +15,9 @@ class GUNFIREPARAGON_API AFPSGameState : public AGameState
 public:
 	AFPSGameState();
 	void OnEnemyKilled();
-	void AdvancedToNextStage();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
-	int32 CurrentStage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
+	int32 CurrentStageIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
 	int32 RemainingEnemies;
 };

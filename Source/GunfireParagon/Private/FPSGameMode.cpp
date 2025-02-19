@@ -3,7 +3,11 @@
 
 #include "FPSGameMode.h"
 #include "FPSGameState.h"
+#include "FPSGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "BaseEnemy.h"
+#include "AIObjectPool.h"
+#include "SpawnVolume.h"
 
 AFPSGameMode::AFPSGameMode()
 {
@@ -12,10 +16,18 @@ AFPSGameMode::AFPSGameMode()
 	GameStateClass = AFPSGameState::StaticClass();
 }
 
-void AFPSGameMode::StartPlay()
+void AFPSGameMode::BeginPlay()
 {
-	Super::StartPlay();
-
+	Super::BeginPlay();
+	
+	// HUD 추가 로직
+	/*
+	AMyPlayerController* PlayerController = Cast<AmyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	if (PlayerController)
+	{
+		PlayerController->ShowHUD();
+	}
+	*/
 }
 
 void AFPSGameMode::OnBossDefeated()
@@ -26,6 +38,78 @@ void AFPSGameMode::OnBossDefeated()
 void AFPSGameMode::OnPlayerDead()
 {
 	EndGame(false);
+}
+
+void AFPSGameMode::OnStageClear()
+{
+	ClearAllEnemies();
+
+	// 상자를 열면 다음스테이지 가던지, 어디에 도착하면 다음 스테이지 가던지 로직 구현해야함
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GameInstance))
+		{
+			if (FPSGameInstance)
+			{
+				FPSGameInstance->LoadNextStage();
+
+				int32 NewStageIndex = FPSGameInstance->CurrentStageIndex;
+				int32 NumEnemies = NewStageIndex * 5;
+
+				// 바로 스폰되면 어색할 수 있으니 보고 SetTimer 추가할지 생각
+				SpawnEnemies(NumEnemies);
+			}
+		}
+	}
+}
+
+void AFPSGameMode::SpawnEnemies(int32 NumEnemies)
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	AFPSGameState* FPSGameState = Cast<AFPSGameState>(World->GetGameState());
+	if (!FPSGameState) return;
+
+	AAIObjectPool* AIObjectPool = Cast<AAIObjectPool>(UGameplayStatics::GetActorOfClass(World, AAIObjectPool::StaticClass()));
+	if (AIObjectPool) return;
+
+	TArray<AActor*> FoundVolumes;
+
+	UGameplayStatics::GetAllActorsOfClass(World, ASpawnVolume::StaticClass(), FoundVolumes);
+	if (FoundVolumes.Num() > 0)
+	{
+		ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
+		if (SpawnVolume)
+		{
+			for (int32 i = 0; i < NumEnemies; i++)
+			{
+				ABaseEnemy* SpawnedEnemy = AIObjectPool->GetPooledAI(SpawnVolume);
+				if (SpawnedEnemy)
+				{
+					FPSGameState->RemainingEnemies++;
+				}
+			}
+		}	
+	}
+}
+
+void AFPSGameMode::ClearAllEnemies()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	TArray<AActor*> Enemies;
+	UGameplayStatics::GetAllActorsOfClass(World, ABaseEnemy::StaticClass(), Enemies);
+
+	for (AActor* Enemy : Enemies)
+	{
+		if (Enemy)
+		{
+			Enemy->Destroy();
+		}
+	}
 }
 
 void AFPSGameMode::EndGame(bool bPlayWin)
@@ -60,16 +144,15 @@ void AFPSGameMode::EndGame(bool bPlayWin)
 
 void AFPSGameMode::ReturnToMainMenu()
 {
-	UGameplayStatics::OpenLevel(this, "MainMenu");
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GameInstance))
+		{
+			if (FPSGameInstance)
+			{
+				FPSGameInstance->GotoMainMenu();
+			}
+		}
+	}	
 }
 
-void AFPSGameMode::StartNewStage(int32 Stage)
-{
-	AFPSGameState* FPSGameState = GetWorld()->GetGameState<AFPSGameState>();
-	if (!FPSGameState) return;
-
-	FPSGameState->RemainingEnemies = Stage * 10; // 스테이지 * 10마리로 설정
-	UE_LOG(LogTemp, Warning, TEXT("Stage : %d, SpawnEnemies : %d"), Stage, FPSGameState->RemainingEnemies);
-
-	// 캐릭터, 적AI, 액터 스폰 로직 필요함
-}

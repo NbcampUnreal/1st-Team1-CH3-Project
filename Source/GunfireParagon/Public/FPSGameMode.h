@@ -15,11 +15,19 @@ class GUNFIREPARAGON_API AFPSGameMode : public AGameMode
 public:
 	
 	AFPSGameMode();
-	virtual void StartPlay() override;
-	void OnBossDefeated();
-	void OnPlayerDead();
-	void EndGame(bool bPlayWin);
-	void ReturnToMainMenu();
-	void StartNewStage(int32 Stage);
+	virtual void BeginPlay() override;
+	void ClearAllEnemies();
 
+	UFUNCTION()
+	void OnBossDefeated();
+	UFUNCTION()
+	void OnPlayerDead();
+	UFUNCTION()
+	void OnStageClear();
+	UFUNCTION()
+	void SpawnEnemies(int32 NumEnemies);
+	UFUNCTION()
+	void EndGame(bool bPlayWin);
+	UFUNCTION()
+	void ReturnToMainMenu();
 };

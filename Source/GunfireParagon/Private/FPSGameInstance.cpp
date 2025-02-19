@@ -2,15 +2,64 @@
 
 
 #include "FPSGameInstance.h"
-
+#include "Kismet/GameplayStatics.h"
 
 UFPSGameInstance::UFPSGameInstance()
 {
 	PlayerLevel = 1;
 	ExperiencePoints = 0.f;
 	PlayerHealth = 1000.0f;
-	CurrentLevelIndex = 0;
+	CurrentStageIndex = 0; // 0 이 메인메뉴, 1 ~ 10 Stage 
 }
+
+void UFPSGameInstance::Init()
+{
+	Super::Init();
+
+	if (CurrentStageIndex == 0)
+	{
+		if (StageMapNames.IsValidIndex(CurrentStageIndex))
+		{
+			UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+		}
+	}
+}
+
+// LoadNextStage가 있어서 없어도 될 것 같긴한데 추후 유용할 수 있으니 남겨둠
+void UFPSGameInstance::StartGame()
+{
+	CurrentStageIndex = 1;
+	if (StageMapNames.IsValidIndex(CurrentStageIndex))
+	{
+		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+	}
+}
+
+void UFPSGameInstance::LoadNextStage()
+{
+	CurrentStageIndex++;
+
+	if (CurrentStageIndex > 10)
+	{
+		GotoMainMenu();
+		return;
+	}
+
+	if (StageMapNames.IsValidIndex(CurrentStageIndex))
+	{
+		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+	}
+}
+
+void UFPSGameInstance::GotoMainMenu()
+{
+	CurrentStageIndex = 0;
+	if (StageMapNames.IsValidIndex(CurrentStageIndex))
+	{
+		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+	}
+}
+
 
 /*
 void UFPSGameInstance::SavePlayerStats(ACharacter* PlayerCharacter)
