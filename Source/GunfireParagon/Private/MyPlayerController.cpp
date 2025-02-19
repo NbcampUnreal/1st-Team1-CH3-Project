@@ -7,7 +7,9 @@ AMyPlayerController::AMyPlayerController()
 	LookAction(nullptr),
 	JumpAction(nullptr),
 	SprintAction(nullptr),
-	DashAction(nullptr)
+	CrouchAction(nullptr),
+	DashAction(nullptr),
+	DebugDamageAction(nullptr)
 {
 }
 

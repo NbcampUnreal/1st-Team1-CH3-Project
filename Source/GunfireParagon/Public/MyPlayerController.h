@@ -26,7 +26,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SprintAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* CrouchAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* DashAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* DebugDamageAction;
 	
 
 protected:
