@@ -49,5 +49,7 @@
 ## UI
 <details>
 <summary>InGame UI UML Class Diagram</summary>  
-![다이어그램 인게임 UI](https://github.com/user-attachments/assets/05ae29ff-0989-4f0b-acd8-216f980428a6)
+
+  ![다이어그램 인게임 UI](https://github.com/user-attachments/assets/05ae29ff-0989-4f0b-acd8-216f980428a6)
+
 </details>
