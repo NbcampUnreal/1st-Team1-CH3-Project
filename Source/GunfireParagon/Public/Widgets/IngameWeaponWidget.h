@@ -18,6 +18,7 @@ class GUNFIREPARAGON_API UIngameWeaponWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 
 protected:
@@ -35,6 +36,9 @@ protected:
 
 	UPROPERTY(meta =(BindWidget))
 	UImage* SkillTexture;
+
+	UPROPERTY(EditAnywhere, Category = "Textures")
+	class UInGameStateDataAsset* CurrentTextures;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")

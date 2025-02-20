@@ -5,6 +5,17 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Widgets/DataAssets/InGameStateDataAsset.h"
+
+void UIngamePlayerStatus::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	if (!CurrentTextures)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Texture DataAsset Is Missing"));
+	}
+}
 
 void UIngamePlayerStatus::NativeConstruct()
 {

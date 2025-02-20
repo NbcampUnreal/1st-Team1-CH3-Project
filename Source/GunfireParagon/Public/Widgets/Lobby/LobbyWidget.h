@@ -4,30 +4,40 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "IngameMainWidget.generated.h"
+#include "LobbyWidget.generated.h"
 
 /**
  * 
  */
+class UButton;
+
 UCLASS()
-class GUNFIREPARAGON_API UIngameMainWidget : public UUserWidget
+class GUNFIREPARAGON_API ULobbyWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
-public:
+public :
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
-	class UInGameMinimap* MinimapWidget;
-
-	UPROPERTY(meta = (BindWidget))	
-	class UIngamePlayerStatus* PlayerStatusWidget;
+	UButton* StartButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UIngameWeaponWidget* WeaponStatusWidget;
+	UButton* InfoButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UIngameCrossHairs* CrossHairWidget;
+	UButton* EndButton;
+
+private:
+	UFUNCTION()
+	void OnStartButtonClicked();
+
+	UFUNCTION()
+	void OnInfoButtonClicked();
+
+	UFUNCTION()
+	void OnEndButtonClicked();
+
 };

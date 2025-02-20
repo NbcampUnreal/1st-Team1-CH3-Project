@@ -20,6 +20,7 @@ class GUNFIREPARAGON_API UIngamePlayerStatus : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 
 protected:
@@ -38,6 +39,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UImage* CurrentPlayerTexture;
 
+	UPROPERTY(EditAnywhere, Category = "Textures")
+	class UInGameStateDataAsset* CurrentTextures;
 public:
 	// Todo : 로직 테스트용이며, 실제로는 Player의 CurrentHP, MaxHP, CurrentShield, MaxShield를 사용하여 업데이트 할 것입니다.
 	// Test

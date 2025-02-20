@@ -4,6 +4,17 @@
 #include "Widgets/IngameWeaponWidget.h"
 #include "Components\Image.h"
 #include "Components\TextBlock.h"
+#include "Widgets/DataAssets/InGameStateDataAsset.h"
+
+void UIngameWeaponWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	if (!CurrentTextures)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Weapon Texture is Missing"));
+	}
+}
 
 void UIngameWeaponWidget::NativeConstruct()
 {
