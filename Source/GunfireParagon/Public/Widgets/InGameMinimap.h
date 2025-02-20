@@ -23,6 +23,8 @@ public:
 
 	UFUNCTION()
 	void UpdatePlayTime();
+	UFUNCTION()
+	void UpdateLevelName();
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* MapNameTextBlock;

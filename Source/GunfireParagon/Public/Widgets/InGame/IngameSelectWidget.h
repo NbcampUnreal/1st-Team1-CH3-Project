@@ -14,4 +14,5 @@ class GUNFIREPARAGON_API UIngameSelectWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+	// 상점관련
 };

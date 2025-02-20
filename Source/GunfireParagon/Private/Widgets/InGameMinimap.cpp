@@ -30,6 +30,7 @@ void UInGameMinimap::NativeConstruct()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_UpdateTime, this, &UInGameMinimap::UpdatePlayTime, 1.0f, true);
 
 	UpdatePlayTime();
+	UpdateLevelName();
 }
 
 void UInGameMinimap::UpdatePlayTime()
@@ -47,4 +48,12 @@ void UInGameMinimap::UpdatePlayTime()
 		FString TimeText = FString::Printf(TEXT("%02d분 %02d초"), Minutes, Seconds);
 		TimeTextBlock->SetText(FText::FromString(TimeText));
 	}
+}
+
+void UInGameMinimap::UpdateLevelName()
+{
+	FString CurrentLevel = GetWorld()->GetMapName();
+	CurrentLevel.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+
+	MapNameTextBlock->SetText(FText::FromString(CurrentLevel));
 }

@@ -30,6 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetAnimationSpread(float Sperad);
 
+	UFUNCTION()
+	void SetAnimationVisible();
 protected:
 	// TODO:
 	// 메모리 적으로는 x2의 방식을 사용하게된다. 비효율적

@@ -19,6 +19,7 @@ void UIngameCrossHairs::NativeOnInitialized()
 	Animations.Add(AnimationBottom, FVector2D(-1,1));
 
 	Spread = 50.f;
+	SetAnimationVisible();
 }
 
 void UIngameCrossHairs::NativeConstruct()
@@ -53,6 +54,17 @@ void UIngameCrossHairs::SetAnimationSpread(float Sperad)
 			Pair.Key->SetVisibility(ESlateVisibility::Visible);
 			FVector2D Move = Pair.Value * Spread;
 			Pair.Key->SetRenderTranslation(Move);
+		}
+	}
+}
+
+void UIngameCrossHairs::SetAnimationVisible()
+{
+	for (const auto& Pair : Animations)
+	{
+		if (Pair.Key)
+		{
+			Pair.Key->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
