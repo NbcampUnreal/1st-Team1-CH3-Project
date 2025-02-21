@@ -1,10 +1,14 @@
 #include "PlayerCharacter.h"
 #include "MyPlayerController.h"
+#include "CGunBase.h"
+#include "Gun_Rifle.h"
+#include "Gun_Pistol.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -18,8 +22,22 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+
 	CurrentHealth = MaxHealth;
 	CurrentShield = MaxShield;
+
+	if (DefaultWeaponClass)
+	{
+		ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
+		if (DefaultWeapon)
+		{
+			EquipWeapon(DefaultWeapon, 1);
+			UE_LOG(LogTemp, Warning, TEXT("기본 권총 장착 완료: %s"), *DefaultWeapon->GetName());
+		}
+	}
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -55,6 +73,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController()))
 		{
+		
 			if (PlayerController->MoveAction)
 			{
 				EnhancedInput->BindAction(
@@ -69,7 +88,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			{
 				EnhancedInput->BindAction(
 					PlayerController->JumpAction,
-					ETriggerEvent::Triggered,
+					ETriggerEvent::Started,
 					this,
 					&APlayerCharacter::StartJump
 				);
@@ -143,6 +162,50 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 					&APlayerCharacter::DebugTakeDamage
 				);
 			}
+
+			if (PlayerController->SwitchToPrimaryWeaponAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->SwitchToPrimaryWeaponAction,
+					ETriggerEvent::Triggered,
+					this,
+					&APlayerCharacter::SwitchWeaponSlot,
+					1
+				);
+			}
+
+			if (PlayerController->SwitchToSecondaryWeaponAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->SwitchToSecondaryWeaponAction,
+					ETriggerEvent::Triggered,
+					this,
+					&APlayerCharacter::SwitchWeaponSlot,
+					2
+				);
+			}
+
+			if (PlayerController->SwapWeaponAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->SwapWeaponAction,
+					ETriggerEvent::Triggered,
+					this,
+					&APlayerCharacter::HandleSwapWeaponInput
+				);
+			}
+
+
+
+			if (PlayerController->FireAction)
+			{
+				EnhancedInput->BindAction(
+					PlayerController->FireAction,
+					ETriggerEvent::Triggered,
+					this,
+					&APlayerCharacter::FireWeapon
+				);
+			}
 		}
 	}
 }
@@ -165,9 +228,10 @@ void APlayerCharacter::Move(const FInputActionValue& value)
 }
 void APlayerCharacter::StartJump(const FInputActionValue& value)
 {
-	if (value.Get<bool>())
+	if (JumpCount < MaxJumpCount)
 	{
 		Jump();
+		JumpCount++;
 	}
 }
 void APlayerCharacter::StopJump(const FInputActionValue& value)
@@ -343,7 +407,7 @@ void APlayerCharacter::RegenerateShield()
 	if (CurrentShield >= MaxShield)
 	{
 		GetWorldTimerManager().ClearTimer(ShieldRegenTimer);
-		UE_LOG(LogTemp, Warning, TEXT("실드가 가득 참!"));
+		UE_LOG(LogTemp, Warning, TEXT("실드가 가득 참"));
 		return;
 	}
 
@@ -353,6 +417,292 @@ void APlayerCharacter::RegenerateShield()
 
 void APlayerCharacter::DebugTakeDamage()
 {
-	TakeDamage(20.0f); // 20 데미지를 가함
-	UE_LOG(LogTemp, Warning, TEXT("디버그: 플레이어에게 20 데미지를 가했습니다! 현재 체력: %f, 실드: %f"), CurrentHealth, CurrentShield);
+	TakeDamage(20.0f);
+	UE_LOG(LogTemp, Warning, TEXT("플레이어에게 20 데미지를 가했습니다 현재 체력: %f, 실드: %f"), CurrentHealth, CurrentShield);
 }
+
+void APlayerCharacter::SwitchWeapon(ACGunBase* NewWeapon)
+{
+	EquipWeapon(NewWeapon, 2);
+}
+
+void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
+{
+	if (!CurrentWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("현재 장착된 무기가 없습니다"));
+		return;
+	}
+
+	if (CurrentWeapon->AmmoCount <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("탄약이 없습니다"));
+		return;
+	}
+
+	FVector MuzzleLocation = CurrentWeapon->GetActorLocation();
+	FVector ShotDirection = GetControlRotation().Vector();
+	CurrentWeapon->Fire(MuzzleLocation, ShotDirection, CurrentWeapon->Damage);
+
+	CurrentWeapon->AmmoCount--;
+}
+
+
+void APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
+{
+	if (!NewWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("EquipWeapon 실패: NewWeapon이 nullptr입니다."));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("무기 교체 시작: %s (슬롯: %d)"), *NewWeapon->GetName(), Slot);
+
+	ACGunBase* OldWeapon = (Slot == 1) ? PrimaryWeapon : SecondaryWeapon;
+
+	if (OldWeapon)
+	{
+		FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
+
+		OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		OldWeapon->SetActorLocation(DropLocation, false, nullptr, ETeleportType::TeleportPhysics);
+		OldWeapon->SetActorHiddenInGame(false);
+		OldWeapon->SetActorEnableCollision(true);
+		OldWeapon->bWasDropped = true;
+
+		if (OldWeapon->WeaponMesh)
+		{
+			OldWeapon->WeaponMesh->SetSimulatePhysics(true);
+			OldWeapon->WeaponMesh->SetEnableGravity(true);
+			OldWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			OldWeapon->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
+			OldWeapon->WeaponMesh->AddImpulse(FVector(0, 0, -300.0f), NAME_None, true);
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("기존 무기 드랍 완료: %s"), *OldWeapon->GetName());
+	}
+
+	if (Slot == 1)
+	{
+		PrimaryWeapon = NewWeapon;
+		UE_LOG(LogTemp, Warning, TEXT("1번 슬롯에 무기 장착: %s"), *NewWeapon->GetName());
+	}
+	else
+	{
+		SecondaryWeapon = NewWeapon;
+		UE_LOG(LogTemp, Warning, TEXT("2번 슬롯에 무기 장착: %s"), *NewWeapon->GetName());
+		SwitchWeaponSlot(2);
+	}
+
+	CurrentWeapon = NewWeapon;
+	CurrentWeaponSlot = Slot;
+
+	if (Cast<AGun_Rifle>(NewWeapon))
+	{
+		bIsHoldingRifle = true;
+		UE_LOG(LogTemp, Warning, TEXT("현재 무기 타입: 라이플"));
+	}
+	else
+	{
+		bIsHoldingRifle = false;
+		UE_LOG(LogTemp, Warning, TEXT("현재 무기 타입: 권총"));
+	}
+
+	USkeletalMeshComponent* WeaponSkeletalMesh = Cast<USkeletalMeshComponent>(CurrentWeapon->WeaponMesh);
+
+	CurrentWeapon->WeaponMesh->SetSimulatePhysics(false);
+	CurrentWeapon->WeaponMesh->SetEnableGravity(false);
+	CurrentWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	CurrentWeapon->SetActorLocation(GetMesh()->GetSocketLocation(TEXT("WeaponSocket")), false, nullptr, ETeleportType::TeleportPhysics);
+
+	CurrentWeapon->AttachToComponent(GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		TEXT("WeaponSocket"));
+
+	UE_LOG(LogTemp, Warning, TEXT("✅ 무기 손에 장착 완료: %s (소켓: WeaponSocket)"), *NewWeapon->GetName());
+
+}
+
+
+
+
+
+
+
+
+
+
+void APlayerCharacter::HandleSwapWeaponInput(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("G키 입력 감지됨: 무기 교체 시도 중"));
+
+	ACGunBase* DroppedWeapon = FindNearbyDroppedWeapon();
+	if (!DroppedWeapon)
+	{
+		return;
+	}
+
+	if (!SecondaryWeapon)
+	{
+		EquipWeapon(DroppedWeapon, 2);
+		UE_LOG(LogTemp, Warning, TEXT("2번 슬롯이 비어 있어 자동 장착됨: %s"), *DroppedWeapon->GetName());
+		return;
+	}
+
+	SwapWeaponWithDropped(DroppedWeapon);
+}
+
+void APlayerCharacter::SwapWeaponWithDropped(ACGunBase* DroppedWeapon)
+{
+	if (!DroppedWeapon)
+	{
+		return;
+	}
+
+	if (CurrentWeaponSlot == 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("기본 무기는 교체할 수 없습니다"));
+		return;
+	}
+
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
+
+	if (CurrentWeaponSlot == 2)
+	{
+		if (SecondaryWeapon)
+		{
+			SecondaryWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			SecondaryWeapon->SetActorLocation(DropLocation);
+
+			if (SecondaryWeapon->WeaponMesh)
+			{
+				SecondaryWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				SecondaryWeapon->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
+				SecondaryWeapon->WeaponMesh->SetSimulatePhysics(true);
+				SecondaryWeapon->WeaponMesh->AddImpulse(FVector(0, 0, -300.0f), NAME_None, true);
+			}
+
+			SecondaryWeapon->SetActorHiddenInGame(false);
+			SecondaryWeapon->SetActorEnableCollision(true);
+			SecondaryWeapon->bWasDropped = true;
+
+			UE_LOG(LogTemp, Warning, TEXT("2번 무기 드랍 완료 위치: %s"), *DropLocation.ToString());
+		}
+
+		EquipWeapon(DroppedWeapon, 2);
+		UE_LOG(LogTemp, Warning, TEXT("2번 무기 교체 완료 새로운 무기: %s"), *DroppedWeapon->GetName());
+	}
+}
+
+
+
+
+
+ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
+{
+	FVector PlayerLocation = GetActorLocation();
+	float WeaponPickupRadius = 600.0f;
+
+	TArray<AActor*> OverlappingActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery2);
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery3);
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery4);
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery5);
+
+	bool bOverlapSuccess = UKismetSystemLibrary::SphereOverlapActors(
+		this,
+		PlayerLocation,
+		WeaponPickupRadius,
+		ObjectTypes,
+		ACGunBase::StaticClass(),
+		TArray<AActor*>(),
+		OverlappingActors
+	);
+
+	UE_LOG(LogTemp, Warning, TEXT("감지된 액터 수: %d"), OverlappingActors.Num());
+
+	ACGunBase* ClosestWeapon = nullptr;
+	float ClosestDistance = FLT_MAX;
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		ACGunBase* FoundWeapon = Cast<ACGunBase>(Actor);
+		if (FoundWeapon)
+		{
+			float Distance = FVector::Dist(PlayerLocation, FoundWeapon->GetActorLocation());
+			UE_LOG(LogTemp, Warning, TEXT("감지된 무기: %s, 거리: %f"), *FoundWeapon->GetName(), Distance);
+
+			if (Distance < ClosestDistance)
+			{
+				ClosestDistance = Distance;
+				ClosestWeapon = FoundWeapon;
+			}
+		}
+	}
+
+	if (ClosestWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("가장 가까운 무기 감지됨: %s (거리: %f)"), *ClosestWeapon->GetName(), ClosestDistance);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("감지된 무기가 없음."));
+	}
+
+	return ClosestWeapon;
+}
+
+
+
+
+
+
+
+
+
+void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
+{
+	if (Slot == 1)
+	{
+		if (!PrimaryWeapon)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("1번 무기가 없습니다."));
+			return;
+		}
+
+		CurrentWeapon = PrimaryWeapon;
+		CurrentWeaponSlot = 1;
+	}
+	else if (Slot == 2)
+	{
+		if (!SecondaryWeapon)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("2번 무기가 없습니다."));
+			return;
+		}
+
+		CurrentWeapon = SecondaryWeapon;
+		CurrentWeaponSlot = 2;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("잘못된 슬롯 번호: %d"), Slot);
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("무기 슬롯 변경 완료. 현재 무기: %s"), *CurrentWeapon->GetName());
+}
+
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	JumpCount = 0;
+}
+
+
+
+

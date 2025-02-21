@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
 
-class UInputMappingContext;
-class UInputAction;
 
 UCLASS()
 class GUNFIREPARAGON_API AMyPlayerController : public APlayerController
@@ -29,6 +29,16 @@ public:
 	UInputAction* CrouchAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* DashAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* FireAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* SwitchToPrimaryWeaponAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* SwitchToSecondaryWeaponAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* SwapWeaponAction;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* DebugDamageAction;
 	

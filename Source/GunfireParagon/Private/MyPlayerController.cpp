@@ -9,6 +9,10 @@ AMyPlayerController::AMyPlayerController()
 	SprintAction(nullptr),
 	CrouchAction(nullptr),
 	DashAction(nullptr),
+	FireAction(nullptr),
+	SwitchToPrimaryWeaponAction(nullptr),
+	SwitchToSecondaryWeaponAction(nullptr),
+	SwapWeaponAction(nullptr),
 	DebugDamageAction(nullptr)
 {
 }
