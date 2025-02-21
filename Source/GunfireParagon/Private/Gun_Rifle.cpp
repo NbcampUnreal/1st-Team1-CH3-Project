@@ -2,4 +2,23 @@
 
 
 #include "Gun_Rifle.h"
+#include "BulletBase.h"
 
+AGun_Rifle::AGun_Rifle()
+{
+    PrimaryActorTick.bCanEverTick = false;
+
+	AmmoType = EAmmoType::Normal;
+}
+
+void AGun_Rifle::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AGun_Rifle::Fire()
+{
+	Super::Fire();
+
+	
+}

@@ -4,25 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "CGunBase.h"
-#include "Gun_Rifle.generated.h"
+#include "Gun_Rocket.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GUNFIREPARAGON_API AGun_Rifle : public ACGunBase
+class GUNFIREPARAGON_API AGun_Rocket : public ACGunBase
 {
 	GENERATED_BODY()
-
-public:
-	
-	AGun_Rifle();
-
-	virtual void BeginPlay() override;
-
-	virtual void Fire() override;
-
-	
-	
 	
 };
