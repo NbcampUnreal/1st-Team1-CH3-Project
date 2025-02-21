@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "BulletBase.h"
+#include "Actor/Bullet/BulletBase.h"
 #include "CGunBase.generated.h"
 
 class ABulletPool;

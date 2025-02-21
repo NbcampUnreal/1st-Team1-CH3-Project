@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BombBullet.h"
-#include "BulletPool.h"
+#include "Actor/Bullet/BombBullet.h"
+#include "Actor/BulletPool.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "Engine/World.h"

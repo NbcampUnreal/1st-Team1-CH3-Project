@@ -1,30 +1,37 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PierceBullet.h"
-#include "BulletPool.h"
+#include "Actor/Bullet/NormalBullet.h"
+#include "Actor/BulletPool.h"
 #include "Kismet/GameplayStatics.h"
 
-APierceBullet::APierceBullet()
+ANormalBullet::ANormalBullet()
 {
-	PierceCount = 3;
-	BulletDamage = 50.0f;
-	AmmoType = EAmmoType::Pierce;
+	AmmoType = EAmmoType::Normal;
 }
 
-void APierceBullet::BeginPlay()
+void ANormalBullet::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void APierceBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
+void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
 {
 	Super::Fire(StartLocation, Direction, GunDamage);
+	SetActorLocation(StartLocation);
+	BulletDamage = GunDamage;
+    
+	ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+	//
+	// SetOwner(GetInstigator());
+	// CollisionComponent->MoveIgnoreActors.Add(GetOwner());
+	
 }
 
-void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	
 	Super::OnBulletOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
 	if (!OtherActor || OtherActor == this) 
@@ -47,7 +54,6 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	
 	if (OtherActor->ActorHasTag("Enemy"))
 	{
-		PierceCount--;
 		// 맞은 부위가 "head"인지 확인 (Skeleton Bone Name 사용)
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
@@ -58,29 +64,23 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		{
 			UE_LOG(LogTemp, Warning, TEXT("일반 공격! 데미지: %f"), FinalDamage);
 		}
+
 		//  ApplyPointDamage 사용 (맞은 위치 포함)
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
+
 		UE_LOG(LogTemp, Warning, TEXT("총알이 Enemy를 맞춤: %s"), *OtherActor->GetName());
-		
-		if (PierceCount<=0)
-		{
-			if (BulletPool)
-			{
-				BulletPool->ReturnBullet(this, AmmoType);
-				UE_LOG(LogTemp, Warning, TEXT("%s 총알이 %s 맞춤"),*GetName() ,*OtherActor->GetName());
-				UE_LOG(LogTemp, Warning, TEXT("Normal Bullet__풀링으로 반환됨"));
-			}
-			return;
-		}
 	}
 
-
+	
 	if (BulletPool)
 	{
 		BulletPool->ReturnBullet(this, AmmoType);
 		UE_LOG(LogTemp, Warning, TEXT("%s 총알이 %s 맞춤"),*GetName() ,*OtherActor->GetName());
 		UE_LOG(LogTemp, Warning, TEXT("Normal Bullet__풀링으로 반환됨"));
 	}
-
+	
+	
 	
 }
+
+

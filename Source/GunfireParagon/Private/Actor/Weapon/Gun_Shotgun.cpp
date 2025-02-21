@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Gun_Shotgun.h"
-#include "BulletBase.h"  
-#include "BulletPool.h" 
+#include "Actor/Weapon/Gun_Shotgun.h"
+#include "Actor/Bullet/BulletBase.h"  
+#include "Actor/BulletPool.h" 
 #include "Kismet/GameplayStatics.h"
 
 

@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Gun_Rifle.h"
-#include "BulletBase.h"
+#include "Actor/Weapon/Gun_Rifle.h"
+#include "Actor/Bullet/BulletBase.h"
 
 AGun_Rifle::AGun_Rifle()
 {

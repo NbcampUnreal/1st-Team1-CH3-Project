@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BulletPool.h" 
-#include "BulletBase.h" 
-#include "NormalBullet.h" // cpp에서만 포함하여 불필요한 의존성을 줄임
+#include "Actor/BulletPool.h" 
+#include "Actor/Bullet/BulletBase.h" 
+#include "Actor/Bullet/NormalBullet.h" // cpp에서만 포함하여 불필요한 의존성을 줄임
 
 ABulletPool::ABulletPool()
 {

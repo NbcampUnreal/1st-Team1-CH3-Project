@@ -1,7 +1,7 @@
 
 
-#include "BulletBase.h"
-#include "BulletPool.h"
+#include "Actor/Bullet/BulletBase.h"
+#include "Actor/BulletPool.h"
 #include "Kismet/GameplayStatics.h"
 
 ABulletBase::ABulletBase()
