@@ -8,6 +8,8 @@
  * ABaseEnemyAIController: 적 AI를 제어하는 AI 컨트롤러 클래스
  * AI Perception을 사용하여 플레이어를 감지하고, Behavior Tree와 블랙보드를 활용하여 AI의 행동을 결정함.
  */
+
+
 UCLASS()
 class GUNFIREPARAGON_API ABaseEnemyAIController : public AAIController
 {
