@@ -4,8 +4,8 @@
 #include "FPSGameInstance.h"
 #include "AIEnemySpawnRaw.h"
 #include "AIEnemyPoolRaw.h"
-#include "../NormalMeleeEnemy.h"
-#include "../NormalRangeEnemy.h"
+#include "AI/NormalMeleeEnemy.h"
+#include "AI/NormalRangeEnemy.h"
 #include "Kismet/GameplayStatics.h"
 
 UFPSGameInstance::UFPSGameInstance()
@@ -13,7 +13,7 @@ UFPSGameInstance::UFPSGameInstance()
 	PlayerLevel = 1;
 	ExperiencePoints = 0.f;
 	PlayerHealth = 1000.0f;
-	CurrentStageIndex = 0; // 0 ÀÌ ¸ÞÀÎ¸Þ´º, 1 ~ 10 Stage 
+	CurrentStageIndex = 0; // 0 ï¿½ï¿½ ï¿½ï¿½ï¿½Î¸Þ´ï¿½, 1 ~ 10 Stage 
 	AIObjectPoolInstance = nullptr;
 }
 
@@ -37,9 +37,9 @@ void UFPSGameInstance::InitializeObjectPool()
 	UWorld* World = GetWorld();
 	if (!World) return;
 
-	if (!IsValid(AIObjectPoolInstance)) // »ý¼ºµÈ Object PoolÀÌ ÀÖ´ÂÁö È®ÀÎ
+	if (!IsValid(AIObjectPoolInstance)) // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Object Poolï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 	{
-		AIObjectPoolInstance = World->SpawnActor<AAIObjectPool>(); // ¾øÀ¸¸é »ý¼º 
+		AIObjectPoolInstance = World->SpawnActor<AAIObjectPool>(); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
 
 		if (AIObjectPoolInstance)
 		{
@@ -48,12 +48,12 @@ void UFPSGameInstance::InitializeObjectPool()
 			 TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClassCount = GetPoolInitializationData();
 			
 			 /*
-			 EnemyClassCount.Add(ANormalRangeEnemy::StaticClass(), 20); // ¿ø°Å¸® ÀÏ¹Ý
-			 EnemyClassCount.Add(ANormalMeleeEnemy::StaticClass(), 15); // ±Ù°Å¸® ÀÏ¹Ý ½ºÅ×ÀÌÁö 1 ~ 8
-			 EnemyClassCount.Add(AEliteMeleeEnemy::StaticClass(), 25); // ±Ù°Å¸® Á¤¿¹ ½ºÅ×ÀÌÁö 3, 7 ~ 9
-			 EnemyClassCount.Add(AEliteRangeEnemy::StaticClass(), 1); // ¿ø°Å¸® Á¤¿¹ ½ºÅ×ÀÌÁö 6
-			 EnemyClassCount.Add(AEliteBufferEnemy::StaticClass(), 1); // ¹öÆÛ Á¤¿¹ ½ºÅ×ÀÌÁö 9
-			 EnemyClassCount.Add(ABossEnemy::StaticClass(), 1); // º¸½º ½ºÅ×ÀÌÁö 10
+			 EnemyClassCount.Add(ANormalRangeEnemy::StaticClass(), 20); // ï¿½ï¿½ï¿½Å¸ï¿½ ï¿½Ï¹ï¿½
+			 EnemyClassCount.Add(ANormalMeleeEnemy::StaticClass(), 15); // ï¿½Ù°Å¸ï¿½ ï¿½Ï¹ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1 ~ 8
+			 EnemyClassCount.Add(AEliteMeleeEnemy::StaticClass(), 25); // ï¿½Ù°Å¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 3, 7 ~ 9
+			 EnemyClassCount.Add(AEliteRangeEnemy::StaticClass(), 1); // ï¿½ï¿½ï¿½Å¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 6
+			 EnemyClassCount.Add(AEliteBufferEnemy::StaticClass(), 1); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 9
+			 EnemyClassCount.Add(ABossEnemy::StaticClass(), 1); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 10
 			 */
 
 			AIObjectPoolInstance->InitializePool(EnemyClassCount);
@@ -64,7 +64,7 @@ void UFPSGameInstance::InitializeObjectPool()
 TMap<TSubclassOf<ABaseEnemy>, int32> UFPSGameInstance::GetEnemySpawnData(int32 StageNumber)
 {
 	TMap<TSubclassOf<ABaseEnemy>, int32> EnemyData;
-	if (!EnemySpawnTable) return EnemyData; // µ¥ÀÌÅÍ Å×ÀÌºí ¾øÀ¸¸é ºó EnemyData ¹ÝÈ¯
+	if (!EnemySpawnTable) return EnemyData; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ EnemyData ï¿½ï¿½È¯
 
 	static const FString ContextString(TEXT("EnemySpawnContext"));
 	TArray<FAIEnemySpawnRaw*> AllRows;
@@ -108,7 +108,7 @@ TMap<TSubclassOf<ABaseEnemy>, int32> UFPSGameInstance::GetPoolInitializationData
 	return PoolData;
 }
 
-// LoadNextStage°¡ ÀÖ¾î¼­ ¾ø¾îµµ µÉ °Í °°±äÇÑµ¥ ÃßÈÄ À¯¿ëÇÒ ¼ö ÀÖÀ¸´Ï ³²°ÜµÒ
+// LoadNextStageï¿½ï¿½ ï¿½Ö¾î¼­ ï¿½ï¿½ï¿½îµµ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Üµï¿½
 void UFPSGameInstance::StartGame()
 {
 	CurrentStageIndex = 1;
@@ -178,7 +178,7 @@ void UFPSGameInstance::LoadPlayerStats(ACharacter* PlayerCharacter)
 /*
 void UFPSGameInstance::AddPassive(FPassiveInventory NewPassive)
 {
-	// °°Àº ÆÐ½Ãºê°¡ ÀÌ¹Ì ÀÖÀ¸¸é ÁßÃ¸ Áõ°¡
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ð½Ãºê°¡ ï¿½Ì¹ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¸ ï¿½ï¿½ï¿½ï¿½
 	for (FPassiveInventory& Passive : PlayerPassiveInventory)
 	{
 		if (Passive.PassiveName == NewPassive.PassiveName)
@@ -188,7 +188,7 @@ void UFPSGameInstance::AddPassive(FPassiveInventory NewPassive)
 		}
 	}
 
-	// °°Àº ÆÐ½Ãºê°¡ ¾øÀ¸¸é »õ ÆÐ½Ãºê·Î Ãß°¡
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ð½Ãºê°¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ð½Ãºï¿½ï¿½ ï¿½ß°ï¿½
 	PlayerPassiveInventory.Add(NewPassive);
 }
 

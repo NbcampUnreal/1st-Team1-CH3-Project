@@ -3,7 +3,7 @@
 
 #include "AIObjectPool.h"
 #include "SpawnVolume.h"
-#include "../BaseEnemy.h" 
+#include "AI/BaseEnemy.h" 
 
 
 AAIObjectPool::AAIObjectPool()
@@ -22,7 +22,7 @@ void AAIObjectPool::InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyCla
 		if (!EnemyClass) continue;
 
 		TSharedPtr<TArray<ABaseEnemy*>>& Pool = EnemyPools.FindOrAdd(EnemyClass);
-		if (!Pool.IsValid())  // PoolÀÌ ¾ø´Ù¸é »õ·Î »ý¼º
+		if (!Pool.IsValid())  // Poolï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		{
 			Pool = MakeShared<TArray<ABaseEnemy*>>();
 		}
