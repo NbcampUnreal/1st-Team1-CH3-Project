@@ -5,7 +5,7 @@
 #include "FPSGameState.h"
 #include "FPSGameInstance.h"
 #include "Kismet/GameplayStatics.h"
-#include "BaseEnemy.h"
+#include "../BaseEnemy.h"
 #include "AIObjectPool.h"
 #include "SpawnVolume.h"
 
@@ -42,8 +42,6 @@ void AFPSGameMode::OnPlayerDead()
 
 void AFPSGameMode::OnStageClear()
 {
-	ClearAllEnemies();
-
 	// 상자를 열면 다음스테이지 가던지, 어디에 도착하면 다음 스테이지 가던지 로직 구현해야함
 
 	if (UGameInstance* GameInstance = GetGameInstance())
@@ -55,46 +53,59 @@ void AFPSGameMode::OnStageClear()
 				FPSGameInstance->LoadNextStage();
 
 				int32 NewStageIndex = FPSGameInstance->CurrentStageIndex;
-				int32 NumEnemies = NewStageIndex * 5;
 
-				// 바로 스폰되면 어색할 수 있으니 보고 SetTimer 추가할지 생각
-				SpawnEnemies(NumEnemies);
+				if (NewStageIndex <= 10) 
+				{
+					// 바로 스폰되면 어색할 수 있으니 보고 SetTimer 추가할지 생각
+					SpawnEnemiesForStage(NewStageIndex);
+				}
 			}
 		}
 	}
 }
 
-void AFPSGameMode::SpawnEnemies(int32 NumEnemies)
+void AFPSGameMode::SpawnEnemiesForStage(int32 StageNumber)
 {
-	UWorld* World = GetWorld();
-	if (!World) return;
-
-	AFPSGameState* FPSGameState = Cast<AFPSGameState>(World->GetGameState());
-	if (!FPSGameState) return;
-
-	AAIObjectPool* AIObjectPool = Cast<AAIObjectPool>(UGameplayStatics::GetActorOfClass(World, AAIObjectPool::StaticClass()));
-	if (AIObjectPool) return;
-
+	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	if (!FPSGameInstance) return;
+	AFPSGameState* FPSGameState = Cast<AFPSGameState>(GetWorld()->GetGameState());
+	if (!IsValid(FPSGameState)) return;
+	AAIObjectPool* AIObjectPool = FPSGameInstance->AIObjectPoolInstance;
+	if (!IsValid(AIObjectPool)) return;
 	TArray<AActor*> FoundVolumes;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundVolumes);
+	if (FoundVolumes.Num() == 0) return;
+	
 
-	UGameplayStatics::GetAllActorsOfClass(World, ASpawnVolume::StaticClass(), FoundVolumes);
+	// 스테이지 마다 스폰해야될 적, 적 개체수 가져옴
+	TMap<TSubclassOf<ABaseEnemy>, int32> EnemyData = FPSGameInstance->GetEnemySpawnData(StageNumber); 
+
 	if (FoundVolumes.Num() > 0)
 	{
 		ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
 		if (SpawnVolume)
 		{
-			for (int32 i = 0; i < NumEnemies; i++)
+			for (const TPair<TSubclassOf<ABaseEnemy>, int32>& Pair : EnemyData)
 			{
-				ABaseEnemy* SpawnedEnemy = AIObjectPool->GetPooledAI(SpawnVolume);
-				if (SpawnedEnemy)
+				TSubclassOf<ABaseEnemy> EnemyClass = Pair.Key;
+				int32 EnemyCount = Pair.Value;
+
+				for (int32 i = 0; i < EnemyCount; i++)
 				{
-					FPSGameState->RemainingEnemies++;
+					ABaseEnemy* SpawnedEnemy = AIObjectPool->GetPooledAI(SpawnVolume, EnemyClass);
+					if (SpawnedEnemy)
+					{
+						FPSGameState->RemainingEnemies++;
+					}
 				}
 			}
-		}	
+		}
 	}
+
 }
 
+// Object Pool이기 때문에 필요 없지만 일단 놔둠
+/*
 void AFPSGameMode::ClearAllEnemies()
 {
 	UWorld* World = GetWorld();
@@ -111,7 +122,7 @@ void AFPSGameMode::ClearAllEnemies()
 		}
 	}
 }
-
+*/
 void AFPSGameMode::EndGame(bool bPlayWin)
 {
 	if (bPlayWin)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "AIObjectPool.h"
 #include "FPSGameInstance.generated.h"
 
 
@@ -15,6 +16,9 @@ class GUNFIREPARAGON_API UFPSGameInstance : public UGameInstance
 public:
 	UFPSGameInstance();
 	virtual void Init() override;
+	void InitializeObjectPool();
+	TMap<TSubclassOf<ABaseEnemy>, int32> GetEnemySpawnData(int32 StageNumber);
+	TMap<TSubclassOf<ABaseEnemy>, int32> GetPoolInitializationData();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;
@@ -26,6 +30,12 @@ public:
 	int32 CurrentStageIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
 	TArray<FName> StageMapNames;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+	UDataTable* EnemySpawnTable;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+	UDataTable* EnemyPoolTable;
+	UPROPERTY()
+	AAIObjectPool* AIObjectPoolInstance;
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();

@@ -3,7 +3,7 @@
 
 #include "AIObjectPool.h"
 #include "SpawnVolume.h"
-#include "BaseEnemy.h" 
+#include "../BaseEnemy.h" 
 
 
 AAIObjectPool::AAIObjectPool()
@@ -12,42 +12,67 @@ AAIObjectPool::AAIObjectPool()
 
 }
 
-void AAIObjectPool::InitializePool(int32 PoolSize, TSubclassOf<ABaseEnemy> EnemyClass)
+void AAIObjectPool::InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClasses)
 {
-	EnemyBP = EnemyClass;
-
-	for (int32 i = 0; i < PoolSize; i++)
+	for (const TPair<TSubclassOf<ABaseEnemy>, int32>& Pair : EnemyClasses)
 	{
-		ABaseEnemy* NewEnemy = GetWorld()->SpawnActor<ABaseEnemy>(
-			EnemyBP,
-			FVector::ZeroVector,
-			FRotator::ZeroRotator);
+		TSubclassOf<ABaseEnemy> EnemyClass = Pair.Key;
+		int32 Count = Pair.Value;
+		
+		if (!EnemyClass) continue;
 
-		// 미리 Spawn, 스크럼때 얘기했던 Object Pooling 방식
-		if (NewEnemy)
+		TSharedPtr<TArray<ABaseEnemy*>>& Pool = EnemyPools.FindOrAdd(EnemyClass);
+		if (!Pool.IsValid())  // Pool이 없다면 새로 생성
 		{
-			NewEnemy->SetActorHiddenInGame(true);
-			NewEnemy->SetActorEnableCollision(false);
-			NewEnemy->SetActorTickEnabled(false);
-			PooledEnemies.Add(NewEnemy);
+			Pool = MakeShared<TArray<ABaseEnemy*>>();
 		}
+
+		for (int32 i = 0; i < Count; i++)
+		{
+			ABaseEnemy* NewEnemy = GetWorld()->SpawnActor<ABaseEnemy>(
+				EnemyClass,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator);
+
+			if (NewEnemy)
+			{
+				NewEnemy->SetActorHiddenInGame(true);
+				NewEnemy->SetActorEnableCollision(false);
+				NewEnemy->SetActorTickEnabled(false);
+				if (Pool.IsValid())
+				{
+					Pool->Add(NewEnemy);
+				}
+			}
+		}
+		UE_LOG(LogTemp, Log, TEXT("Created %d enemies of type: %s"), Count, *EnemyClass->GetName());
 	}
 }
 
-ABaseEnemy* AAIObjectPool::GetPooledAI(ASpawnVolume* SpawnVolume)
+ABaseEnemy* AAIObjectPool::GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<ABaseEnemy> EnemyClass)
 {
-	if (!SpawnVolume) return nullptr;
+	if (!SpawnVolume || !EnemyClass) return nullptr;
 
-	for (ABaseEnemy* Enemy : PooledEnemies)
+	if (EnemyPools.Contains(EnemyClass))
 	{
-		if (!Enemy->IsActorTickEnabled())
+		TSharedPtr<TArray<ABaseEnemy*>>& Pool = EnemyPools[EnemyClass];
+
+		if (Pool.IsValid())
 		{
-			FVector SpawnLocation = SpawnVolume->GetSafeSpawnPoint();
-			Enemy->SetActorLocation(SpawnLocation);
-			Enemy->SetActorHiddenInGame(false);
-			Enemy->SetActorEnableCollision(true);
-			Enemy->SetActorTickEnabled(true);
-			return Enemy;
+			for (ABaseEnemy* Enemy : *Pool)
+			{
+				if (!Enemy->IsActorTickEnabled())
+				{
+					FVector SpawnLocation = SpawnVolume->GetSafeSpawnPoint();
+					Enemy->SetActorLocation(SpawnLocation);
+					Enemy->SetActorHiddenInGame(false);
+					Enemy->SetActorEnableCollision(true);
+					Enemy->SetActorTickEnabled(true);
+
+					UE_LOG(LogTemp, Log, TEXT("%s spawned from pool"), *EnemyClass->GetName());
+					return Enemy;
+				}
+			}
 		}
 	}
 	return nullptr;

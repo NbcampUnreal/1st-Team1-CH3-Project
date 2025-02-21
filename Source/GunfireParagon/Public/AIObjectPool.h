@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Templates/SharedPointer.h"
 #include "AIObjectPool.generated.h"
 
-class ABaseEnemy; // µ¿Çö´Ô Ã¼Å©ÇØÁÖ½Ê¼î!
+class ABaseEnemy;
 class ASpawnVolume;
 
 UCLASS()
@@ -18,12 +19,12 @@ public:
 	
 	AAIObjectPool();
 
-	void InitializePool(int32 PoolSize, TSubclassOf<ABaseEnemy> EnemyClass);
-	ABaseEnemy* GetPooledAI(ASpawnVolume* SpawnVolume);
+	void InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClasses);
+	ABaseEnemy* GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<ABaseEnemy> EnemyClass);
 	void ReturnAIToPool(ABaseEnemy* Enemy);
 
-	UPROPERTY()
-	TArray<ABaseEnemy*> PooledEnemies;
-	UPROPERTY()
-	TSubclassOf<ABaseEnemy> EnemyBP;
+	TMap<TSubclassOf<ABaseEnemy>, TSharedPtr<TArray<ABaseEnemy*>>> EnemyPools;
+
+private:
+	
 };

@@ -3,6 +3,7 @@
 
 #include "SpawnVolume.h"
 #include "Components/BoxComponent.h"
+#include "NavigationSystem.h"
 
 
 ASpawnVolume::ASpawnVolume()
@@ -33,6 +34,7 @@ FVector ASpawnVolume::GetSafeSpawnPoint() const
 {
     FVector SpawnPoint;
     int32 MaxAttempts = 10;
+    UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 
     for (int32 i = 0; i < MaxAttempts; i++)
     {
@@ -56,9 +58,15 @@ FVector ASpawnVolume::GetSafeSpawnPoint() const
             QueryParams
         );
 
-        if (!bBlocked)
+        // Navmesh 위에 스폰되도록 설정
+        if (!bBlocked && NavSystem)
         {
-            return SpawnPoint;  // 안전한 위치면 반환
+            FNavLocation NavLocation;
+            if (NavSystem->ProjectPointToNavigation(SpawnPoint, NavLocation))
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Spawned AI at : %s"), *NavLocation.Location.ToString());
+                return NavLocation.Location;
+            }
         }
     }
 

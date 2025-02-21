@@ -16,7 +16,7 @@ public:
 	
 	AFPSGameMode();
 	virtual void BeginPlay() override;
-	void ClearAllEnemies();
+	// void ClearAllEnemies();
 
 	UFUNCTION()
 	void OnBossDefeated();
@@ -25,7 +25,7 @@ public:
 	UFUNCTION()
 	void OnStageClear();
 	UFUNCTION()
-	void SpawnEnemies(int32 NumEnemies);
+	void SpawnEnemiesForStage(int32 StageNumber);
 	UFUNCTION()
 	void EndGame(bool bPlayWin);
 	UFUNCTION()
