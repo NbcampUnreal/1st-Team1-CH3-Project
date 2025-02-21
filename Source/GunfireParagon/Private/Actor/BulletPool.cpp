@@ -59,47 +59,47 @@ void ABulletPool::BeginPlay()
 	
 	//GetWorldTimerManager().SetTimer(BulletCheckTimer, this, &ABulletPool::CheckBulletLifetime, MaxBulletLifetime, true);
 }
-void ABulletPool::CheckBulletLifetime()
-{
-	float CurrentTime = GetWorld()->GetTimeSeconds();
-
-	if (ActiveBullets.Num() == 0) // 총알이 없으면 검사하지 않음
-	{
-        UE_LOG(LogTemp, Warning, TEXT("활성화된 총알 없음"));
-		return;
-	}
-	TArray<ABulletBase*> BulletsToRemove; // 제할 총알을 따로 저장
-    
-        for (ABulletBase* Bullet : ActiveBullets)
-        {
-        	if (!IsValid(Bullet)) // nullptr 또는 삭제된 경우 체크
-        	{
-        		BulletsToRemove.Add(Bullet);
-        		continue;
-        	}
-    
-        	//  총알이 일정 시간 이상 유지되었다면 회수
-        	if (CurrentTime - Bullet->GetSpawnTime() >= MaxBulletLifetime)
-        	{
-        		ReturnBullet(Bullet, Bullet->AmmoType);
-        		BulletsToRemove.Add(Bullet);
-        		UE_LOG(LogTemp, Warning, TEXT("너무 오래있던 총알 회수"));
-        	}
-        }
-    
-        //  반복문 종료 후 한꺼번에 삭제 (Set에서 안전하게 제거)
-        if (BulletsToRemove.Num() > 0)
-        {
-        	for (ABulletBase* Bullet : BulletsToRemove)
-        	{
-        		if (ActiveBullets.Contains(Bullet))
-        		{
-        			ActiveBullets.Remove(Bullet);
-        		}
-        	}
-        }
-
-}
+//void ABulletPool::CheckBulletLifetime()
+//{
+//	float CurrentTime = GetWorld()->GetTimeSeconds();
+//
+//	if (ActiveBullets.Num() == 0) // 총알이 없으면 검사하지 않음
+//	{
+//        UE_LOG(LogTemp, Warning, TEXT("활성화된 총알 없음"));
+//		return;
+//	}
+//	TArray<ABulletBase*> BulletsToRemove; // 제할 총알을 따로 저장
+//    
+//        for (ABulletBase* Bullet : ActiveBullets)
+//        {
+//        	if (!IsValid(Bullet)) // nullptr 또는 삭제된 경우 체크
+//        	{
+//        		BulletsToRemove.Add(Bullet);
+//        		continue;
+//        	}
+//    
+//        	//  총알이 일정 시간 이상 유지되었다면 회수
+//        	if (CurrentTime - Bullet->GetSpawnTime() >= MaxBulletLifetime)
+//        	{
+//        		ReturnBullet(Bullet, Bullet->AmmoType);
+//        		BulletsToRemove.Add(Bullet);
+//        		UE_LOG(LogTemp, Warning, TEXT("너무 오래있던 총알 회수"));
+//        	}
+//        }
+//    
+//        //  반복문 종료 후 한꺼번에 삭제 (Set에서 안전하게 제거)
+//        if (BulletsToRemove.Num() > 0)
+//        {
+//        	for (ABulletBase* Bullet : BulletsToRemove)
+//        	{
+//        		if (ActiveBullets.Contains(Bullet))
+//        		{
+//        			ActiveBullets.Remove(Bullet);
+//        		}
+//        	}
+//        }
+//
+//}
 
 
 ABulletBase* ABulletPool::GetPooledBullet(EAmmoType AmmoType)

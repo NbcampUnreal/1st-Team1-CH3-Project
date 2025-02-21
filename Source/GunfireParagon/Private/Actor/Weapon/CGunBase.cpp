@@ -35,10 +35,7 @@ void ACGunBase::BeginPlay()
 	}
 	
 	BulletPool = Cast<ABulletPool>(UGameplayStatics::GetActorOfClass(GetWorld(), ABulletPool::StaticClass()));
-
 	
-	//test용
-	GetWorldTimerManager().SetTimer(TestFireTimer, this, &ACGunBase::Fire, GunDelay, true);
 }
 
 void ACGunBase::Fire()
