@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "TimerManager.h"
-#include "CGunBase.h"
+#include "Actor/Weapon/CGunBase.h"
 #include "Components/CapsuleComponent.h"
 #include "PlayerCharacter.generated.h"
 
