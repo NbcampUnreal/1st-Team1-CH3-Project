@@ -5,7 +5,7 @@
 #include "FPSGameState.h"
 #include "FPSGameInstance.h"
 #include "Kismet/GameplayStatics.h"
-#include "../BaseEnemy.h"
+#include "AI/BaseEnemy.h"
 #include "AIObjectPool.h"
 #include "SpawnVolume.h"
 
@@ -20,7 +20,7 @@ void AFPSGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// HUD Ãß°¡ ·ÎÁ÷
+	// HUD ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½
 	/*
 	AMyPlayerController* PlayerController = Cast<AmyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (PlayerController)
@@ -42,7 +42,7 @@ void AFPSGameMode::OnPlayerDead()
 
 void AFPSGameMode::OnStageClear()
 {
-	// »óÀÚ¸¦ ¿­¸é ´ÙÀ½½ºÅ×ÀÌÁö °¡´øÁö, ¾îµð¿¡ µµÂøÇÏ¸é ´ÙÀ½ ½ºÅ×ÀÌÁö °¡´øÁö ·ÎÁ÷ ±¸ÇöÇØ¾ßÇÔ
+	// ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½ï¿½
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
@@ -56,7 +56,7 @@ void AFPSGameMode::OnStageClear()
 
 				if (NewStageIndex <= 10) 
 				{
-					// ¹Ù·Î ½ºÆùµÇ¸é ¾î»öÇÒ ¼ö ÀÖÀ¸´Ï º¸°í SetTimer Ãß°¡ÇÒÁö »ý°¢
+					// ï¿½Ù·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ SetTimer ï¿½ß°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 					SpawnEnemiesForStage(NewStageIndex);
 				}
 			}
@@ -77,7 +77,7 @@ void AFPSGameMode::SpawnEnemiesForStage(int32 StageNumber)
 	if (FoundVolumes.Num() == 0) return;
 	
 
-	// ½ºÅ×ÀÌÁö ¸¶´Ù ½ºÆùÇØ¾ßµÉ Àû, Àû °³Ã¼¼ö °¡Á®¿È
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ßµï¿½ ï¿½ï¿½, ï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	TMap<TSubclassOf<ABaseEnemy>, int32> EnemyData = FPSGameInstance->GetEnemySpawnData(StageNumber); 
 
 	if (FoundVolumes.Num() > 0)
@@ -104,7 +104,7 @@ void AFPSGameMode::SpawnEnemiesForStage(int32 StageNumber)
 
 }
 
-// Object PoolÀÌ±â ¶§¹®¿¡ ÇÊ¿ä ¾øÁö¸¸ ÀÏ´Ü ³öµÒ
+// Object Poolï¿½Ì±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½
 /*
 void AFPSGameMode::ClearAllEnemies()
 {
@@ -128,7 +128,7 @@ void AFPSGameMode::EndGame(bool bPlayWin)
 	if (bPlayWin)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Game Clear!"));
-		// °ÔÀÓ Å¬¸®¾î UI È£ÃâÇÏ´Â ·ÎÁ÷ Ãß°¡ÇØ¾ß‰Î.
+		// ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ UI È£ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½Ø¾ß‰ï¿½.
 		FTimerHandle EndTimerHandle;
 		GetWorldTimerManager().SetTimer(
 			EndTimerHandle,
@@ -141,7 +141,7 @@ void AFPSGameMode::EndGame(bool bPlayWin)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Game Over!"));
-		// °ÔÀÓ ¿À¹ö UI È£ÃâÇÏ´Â ·ÎÁ÷ Ãß°¡ÇØ¾ß‰Î.
+		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI È£ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½Ø¾ß‰ï¿½.
 		FTimerHandle EndTimerHandle;
 		GetWorldTimerManager().SetTimer(
 			EndTimerHandle,
