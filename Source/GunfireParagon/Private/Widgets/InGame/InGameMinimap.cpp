@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Widgets/InGameMinimap.h"
+#include "Widgets/InGame/InGameMinimap.h"
 #include "Components\TextBlock.h"
 #include "Kismet\GameplayStatics.h"
 #include "Widgets/DataAssets/InGameMinimapDataAsset.h"
@@ -37,8 +37,6 @@ void UInGameMinimap::UpdatePlayTime()
 {
 	if (TimeTextBlock)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Time Test"));
-
 		float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 		float ElapsedTime = CurrentTime - LevelEntryTime;
 

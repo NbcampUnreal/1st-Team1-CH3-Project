@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Widgets/IngameMainWidget.h"
-#include "Widgets\InGameMinimap.h"
-#include "Widgets\IngamePlayerStatus.h"
-#include "Widgets\IngameWeaponWidget.h"
+#include "Widgets/InGame/IngameMainWidget.h"
+#include "Widgets\InGame\InGameMinimap.h"
+#include "Widgets\InGame\IngamePlayerStatus.h"
+#include "Widgets\InGame\IngameWeaponWidget.h"
 #include "Widgets\InGame\IngameCrossHairs.h"
 
 void UIngameMainWidget::NativeOnInitialized()
