@@ -16,12 +16,16 @@ class GUNFIREPARAGON_API ACGunBase : public AActor
 public:	
 	ACGunBase();
 
+	virtual void Fire();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunMesh")
+	UStaticMeshComponent* GunMesh;
+	bool bWasDropped = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunMesh")
+	USkeletalMeshComponent* WeaponMesh;
+
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void Fire();
-
-	
 	// 총기 딜레이에 따라 발사 가능 여부 확인
 	bool CanFire() const;
 
@@ -41,8 +45,7 @@ protected:
 protected:
 
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunMesh")
-	UStaticMeshComponent* GunMesh;
+	
 
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
