@@ -17,13 +17,18 @@ class GUNFIREPARAGON_API AAIObjectPool : public AActor
 	
 public:	
 	
+
 	AAIObjectPool();
+	virtual void BeginPlay() override;
 
 	void InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClasses);
 	ABaseEnemy* GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<ABaseEnemy> EnemyClass);
 	void ReturnAIToPool(ABaseEnemy* Enemy);
 
+	TArray<ABaseEnemy*> EnemySave;
 	TMap<TSubclassOf<ABaseEnemy>, TSharedPtr<TArray<ABaseEnemy*>>> EnemyPools;
+	TSharedPtr<TArray<ABaseEnemy*>> Pool;
+
 
 private:
 	
