@@ -26,8 +26,8 @@ public:
 	UFUNCTION()
 	void ReturnBullet(ABulletBase* Bullet,EAmmoType AmmoType);
 
-	UFUNCTION()
-	void CheckBulletLifetime();
+	/*UFUNCTION()
+	void CheckBulletLifetime();*/
 
 	
 protected:
