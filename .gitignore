@@ -78,6 +78,3 @@ DerivedDataCache/*
 
 # Jetbrain Rider specific files
 .idea/*
-
-# Config files
-Config/*
