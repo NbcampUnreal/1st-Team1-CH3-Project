@@ -29,7 +29,8 @@ void APlayerCharacter::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 	CurrentShield = MaxShield;
-
+	ReturnHPValue();
+	ReturnShieldValue();
 	if (DefaultWeaponClass)
 	{
 		ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
@@ -37,6 +38,7 @@ void APlayerCharacter::BeginPlay()
 		{
 			EquipWeapon(DefaultWeapon, 1);
 			UE_LOG(LogTemp, Warning, TEXT("기본 라이플 장착 완료: %s"), *DefaultWeapon->GetName());
+			SetAmmoState(DefaultWeapon->GetCurrentAmmo(), DefaultWeapon->GetMaxAmmo());
 		}
 	}
 }
@@ -312,6 +314,21 @@ void APlayerCharacter::DebugTakeDamage()
 	UE_LOG(LogTemp, Warning, TEXT("플레이어에게 20 데미지를 가했습니다 현재 체력: %f, 실드: %f"), CurrentHealth, CurrentShield);
 }
 
+void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo)
+{
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentAmmo = UpdateCurrentAmmo;
+		MaxAmmo = UpdateMaxAmmo;
+
+		OnAmmoChanged.Broadcast(CurrentAmmo, MaxAmmo);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Current Weapon is nullptr or Not Valid."))
+	}
+}
+
 void APlayerCharacter::SwitchWeapon(ACGunBase* NewWeapon)
 {
 	EquipWeapon(NewWeapon, 2);
@@ -326,6 +343,7 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 	}
 
 	CurrentWeapon->Fire();
+	SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 }
 
 
@@ -518,6 +536,8 @@ void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("무기 슬롯 변경 완료. 현재 무기: %s"), *CurrentWeapon->GetName());
+
+	SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 }
 
 

@@ -41,10 +41,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Textures")
 	class UInGameStateDataAsset* CurrentTextures;
-public:
-	// Todo : 로직 테스트용이며, 실제로는 Player의 CurrentHP, MaxHP, CurrentShield, MaxShield를 사용하여 업데이트 할 것입니다.
-	// Test
 
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
 	int32 CurrentHP;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
@@ -54,6 +52,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
 	int32 MaxShield;
 
+public:
 	UFUNCTION(BlueprintCallable, Category="UI")
 	void UpdatePlayerState();
 
@@ -61,4 +60,7 @@ public:
 	void SetCurrentHP(int32 UpdateHP, int32 UpdateMaxHP);
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetCurrentShield(int32 UpdateShield, int32 UpdateMaxShield);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetCurrentPlayerTexture();
 };

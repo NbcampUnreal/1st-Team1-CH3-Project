@@ -32,16 +32,16 @@ void UIngamePlayerStatus::UpdatePlayerState()
 		HPBar->SetPercent(HPPercent);
 	}
 
-	if (ShieldBar && MaxShield > 0)
-	{
-		float ShieldPercent = (float)CurrentShield / (float)MaxShield;
-		ShieldBar->SetPercent(ShieldPercent);
-	}
-
 	if (HPTextBlock)
 	{
 		FString HPString = FString::Printf(TEXT("%d / %d"), CurrentHP, MaxHP);
 		HPTextBlock->SetText(FText::FromString(HPString));
+	}
+
+	if (ShieldBar && MaxShield > 0)
+	{
+		float ShieldPercent = (float)CurrentShield / (float)MaxShield;
+		ShieldBar->SetPercent(ShieldPercent);
 	}
 
 	if (ShieldTextBlock)
@@ -63,4 +63,9 @@ void UIngamePlayerStatus::SetCurrentShield(int32 UpdateShield, int32 UpdateMaxSh
 	MaxShield = UpdateMaxShield;
 	CurrentShield = FMath::Clamp(UpdateShield, 0, MaxShield);
 	UpdatePlayerState();
+}
+
+void UIngamePlayerStatus::SetCurrentPlayerTexture()
+{
+	// 플레이어 Base 기반의 다른 플레이어가 있을 경우. 없다면 WBP 단계에서 Texture 적용
 }

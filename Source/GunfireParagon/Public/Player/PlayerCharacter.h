@@ -11,6 +11,9 @@
 class UCameraComponent;
 struct FInputActionValue;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangedPlayerValue, float, CurrentValue, float, MaxValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeOneValue, float, OneValue);
+
 UCLASS()
 class GUNFIREPARAGON_API APlayerCharacter : public ACharacter
 {
@@ -145,4 +148,45 @@ private:
 
 public:
 	void DebugTakeDamage();
+
+
+// Event Binding To WBP - KGW
+// 병합시 충돌 관련해서 문제 발생시 해당 과정 추가 바랍니다.
+// 해당 Value관련 델리게이트 Broad 전달 경우, 재사용성을 위해 델리게이트 선언 부 DYNAMIC_MULTICAST 형태로 선언하였으니 필요시 BroadCast하여 전달하셔도 괜찮습니다.
+public:
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangedPlayerValue OnHealthChanged;
+	
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangedPlayerValue OnShieldChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangedPlayerValue OnAmmoChanged;
+
+	// Ammo 관련 변수/함수 존재하지 않음. 플레이어 캐릭터 내 추가 바랍니다. 해당 형태를 Helath선언부분으로 올리셔도 괜찮습니다.
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
+	float CurrentAmmo = 0;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
+	float MaxAmmo = 0;
+
+	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
+	
+	void ReturnHPValue()
+	{
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	}
+
+	void ReturnShieldValue()
+	{
+		OnShieldChanged.Broadcast(CurrentShield, MaxShield);
+	}
 };
+
+/*  UI-> Player Comment
+	BeginPlay 초기 Status값 관련 하나의 SetFunction을 사용하여 정리해주셨으면 합니다.
+	현재 Status Value 변경 시 각각의 함수 내에서 처리되기때문에 유지보수성이 너무 낮습니다.
+	해당 근거를 바탕으로 Damege처리, ShieldRegen, Level/CardSelect로 인한 Statue 변화의 경우 
+	SetterHP/ShieldValue Func 사용하여 응집도를 높여주시며, 결합성을 낮춰주셨으면합니다.
+	Rebase And Merge 브랜치 전략을 사용함으로써 PR을 지양하는 방향성 이기 때문에 Comment 남깁니다.
+*/

@@ -30,4 +30,14 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	class UIngameCrossHairs* CrossHairWidget;
+
+
+protected:
+	//PlayerStatus
+	UFUNCTION()
+	void OnPlayerHealthBinding(float CurrentHP, float MaxHP);
+
+	UFUNCTION()
+	void OnPlayerShieldBinding(float CurrentShield, float MaxShield);
+
 };
