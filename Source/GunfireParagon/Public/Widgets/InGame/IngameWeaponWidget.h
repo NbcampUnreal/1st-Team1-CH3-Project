@@ -46,15 +46,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	float SkillCoolTime;
 
-public:
-	//Test Case
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void UpdateWeaponState();
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Weapon")
 	int32 CurrentAmmo;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "UITest")
 	int32 MaxAmmo;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "UITest")
 	int32 CurrentGrenade;
+
+	void UpdateWeaponState();
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentAmmo(int32 UpdateAmmo, int32 UpdateMaxAmmo);	
 };

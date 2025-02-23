@@ -19,8 +19,6 @@ void UIngameWeaponWidget::NativeOnInitialized()
 void UIngameWeaponWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	UpdateWeaponState();
 }
 
 void UIngameWeaponWidget::UpdateWeaponState()
@@ -39,4 +37,11 @@ void UIngameWeaponWidget::UpdateWeaponState()
 		FString GrenadeString = FString::Printf(TEXT("%d"), CurrentGrenade);
 		GrenadeTextBlock->SetText(FText::FromString(GrenadeString));
 	}
+}
+
+void UIngameWeaponWidget::SetCurrentAmmo(int32 UpdateAmmo, int32 UpdateMaxAmmo)
+{
+	CurrentAmmo = UpdateAmmo;
+	MaxAmmo = UpdateMaxAmmo;
+	UpdateWeaponState();
 }

@@ -33,11 +33,15 @@ protected:
 
 
 protected:
-	//PlayerStatus
+	//Player Status
 	UFUNCTION()
 	void OnPlayerHealthBinding(float CurrentHP, float MaxHP);
 
 	UFUNCTION()
 	void OnPlayerShieldBinding(float CurrentShield, float MaxShield);
+
+	//Weapon Status
+	UFUNCTION()
+	void OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo);
 
 };

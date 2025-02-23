@@ -43,24 +43,23 @@ protected:
 	class UInGameStateDataAsset* CurrentTextures;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PlayerStatus")
 	int32 CurrentHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PlayerStatus")
 	int32 MaxHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PlayerStatus")
 	int32 CurrentShield;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UITest")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PlayerStatus")
 	int32 MaxShield;
 
-public:
-	UFUNCTION(BlueprintCallable, Category="UI")
+	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerState();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
+public:
+	UFUNCTION(BlueprintCallable)
 	void SetCurrentHP(int32 UpdateHP, int32 UpdateMaxHP);
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintCallable)
 	void SetCurrentShield(int32 UpdateShield, int32 UpdateMaxShield);
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintCallable)
 	void SetCurrentPlayerTexture();
 };

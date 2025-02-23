@@ -51,6 +51,10 @@ void UIngameMainWidget::NativeConstruct()
 		{
 			CurrentPlayer->OnShieldChanged.AddDynamic(this, &UIngameMainWidget::OnPlayerShieldBinding);
 		}
+		if (CurrentPlayer && !CurrentPlayer->OnAmmoChanged.IsBound())
+		{
+			CurrentPlayer->OnAmmoChanged.AddDynamic(this, &UIngameMainWidget::OnWeaponAmmoBinding);
+		}
 	}
 
 }
@@ -69,6 +73,11 @@ void UIngameMainWidget::OnPlayerHealthBinding(float CurrentHP, float MaxHP)
 void UIngameMainWidget::OnPlayerShieldBinding(float CurrentShield, float MaxShield)
 {
 	PlayerStatusWidget->SetCurrentShield(CurrentShield, MaxShield);
+}
+
+void UIngameMainWidget::OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo)
+{
+	WeaponStatusWidget->SetCurrentAmmo(CurrentAmmo, MaxAmmo);
 }
 
 
