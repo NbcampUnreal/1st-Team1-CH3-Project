@@ -12,9 +12,17 @@ class GUNFIREPARAGON_API ANormalRangeEnemy : public ABaseEnemy
 public:
 	ANormalRangeEnemy();
 
-	virtual void Attack() override;
+	virtual void Attack(const FVector& TargetLocation) override;
 
 protected:
-	virtual void PerformMeleeAttack() override;
-	virtual void PerformRangeAttack() override;
+	virtual void PerformMeleeAttack(const FVector& TargetLocation) override;
+	virtual void PerformRangeAttack(const FVector& TargetLocation) override;
+
+	void PlayMuzzleFlashEffect();
+	void PlayBulletEffect(const FVector& Start, const FVector& Direction);
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UParticleSystem* MuzzleFlashEffect;
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UParticleSystem* BulletEffect;
 };

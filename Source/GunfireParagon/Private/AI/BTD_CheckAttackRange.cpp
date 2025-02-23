@@ -13,6 +13,8 @@ bool UBTD_CheckAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& O
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return false;
 
+	if (BlackboardComponent->GetValueAsBool("IsAttacking")) return false;
+
 	AActor* TargetPlayer = Cast<AActor>(BlackboardComponent->GetValueAsObject("TargetPlayer"));
 	if (!TargetPlayer || !TargetPlayer->ActorHasTag("Player")) return false;
 

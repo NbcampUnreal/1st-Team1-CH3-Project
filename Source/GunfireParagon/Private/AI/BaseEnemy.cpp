@@ -5,6 +5,9 @@
 #include "BehaviorTree/BehaviorTreeComponent.h" 
 #include "BehaviorTree/BTTaskNode.h"  
 #include "Components/CapsuleComponent.h"
+#include "Perception/AISense_Damage.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ABaseEnemy::ABaseEnemy()
 {
@@ -24,7 +27,7 @@ ABaseEnemy::ABaseEnemy()
 	AttackRange = 200.0f;
 	AttackDelay = 2.0f;
 	MaxHealth = 100.0f;
-	MaxWalkSpeed = 400.0f;
+	BaseWalkSpeed = 300.0f;
 	CurrentHealth = MaxHealth;
 
 	bIsAttacking = false;
@@ -33,12 +36,12 @@ ABaseEnemy::ABaseEnemy()
 
 	Tags.Add("Monster");
 
-	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
-void ABaseEnemy::Attack()
+void ABaseEnemy::Attack(const FVector& TargetLocation)
 {
 }
 
@@ -55,7 +58,6 @@ void ABaseEnemy::EndAttack()
 
 	AlreadyHitActors.Empty();
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called: %s"), *GetName());
-
 }
 
 void ABaseEnemy::UseSkill()
@@ -108,10 +110,31 @@ void ABaseEnemy::ResetEnemy()
 	bIsDead = false;
 }
 
+void ABaseEnemy::UpdateAimPitch()
+{
+	if (!Controller) return;
+
+	AActor* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (!Player) return;
+
+	FVector Start = GetMesh()->GetSocketLocation("Muzzle_Front");
+	FVector Target;
+	USkeletalMeshComponent* PlayerMesh = Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+	if (PlayerMesh)
+	{
+		Target = PlayerMesh->GetSocketLocation("upperarm_l");
+	}
+
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Start, Target);
+
+	AimPitch = FMath::Clamp(LookAtRotation.Pitch, -60.0f, 60.0f);
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("AimPitch: %f"), AimPitch));
+}
+
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay - ABaseEnemy: MaxWalkSpeed = %f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
 float ABaseEnemy::TakeDamage
@@ -131,6 +154,19 @@ float ABaseEnemy::TakeDamage
 		if (BoneName == "head")
 		{
 			ActualDamage *= 2.0f;
+		}
+
+		if (DamageCauser && GetController())
+		{
+			UAISense_Damage::ReportDamageEvent
+			(
+				GetWorld(),
+				this,
+				DamageCauser,
+				ActualDamage,
+				GetActorLocation(),
+				PointDamageEvent->HitInfo.ImpactPoint
+			);
 		}
 	}
 
@@ -180,11 +216,11 @@ void ABaseEnemy::SetDeathState()
 	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	MeshComp->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
 
-	// 물리 속도 초기화 (이전 힘 제거)
+	// 물리 속도 초기화 
 	MeshComp->SetPhysicsLinearVelocity(FVector::ZeroVector);
 	MeshComp->SetSimulatePhysics(true);
 
-	// 충격 적용 (너무 세지 않도록 수정)
+	// 충격 적용 
 	FVector ImpulseDirection = GetActorRotation().Vector() * -1.0f;
 	ImpulseDirection.Normalize();
 
