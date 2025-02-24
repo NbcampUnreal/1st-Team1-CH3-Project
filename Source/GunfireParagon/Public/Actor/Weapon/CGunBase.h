@@ -59,6 +59,8 @@ protected:
 	
 	FVector SpreadDirection(const FVector OriginDirection) const;
 
+	FVector GetAimDirection() const;
+
 
 //총기의 스텟관련 변수들,assetraw에서 데이터 받아와서저장시킬예정
 protected:

@@ -1,0 +1,13 @@
+RowName,Key,Name,AttackPower,Attackspeed,MaxAmmo,GunDelay,Grade
+1001,1001,NormalRifle,10,2000,40,0.15,normal
+2001,2001,NormalShotgun,5,1000,12,2,normal
+3001,3001,NormalSniper,40,4000,5,3,normal
+4001,4001,NormalRocket,30,500,5,3,normal
+1101,1101,RareRifle,20,2000,50,0.15,rare
+2101,2101,RareShotgun,10,1000,18,2,rare
+3101,3101,RareSniper,80,4000,5,2,rare
+4101,4101,RareRocket,60,500,5,2,rare
+1201,1201,LegendRifle,44,3000,444,0.12,legendery
+2201,2201,Legendhotgun,22,1111,111,1.1,legendery
+3201,3201,LegendSniper,777,7777,77,0.77,legendery
+4201,4201,LegendRocket,555,555,55,0.55,legendery
