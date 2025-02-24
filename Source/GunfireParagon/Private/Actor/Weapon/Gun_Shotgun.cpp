@@ -42,7 +42,7 @@ void AGun_Shotgun::Fire()
 	for (int i = 0; i < Pellets; i++)
 	{
 		// 총알 퍼짐 방향 설정
-		FVector forwardDirection = GetActorForwardVector();
+		FVector forwardDirection = GetAimDirection();
 		forwardDirection = SpreadDirection(forwardDirection);
 	
 		//  총알을 풀에서 가져오기

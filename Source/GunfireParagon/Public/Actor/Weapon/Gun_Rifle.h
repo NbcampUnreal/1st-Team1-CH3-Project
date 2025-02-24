@@ -6,9 +6,6 @@
 #include "CGunBase.h"
 #include "Gun_Rifle.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class GUNFIREPARAGON_API AGun_Rifle : public ACGunBase
 {

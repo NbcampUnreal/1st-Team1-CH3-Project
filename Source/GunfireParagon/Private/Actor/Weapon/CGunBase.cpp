@@ -1,6 +1,8 @@
 #include "Actor/Weapon/CGunBase.h"
 #include "Actor/Bullet/BulletBase.h"  
 #include "Actor/BulletPool.h" 
+#include "Player/MyPlayerController.h" 
+#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -55,8 +57,7 @@ void ACGunBase::Fire()
 	}
 	
 	// 지금 잏시적으로 앞으로 발사하게만해둠
-	FVector forwardDirection = GetActorForwardVector();
-	forwardDirection = SpreadDirection(forwardDirection);
+	FVector forwardDirection = GetAimDirection();
 	
 	//  총알을 풀에서 가져오기
 	ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
@@ -125,6 +126,41 @@ void ACGunBase::Reload()
 	// 탄창을 가득 채움
 	CurrentAmmo = MaxAmmo;
 	UE_LOG(LogTemp, Warning, TEXT("재장전 완료! 현재 탄약: %d"), CurrentAmmo);
+}
+
+FVector ACGunBase::GetAimDirection() const
+{
+	//싱글플레이어라 0번을 가져옴
+	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	if (!PlayerCharacter) return GetActorForwardVector(); // 기본값: 총이 향하는 방향
+
+	//  2. 플레이어의 컨트롤러 가져오기
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(PlayerCharacter->GetController());
+	if (!PlayerController) return GetActorForwardVector();
+	FVector WorldLocation, WorldDirection;
+	if (PlayerController->DeprojectScreenPositionToWorld(960.0f, 540.0f, WorldLocation, WorldDirection))
+	{
+		//  1. 화면 중앙(960x540, 1920x1080 해상도 기준)에서 월드 방향 벡터 얻기
+
+		FVector TraceStart = PlayerController->PlayerCameraManager->GetCameraLocation();
+		FVector TraceEnd = TraceStart + (WorldDirection * 10000.0f); // 긴 레이 트레이스
+
+		FHitResult HitResult;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		QueryParams.AddIgnoredActor(GetOwner()); // 플레이어 자신 무시
+
+		// 2. 라인 트레이스 실행
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+		{
+			// 3. 충돌한 위치로 발사 방향 계산
+			FVector AimDirection = (HitResult.ImpactPoint - MuzzleSpot).GetSafeNormal();
+			return AimDirection;
+		}
+	}
+
+	// 실패 시 기본 총구 방향
+	return GetActorForwardVector();
 }
 
 FVector ACGunBase::SpreadDirection(const FVector OriginDirection) const
