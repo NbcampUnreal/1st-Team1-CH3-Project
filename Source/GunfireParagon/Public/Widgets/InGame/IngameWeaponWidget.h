@@ -56,5 +56,5 @@ protected:
 	void UpdateWeaponState();
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetCurrentAmmo(int32 UpdateAmmo, int32 UpdateMaxAmmo);	
+	void SetCurrentAmmo(const int32& UpdateAmmo, const int32& UpdateMaxAmmo);	
 };

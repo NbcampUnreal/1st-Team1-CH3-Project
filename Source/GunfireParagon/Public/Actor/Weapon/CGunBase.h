@@ -89,7 +89,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties")
 	EAmmoType AmmoType; 
 	
-	// Ammo 관련 Player에게 전달해야하는 값들이 존재. Getter 생성했습니다. 해당 Type,CallName,ReturnValue 유지 상태의 리팩토링 부탁드립니다.
+	// Ammo 관련 Player에게 전달해야하는 값들이 존재. Getter 생성했습니다. 필요시 해당 Type,CallName,ReturnValue 유지 상태의 리팩토링 부탁드립니다.
 public:
 	UFUNCTION()
 	float GetCurrentAmmo() { return CurrentAmmo; }

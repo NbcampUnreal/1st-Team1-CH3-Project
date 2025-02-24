@@ -39,7 +39,7 @@ void UIngameWeaponWidget::UpdateWeaponState()
 	}
 }
 
-void UIngameWeaponWidget::SetCurrentAmmo(int32 UpdateAmmo, int32 UpdateMaxAmmo)
+void UIngameWeaponWidget::SetCurrentAmmo(const int32& UpdateAmmo, const int32& UpdateMaxAmmo)
 {
 	CurrentAmmo = UpdateAmmo;
 	MaxAmmo = UpdateMaxAmmo;

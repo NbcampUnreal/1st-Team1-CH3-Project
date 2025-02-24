@@ -51,14 +51,14 @@ void UIngamePlayerStatus::UpdatePlayerState()
 	}
 }
 
-void UIngamePlayerStatus::SetCurrentHP(int32 UpdateHP, int32 UpdateMaxHP)
+void UIngamePlayerStatus::SetCurrentHP(const int32& UpdateHP, const int32& UpdateMaxHP)
 {
 	MaxHP = UpdateMaxHP;
 	CurrentHP = FMath::Clamp(UpdateHP, 0, MaxHP);
 	UpdatePlayerState();
 }
 
-void UIngamePlayerStatus::SetCurrentShield(int32 UpdateShield, int32 UpdateMaxShield)
+void UIngamePlayerStatus::SetCurrentShield(const int32& UpdateShield, const int32& UpdateMaxShield)
 {
 	MaxShield = UpdateMaxShield;
 	CurrentShield = FMath::Clamp(UpdateShield, 0, MaxShield);

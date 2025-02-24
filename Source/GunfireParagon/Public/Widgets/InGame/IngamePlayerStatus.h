@@ -56,9 +56,9 @@ protected:
 	void UpdatePlayerState();
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetCurrentHP(int32 UpdateHP, int32 UpdateMaxHP);
+	void SetCurrentHP(const int32& UpdateHP, const int32& UpdateMaxHP);
 	UFUNCTION(BlueprintCallable)
-	void SetCurrentShield(int32 UpdateShield, int32 UpdateMaxShield);
+	void SetCurrentShield(const int32& UpdateShield, const int32& UpdateMaxShield);
 
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentPlayerTexture();
