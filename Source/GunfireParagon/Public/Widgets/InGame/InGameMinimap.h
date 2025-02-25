@@ -71,7 +71,7 @@ protected:
 	float MinimapScale = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
-	float MaxRenderDistance = 500.0f;
+	float MaxRenderDistance = 1600.f;
 
 private:
 	FVector2D IconRenderPosition(FVector WorldLocation);

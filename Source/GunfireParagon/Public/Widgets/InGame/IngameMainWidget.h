@@ -50,5 +50,5 @@ protected:
 
 private:
 	// Minimap Rendering Character Distance
-	float MaxRenderDistance = 500.f;
+	float MaxRenderDistance = 1600.f;
 };

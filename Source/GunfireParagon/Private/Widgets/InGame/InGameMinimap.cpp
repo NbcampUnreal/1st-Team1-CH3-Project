@@ -136,22 +136,42 @@ void UInGameMinimap::UpdateAllIcons()
 
 FVector2D UInGameMinimap::IconRenderPosition(FVector WorldLocation)
 {
+	//if (!PlayerCharacter || !RenderCanvas) return FVector2D::ZeroVector;
+
+	//FVector Offset = WorldLocation - PlayerCharacter->GetActorLocation();
+	//Offset *= MinimapScale;
+
+	//FRotator PlayerRotation = PlayerCharacter->GetActorRotation();
+	//float YawRad = FMath::DegreesToRadians(PlayerRotation.Yaw);
+
+	//float CosYaw = FMath::Cos(YawRad);
+	//float SinYaw = FMath::Sin(YawRad);
+	//float RotatedX = Offset.X * CosYaw + Offset.Y * SinYaw;
+	//float RotatedY = Offset.Y * CosYaw - Offset.X * SinYaw;
+
+	//FVector2D MinimapCenter = FVector2D(RenderCanvas->GetCachedGeometry().GetLocalSize()) * 0.5f;
+	//FVector2D MinimapPosition = MinimapCenter + FVector2D(RotatedX, -RotatedY);
+
+
+	//return MinimapPosition;
+
+
 	if (!PlayerCharacter || !RenderCanvas) return FVector2D::ZeroVector;
 
 	FVector Offset = WorldLocation - PlayerCharacter->GetActorLocation();
 	Offset *= MinimapScale;
 
-	FRotator PlayerRotation = PlayerCharacter->GetActorRotation();
-	float YawRad = FMath::DegreesToRadians(-PlayerRotation.Yaw);
+	FVector Forward = PlayerCharacter->GetActorForwardVector(); 
+	FVector Right = PlayerCharacter->GetActorRightVector(); 
 
-	float CosYaw = FMath::Cos(YawRad);
-	float SinYaw = FMath::Sin(YawRad);
-	float RotatedX = Offset.X * CosYaw - Offset.Y * SinYaw;
-	float RotatedY = Offset.X * SinYaw + Offset.Y * CosYaw;
+	float RotatedX = FVector::DotProduct(Offset, Forward);
+	float RotatedY = FVector::DotProduct(Offset, Right);
 
 	FVector2D MinimapCenter = FVector2D(RenderCanvas->GetCachedGeometry().GetLocalSize()) * 0.5f;
-	FVector2D MinimapPosition = MinimapCenter + FVector2D(RotatedX, RotatedY);
+	FVector2D MinimapPosition = MinimapCenter + FVector2D(RotatedY, -RotatedX);
 
+	UE_LOG(LogTemp, Warning, TEXT("WorldLocation: (%.1f, %.1f) -> MinimapPosition: (%.1f, %.1f)"),
+		WorldLocation.X, WorldLocation.Y, MinimapPosition.X, MinimapPosition.Y);
 
 	return MinimapPosition;
 }
