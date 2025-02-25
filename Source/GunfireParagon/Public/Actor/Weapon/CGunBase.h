@@ -7,6 +7,14 @@
 
 class ABulletPool;
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	Rifle UMETA(DisplayName = "Rifle"),
+	Shotgun UMETA(DisplayName = "Shotgun"),
+	Sniper UMETA(DisplayName = "Sniper"),
+	Default UMETA(DisplayName = "Default")  // 기본값
+};
 
 UCLASS()
 class GUNFIREPARAGON_API ACGunBase : public AActor
@@ -20,22 +28,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunMesh")
 	UStaticMeshComponent* GunMesh;
 	bool bWasDropped = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunMesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	EWeaponType WeaponType;
+	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	USkeletalMeshComponent* WeaponMesh;
+
+protected:
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USceneComponent* RootComp;
+
+
+
 
 protected:
 	virtual void BeginPlay() override;
 
-	// 총기 딜레이에 따라 발사 가능 여부 확인
+	//총기 딜레이에 따라 발사 가능 여부 확인
 	bool CanFire() const;
 
 	//나중에 바인딩할때 마우스 떼면 그만 쏘도록
 	void StopFire();
 	void SetIsFire(); 
-	//  탄창이 비었는지 확인
+	//탄창이 비었는지 확인
 	bool IsAmmoEmpty() const;
 
-	//  탄창을 재장전
+	//탄창을 재장전
 	virtual void Reload();
 	
 	FVector SpreadDirection(const FVector OriginDirection) const;
@@ -53,7 +72,7 @@ protected:
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
     float Damage = 10.0f;
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
-    float GunDelay = 10.0f;
+    float GunDelay = 0.2f;
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
 	float GunSpread = 5.0f;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
@@ -71,20 +90,15 @@ protected:
 	//  자동사격 모드 (true면 자동사격, false면 단발)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunStatus")
 	bool bIsAutoFire = false;
-
 	//딜레이동안 사격금지하기위한 bool
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunStatus")
 	bool bCanFire  = true;
-	
 	UPROPERTY()
 	FTimerHandle FireTimer;
-
 	UPROPERTY()
 	FTimerHandle AutoFireTimer;
-	//  발사 타이머 (자동 발사용)
 	UPROPERTY()
 	FTimerHandle TestFireTimer;
-
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties")
 	EAmmoType AmmoType; 

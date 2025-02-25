@@ -104,9 +104,11 @@ void ABulletPool::BeginPlay()
 
 ABulletBase* ABulletPool::GetPooledBullet(EAmmoType AmmoType)
 {
+	UE_LOG(LogTemp, Warning, TEXT("총알 풀에서 탄환 가져오기 시도! AmmoType: %d"), (int32)AmmoType);
+
 	if (!BulletPools.Contains(AmmoType))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("탄환 풀에 AmmoType이 존재하지 않습니다!"));
+		UE_LOG(LogTemp, Error, TEXT("탄환 풀에 AmmoType이 존재하지 않음!"));
 		return nullptr;
 	}
 
@@ -116,45 +118,36 @@ ABulletBase* ABulletPool::GetPooledBullet(EAmmoType AmmoType)
 		{
 			Bullet->SetActorEnableCollision(true);
 			Bullet->SetActorHiddenInGame(false);
-			Bullet->SetActorTickEnabled(true); // 총알 활성화
-			ActiveBullets.Add(Bullet);
-			//Bullet->SetSpawnTime(GetWorld()->GetTimeSeconds());
+			Bullet->SetActorTickEnabled(true);
+			Bullet->SetActorRotation(FRotator::ZeroRotator); // 🔄 회전 초기화
+			Bullet->ProjectileMovement->Velocity = FVector::ZeroVector; // 🔄 속도 초기화
+			Bullet->ProjectileMovement->StopMovementImmediately();
 			return Bullet;
 		}
-		
 	}
 
-	//  모든 총알이 사용 중이라면 새 총알 생성 후 풀에 추가
+	// 새 총알 생성
 	ABulletBase* NewBullet = nullptr;
 	switch (AmmoType)
 	{
 	case EAmmoType::Normal:
 		NewBullet = GetWorld()->SpawnActor<ANormalBullet>(ANormalBullet::StaticClass());
 		break;
-	// case EAmmoType::Pierce:
-	// 	NewBullet = GetWorld()->SpawnActor<APierceBullet>(APierceBullet::StaticClass());
-	// 	break;
-	// case EAmmoType::Bomb:
-	// 	NewBullet = GetWorld()->SpawnActor<ABombBullet>(ABombBullet::StaticClass());
-	// 	break;
 	default:
-		UE_LOG(LogTemp, Error, TEXT("잘못된 탄환 타입"));
+		UE_LOG(LogTemp, Error, TEXT("잘못된 탄환 타입!"));
 		return nullptr;
 	}
 
 	if (NewBullet)
 	{
 		BulletPools[AmmoType].Add(NewBullet);
-		UE_LOG(LogTemp, Warning, TEXT("새로운 탄환 생성: %s"), *NewBullet->GetName());
-		NewBullet->SetActorEnableCollision(true);
-		NewBullet->SetActorHiddenInGame(false);
-		NewBullet->SetActorTickEnabled(true);
-		ActiveBullets.Add(NewBullet);
-		//NewBullet->SetSpawnTime(GetWorld()->GetTimeSeconds());
+		UE_LOG(LogTemp, Warning, TEXT("새로운 탄환 생성 완료: %s"), *NewBullet->GetName());
 	}
 
 	return NewBullet;
 }
+
+
 
 void ABulletPool::ReturnBullet(ABulletBase* Bullet, EAmmoType AmmoType)
 {

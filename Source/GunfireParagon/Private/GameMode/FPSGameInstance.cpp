@@ -19,15 +19,22 @@ UFPSGameInstance::UFPSGameInstance()
 void UFPSGameInstance::Init()
 {
 	Super::Init();
-
-	if (CurrentStageIndex == 0)
-	{
-		if (StageMapNames.IsValidIndex(CurrentStageIndex))
-		{
-			UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
-		}
-	}
+	StartGame();
 }
+
+
+//void UFPSGameInstance::Init()
+//{
+//	Super::Init();
+//
+//	if (CurrentStageIndex == 0)
+//	{
+//		if (StageMapNames.IsValidIndex(CurrentStageIndex))
+//		{
+//			UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+//		}
+//	}
+//}
 
 // LoadNextStage
 void UFPSGameInstance::StartGame()

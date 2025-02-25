@@ -29,7 +29,6 @@ FVector ASpawnVolume::GetRandomPointInVolume() const
 	);
 }
 
-// 안전한 위치 스폰, 충돌 감지
 FVector ASpawnVolume::GetSafeSpawnPoint() const
 {
     FVector SpawnPoint;
@@ -54,11 +53,11 @@ FVector ASpawnVolume::GetSafeSpawnPoint() const
             SpawnPoint + FVector(0, 0, 10),
             FQuat::Identity,
             ObjectQueryParams,  
-            FCollisionShape::MakeSphere(50.0f), // 추후 Ai 크기 가져와야 할듯
+            FCollisionShape::MakeSphere(50.0f),
             QueryParams
         );
 
-        // Navmesh 위에 스폰되도록 설정
+        
         if (!bBlocked && NavSystem)
         {
             FNavLocation NavLocation;

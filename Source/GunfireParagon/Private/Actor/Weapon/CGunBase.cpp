@@ -8,89 +8,135 @@ ACGunBase::ACGunBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	USceneComponent* SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
-	RootComponent = SceneComponent;
-	GunMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunMesh"));
-	GunMesh->SetupAttachment(RootComponent);
-
-	CurrentAmmo = MaxAmmo;
-	bCanFire =true;
-	
-	
+    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComp"));
+    WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+    WeaponMesh->SetupAttachment(RootComponent);
 }
+
+
+
+
+
+
 
 void ACGunBase::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-	if (GunMesh && GunMesh->DoesSocketExist(TEXT("Muzzle")))
-	{
-		MuzzleSpot = GunMesh->GetSocketLocation(TEXT("Muzzle"));
-		UE_LOG(LogTemp, Warning, TEXT("총구 위치 설정됨: %s"), *MuzzleSpot.ToString());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("GunMesh에 'Muzzle' 소켓이 존재하지 않습니다. 기본 위치 사용."));
-	}
-	
-	BulletPool = Cast<ABulletPool>(UGameplayStatics::GetActorOfClass(GetWorld(), ABulletPool::StaticClass()));
-	
+    CurrentAmmo = MaxAmmo;
+
+    UE_LOG(LogTemp, Warning, TEXT("총기 장착됨: %s, 초기 탄약: %d"), *GetName(), CurrentAmmo);
+
+    if (WeaponMesh)
+    {
+        if (WeaponMesh->GetSkeletalMeshAsset())
+        {
+            UE_LOG(LogTemp, Warning, TEXT("WeaponMesh에 SkeletalMesh가 정상적으로 설정됨: %s"),
+                *WeaponMesh->SkeletalMesh->GetName());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("WeaponMesh에 SkeletalMesh가 설정되지 않음!"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("WeaponMesh가 초기화되지 않음!"));
+    }
+    //  BulletPool을 찾기 (월드에서 검색)
+    BulletPool = Cast<ABulletPool>(UGameplayStatics::GetActorOfClass(GetWorld(), ABulletPool::StaticClass()));
+
+    if (!BulletPool)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("BulletPool이 월드에 없음. 새로 생성합니다."));
+
+        BulletPool = GetWorld()->SpawnActor<ABulletPool>(ABulletPool::StaticClass());
+
+        if (BulletPool)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("BulletPool이 새로 생성되었습니다."));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("BulletPool 생성 실패! 총알 풀링이 동작하지 않을 수 있습니다."));
+        }
+    }
+
+
 }
+
 
 void ACGunBase::Fire()
 {
-	if (!CanFire()) 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("발사 불가! 탄약 부족 또는 발사 타이머 동작 중"));
-		return;
-	}
+    UE_LOG(LogTemp, Warning, TEXT("CGunBase::Fire() 실행됨 - 현재 탄약: %d"), CurrentAmmo);
 
-	//  발사 후 탄약 감소
-	CurrentAmmo--;
-	
-	if (GunMesh && GunMesh->DoesSocketExist(TEXT("Muzzle")))
-	{
-		MuzzleSpot = GunMesh->GetSocketLocation(TEXT("Muzzle"));
-	}
-	
-	// 지금 잏시적으로 앞으로 발사하게만해둠
-	FVector forwardDirection = GetActorForwardVector();
-	forwardDirection = SpreadDirection(forwardDirection);
-	
-	//  총알을 풀에서 가져오기
-	ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
-	if (Bullet)
-	{
-		Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없습니다!"));
-	}
+    if (!CanFire())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("발사 불가! 탄약 부족 또는 발사 타이머 동작 중"));
+        return;
+    }
 
-	bCanFire = false;
-	GetWorldTimerManager().SetTimer(FireTimer, this, &ACGunBase::SetIsFire, GunDelay-0.01f, false);
+    bCanFire = false; //발사 후 즉시 다음 발사 방지
+    GetWorldTimerManager().SetTimer(FireTimer, this, &ACGunBase::SetIsFire, GunDelay, false); //딜레이 적용
 
-	
-	//지금로직은 마우스를 누르고있을때가 아닌 누를때의 바인딩과 뗏을때의 바인딩을 설정해야함.
-	//자동 발사 모드일 경우 타이머로 반복 실행
-	if (bIsAutoFire)
-	{
-		GetWorldTimerManager().SetTimer(AutoFireTimer, this, &ACGunBase::Fire, GunDelay-0.01f, false);
-	}
+    UE_LOG(LogTemp, Warning, TEXT("Fire() 호출됨 - 현재 탄약: %d"), CurrentAmmo);
+
+    CurrentAmmo--;
+
+    if (IsAmmoEmpty())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("탄약 부족! 자동 재장전 실행"));
+        Reload();
+        return;
+    }
+
+    FVector FireDirection;
+    if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
+    {
+        MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
+        FireDirection = WeaponMesh->GetSocketRotation(TEXT("Muzzle")).Vector();
+        FireDirection.Normalize(); //방향 벡터 정규화
+        UE_LOG(LogTemp, Warning, TEXT("Muzzle 위치: %s, 발사 방향: %s"),
+            *MuzzleSpot.ToString(), *FireDirection.ToString());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Muzzle 소켓이 존재하지 않음! 기본 전방 방향 사용"));
+        FireDirection = GetActorForwardVector();
+    }
+
+    if (!BulletPool)
+    {
+        UE_LOG(LogTemp, Error, TEXT("BulletPool이 없음! 총알을 생성할 수 없음"));
+        return;
+    }
+
+    ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
+
+    if (Bullet)
+    {
+        Bullet->Fire(MuzzleSpot, FireDirection, Damage);
+        UE_LOG(LogTemp, Warning, TEXT("총알 발사 완료! 탄환 타입: %d"), (int32)AmmoType);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없음!"));
+    }
 }
+
+
+
 
 bool ACGunBase::CanFire() const
 {
-	//  bCanFire가 false면 발사 불가능 (GunDelay 동안 발사 막기)
+	//bCanFire가 false면 발사 불가능 (GunDelay 동안 발사 막기)
 	if (!bCanFire)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("발사 대기 중!"));
 		return false;
 	}
 
-	// 탄약이 없으면 발사 불가능
+	//탄약이 없으면 발사 불가능
 	return !IsAmmoEmpty();
 }
 
@@ -115,7 +161,7 @@ bool ACGunBase::IsAmmoEmpty() const
 
 void ACGunBase::Reload()
 {
-	// 탄창이 이미 가득 차 있다면 재장전 필요 없음
+	//탄창이 이미 가득 차 있다면 재장전 필요 없음
 	if (CurrentAmmo == MaxAmmo)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("탄창이 이미 가득 찼습니다!"));
@@ -135,6 +181,3 @@ FVector ACGunBase::SpreadDirection(const FVector OriginDirection) const
 	FRotator SpreadRotation = FRotator(RandomPitch, RandomYaw, 0.0f);
 	return SpreadRotation.RotateVector(OriginDirection);
 }
-
-
-

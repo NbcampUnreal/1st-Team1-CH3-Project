@@ -12,7 +12,6 @@ AFPSGameState::AFPSGameState()
 	RemainingEnemies = 0;
 }
 
-// AI 캐릭 죽으면 이거 호출 해주시면 감사하겠습니다.
 void AFPSGameState::OnEnemyKilled()
 {
 	RemainingEnemies--;

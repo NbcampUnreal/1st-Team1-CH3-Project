@@ -25,10 +25,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Animation")
 	bool bIsHoldingRifle = false;
 
-	void SwitchWeaponSlot(int32 Slot);
-	
-	void SwitchToPrimaryWeapon();
-	void SwitchToSecondaryWeapon();
+	//void SwitchWeaponSlot(int32 Slot);
+	//void SwitchToPrimaryWeapon();
+	//void SwitchToSecondaryWeapon();
 	
 
 protected:
@@ -40,6 +39,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ACGunBase> DefaultWeaponClass;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MaxHealth = 100.0f;
@@ -78,20 +78,23 @@ protected:
 	void Dash(const FInputActionValue& Value);
 	UFUNCTION()
 	void FireWeapon(const FInputActionValue& Value);
+	UFUNCTION()
+	void PickupWeapon();
 
-	UFUNCTION()
-	void HandleSwapWeaponInput(const FInputActionValue& Value);
-	UFUNCTION()
-	void EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
-	void TakeDamage(float DamageAmount);
+
+	//UFUNCTION()
+	//void HandleSwapWeaponInput(const FInputActionValue& Value);
+	//UFUNCTION()
+	//void EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
+
 	void Heal(float HealAmount);
 	void StartShieldRegen();
 	void RegenerateShield();
-	//무기 교체 함수
-	void SwitchWeapon(ACGunBase* NewWeapon);
-	void SwapWeaponWithDropped(ACGunBase* NewWeapon);
+	//void SwitchWeapon(ACGunBase* NewWeapon);
+	//void SwapWeaponWithDropped(ACGunBase* NewWeapon);
 	virtual void Landed(const FHitResult& Hit) override;
-
 
 private:
 	void InitializeCharacter();
@@ -109,9 +112,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	bool bCanDash = true;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-	float DashDistance = 1750.0f;
+	float DashDistance = 600.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-	float DashCooldown = 0.5f;
+	float DashCooldown = 1.5f;
 
 	//1번 슬롯 (기본 무기 포함, 교체 가능)
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
@@ -130,7 +133,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	FVector PistolOffset = FVector(-5.0f, 2.0f, 0.0f);
 	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
-	void DropCurrentWeapon(int32 Slot);
+	//void DropCurrentWeapon(int32 Slot);
 
 
 	FTimerHandle DashCooldownTimer;
@@ -142,8 +145,8 @@ private:
 	void ResetDash();
 	UFUNCTION()
 	void StopDash();
-	UFUNCTION()
-	void SmoothCameraTransition(FVector TargetLocation, float Duration);
+	//UFUNCTION()
+	//void SmoothCameraTransition(FVector TargetLocation, float Duration);
 	ACGunBase* FindNearbyDroppedWeapon();
 
 public:
@@ -170,7 +173,7 @@ public:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
 	float MaxAmmo = 0;
 
-	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
+	//void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
 	
 	void ReturnHPValue()
 	{
