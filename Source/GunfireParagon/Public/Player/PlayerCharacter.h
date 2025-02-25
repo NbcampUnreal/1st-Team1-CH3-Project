@@ -149,10 +149,6 @@ private:
 	//void SmoothCameraTransition(FVector TargetLocation, float Duration);
 	ACGunBase* FindNearbyDroppedWeapon();
 
-public:
-	void DebugTakeDamage();
-
-
 // Event Binding To WBP - KGW
 // 병합시 충돌 관련해서 문제 발생시 해당 과정 추가 바랍니다.
 // 해당 Value관련 델리게이트 Broad 전달 경우, 재사용성을 위해 델리게이트 선언 부 DYNAMIC_MULTICAST 형태로 선언하였으니 필요시 BroadCast하여 전달하셔도 괜찮습니다.
@@ -172,8 +168,7 @@ public:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
 	float MaxAmmo = 0;
-
-	//void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
+	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
 	
 	void ReturnHPValue()
 	{

@@ -26,8 +26,9 @@ void APlayerCharacter::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 	CurrentShield = MaxShield;
-
-	if (DefaultWeaponClass)  // 🔥 DefaultWeaponClass는 블루프린트 클래스로 설정해야 함!
+	//ReturnHPValue();
+	//ReturnShieldValue();
+	if (DefaultWeaponClass)
 	{
 		ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
 
@@ -351,6 +352,14 @@ void APlayerCharacter::RegenerateShield()
 
 
 
+void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo)
+{
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentAmmo = UpdateCurrentAmmo;
+		MaxAmmo = UpdateMaxAmmo;
+
+
 //void APlayerCharacter::SwitchWeapon(ACGunBase* NewWeapon)
 //{
 //	EquipWeapon(NewWeapon, 2);
@@ -418,34 +427,34 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 //	ACGunBase*& WeaponSlot = (Slot == 1) ? PrimaryWeapon : SecondaryWeapon;
 //	if (!WeaponSlot) return;
 //
-//	UE_LOG(LogTemp, Warning, TEXT("🔻 무기 드랍 시도: %s (슬롯: %d)"), *WeaponSlot->GetName(), Slot);
+//	UE_LOG(LogTemp, Warning, TEXT("무기 드랍 시도: %s (슬롯: %d)"), *WeaponSlot->GetName(), Slot);
 //
 //	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
 //
 //	if (WeaponSlot->WeaponMesh)
 //	{
-//		// ✅ 먼저 부착 해제 (Detach)
+//		//먼저 부착 해제 (Detach)
 //		WeaponSlot->WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 //
-//		// ✅ 물리 시뮬레이션 활성화
+//		//물리 시뮬레이션 활성화
 //		WeaponSlot->WeaponMesh->SetSimulatePhysics(true);
 //		WeaponSlot->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 //		WeaponSlot->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
 //
-//		// ✅ Impulse 적용 (살짝 튕겨나가게)
+//		//Impulse 적용 (살짝 튕겨나가게)
 //		FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, -800.0f);
 //		WeaponSlot->WeaponMesh->AddImpulse(DropImpulse, NAME_None, true);
 //
-//		UE_LOG(LogTemp, Warning, TEXT("💥 무기에 Impulse 적용 후 드랍: %s"), *WeaponSlot->GetName());
+//		UE_LOG(LogTemp, Warning, TEXT("무기에 Impulse 적용 후 드랍: %s"), *WeaponSlot->GetName());
 //	}
 //	else
 //	{
-//		UE_LOG(LogTemp, Error, TEXT("🚨 WeaponMesh가 존재하지 않습니다!"));
+//		UE_LOG(LogTemp, Error, TEXT("WeaponMesh가 존재하지 않습니다!"));
 //	}
 //
 //	// 슬롯에서 무기 제거
 //	WeaponSlot = nullptr;
-//	UE_LOG(LogTemp, Warning, TEXT("✅ 무기 드랍 완료"));
+//	UE_LOG(LogTemp, Warning, TEXT("무기 드랍 완료"));
 //}
 //
 //
@@ -607,7 +616,9 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 		}
 	}
 
-	return nullptr;
+	UE_LOG(LogTemp, Warning, TEXT("근처에 드랍된 무기가 없음"));
+
+	return nullptr; // nullptr 반환 추가
 }
 
 
