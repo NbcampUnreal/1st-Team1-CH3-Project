@@ -358,7 +358,8 @@ void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float&
 	{
 		CurrentAmmo = UpdateCurrentAmmo;
 		MaxAmmo = UpdateMaxAmmo;
-
+	}
+}
 
 //void APlayerCharacter::SwitchWeapon(ACGunBase* NewWeapon)
 //{
