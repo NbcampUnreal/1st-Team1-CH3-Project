@@ -18,10 +18,22 @@ void ANormalBullet::BeginPlay()
 void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
 {
 	Super::Fire(StartLocation, Direction, GunDamage);
+
 	SetActorLocation(StartLocation);
+	SetActorRotation(Direction.Rotation());
 	BulletDamage = GunDamage;
-    
-	ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+
+	if (ProjectileMovement)
+	{
+		ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+		ProjectileMovement->Activate();
+		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 위치: %s, 방향: %s, 속도: %f"),
+			*StartLocation.ToString(), *Direction.ToString(), ProjectileMovement->InitialSpeed);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ProjectileMovement가 존재하지 않음!"));
+	}
 	//
 	// SetOwner(GetInstigator());
 	// CollisionComponent->MoveIgnoreActors.Add(GetOwner());
