@@ -4,6 +4,9 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "NiagaraComponent.h"  
+#include "NiagaraFunctionLibrary.h"  
+#include "Components/DecalComponent.h"
 #include "BulletBase.generated.h"
 
 
@@ -38,10 +41,8 @@ protected:
 	UFUNCTION()
 	virtual void OnBulletHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
 	FVector NormalImpulse, const FHitResult& Hit);
-	// virtual void NotifyHit(
-	// 		UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, 
-	// 		bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, 
-	// 		const FHitResult& Hit) override;
+
+	void SpawnBulletDecal(const FHitResult& Hit);
 
 public:
 	virtual void Fire(FVector StartLocation, FVector Direction, float GunDamage);
@@ -62,6 +63,8 @@ protected:
 	float BulletDamage = 0.0f;
 
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties")
+	UMaterial* BulletDecalMaterial;
 
 	// Test pool
 	UPROPERTY()

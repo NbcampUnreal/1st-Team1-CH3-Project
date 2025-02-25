@@ -54,10 +54,21 @@ void ACGunBase::Fire()
 	if (GunMesh && GunMesh->DoesSocketExist(TEXT("Muzzle")))
 	{
 		MuzzleSpot = GunMesh->GetSocketLocation(TEXT("Muzzle"));
+		
+		if (MuzzleFlashEffect)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(), 
+				MuzzleFlashEffect,  // 머즐 플래시 이펙트
+				MuzzleSpot,          // 위치 (총구)
+				GunMesh->GetSocketRotation(TEXT("Muzzle")) // 총구 회전 방향
+			);
+		}
 	}
 	
 	// 지금 잏시적으로 앞으로 발사하게만해둠
 	FVector forwardDirection = GetAimDirection();
+
 	
 	//  총알을 풀에서 가져오기
 	ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
@@ -162,6 +173,8 @@ FVector ACGunBase::GetAimDirection() const
 	// 실패 시 기본 총구 방향
 	return GetActorForwardVector();
 }
+
+
 
 FVector ACGunBase::SpreadDirection(const FVector OriginDirection) const
 {
