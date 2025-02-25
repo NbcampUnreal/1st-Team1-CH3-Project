@@ -18,11 +18,16 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
-	void SetWorldLocation(const FVector& NewLocation);
+	UFUNCTION()
+	void SetWorldLocation(FVector2D RenderPosition);
 
+	UFUNCTION()
+	void SetIconTexture(UTexture2D* Texture);
+	
+	UFUNCTION()
+	void SetVisibilityBasedOnDistance(float Distance, float MaxDistance);
 
-
-private:
-	FVector WorldLocation;
-	void UpdateIconPosition();
+protected:
+	UPROPERTY(meta = (BindWidget))
+	class UImage* IconImage;
 };
