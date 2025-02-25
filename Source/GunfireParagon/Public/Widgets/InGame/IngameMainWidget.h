@@ -44,4 +44,11 @@ protected:
 	UFUNCTION()
 	void OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo);
 
+	//Minimap RenderIcon Update
+	UFUNCTION()
+	void OnMinimapUpdated(ACharacter* Target, float Distance);
+
+private:
+	// Minimap Rendering Character Distance
+	float MaxRenderDistance = 500.f;
 };

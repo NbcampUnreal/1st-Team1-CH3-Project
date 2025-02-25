@@ -3,21 +3,32 @@
 
 #include "Widgets/InGame/IngameMinimapIcon.h"
 #include "Kismet\GameplayStatics.h"
+#include "Components\Image.h"
+#include "Components\CanvasPanel.h"
+#include "Components\CanvasPanelSlot.h"
 
 void UIngameMinimapIcon::NativeConstruct()
 {
 	Super::NativeConstruct();
-	UpdateIconPosition();
+
 }
 
-void UIngameMinimapIcon::SetWorldLocation(const FVector& NewLocation)
+void UIngameMinimapIcon::SetWorldLocation(FVector2D RenderPosition)
 {
-	WorldLocation = NewLocation;
-	UpdateIconPosition();
+	SetRenderTranslation(RenderPosition);
+	UE_LOG(LogTemp, Warning, TEXT("Render Position : %.1f, %.1f"),RenderPosition.X, RenderPosition.Y);
 }
 
-void UIngameMinimapIcon::UpdateIconPosition()
+void UIngameMinimapIcon::SetIconTexture(UTexture2D* Texture)
 {
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (!PlayerPawn) return;
+	if (IconImage)
+	{
+		IconImage->SetBrushFromTexture(Texture, true);
+	}
 }
+
+void UIngameMinimapIcon::SetVisibilityBasedOnDistance(float Distance, float MaxDistance)
+{
+	SetVisibility(Distance > MaxDistance ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+}
+

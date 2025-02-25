@@ -8,6 +8,7 @@ public class GunfireParagon : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
+
 		PublicDependencyModuleNames.AddRange(new string[] 
 			{ "Core"
 				,"CoreUObject"
@@ -16,7 +17,8 @@ public class GunfireParagon : ModuleRules
 				, "EnhancedInput"
 				, "AIModule"
 				, "NavigationSystem"
-				, "Niagara"  });
+				, "Niagara"  
+				, "UMG"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

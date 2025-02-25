@@ -7,6 +7,7 @@
 #include "Widgets\InGame\IngameWeaponWidget.h"
 #include "Widgets\InGame\IngameCrossHairs.h"
 #include "Player/PlayerCharacter.h"
+#include "Widgets\MinimapTracker.h"
 
 void UIngameMainWidget::NativeOnInitialized()
 {
@@ -55,6 +56,10 @@ void UIngameMainWidget::NativeConstruct()
 		{
 			CurrentPlayer->OnAmmoChanged.AddDynamic(this, &UIngameMainWidget::OnWeaponAmmoBinding);
 		}
+		if (CurrentPlayer && !UMinimapTracker::OnActorLocation.IsBound())
+		{
+			UMinimapTracker::OnActorLocation.AddDynamic(this, &UIngameMainWidget::OnMinimapUpdated);
+		}
 	}
 
 }
@@ -78,6 +83,23 @@ void UIngameMainWidget::OnPlayerShieldBinding(float CurrentShield, float MaxShie
 void UIngameMainWidget::OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo)
 {
 	WeaponStatusWidget->SetCurrentAmmo(CurrentAmmo, MaxAmmo);
+}
+
+void UIngameMainWidget::OnMinimapUpdated(ACharacter* Target, float Distance)
+{
+	if (Distance <= MaxRenderDistance)
+	{
+		if (!MinimapWidget->ActiveIcons.Contains(Target))
+		{
+			MinimapWidget->AddMinimapIcon(Target);
+		}
+
+		MinimapWidget->UpdateActorIcon(Target, Target->GetActorLocation());
+	}
+	else
+	{
+		MinimapWidget->RemoveMinimapIcon(Target);
+	}
 }
 
 
