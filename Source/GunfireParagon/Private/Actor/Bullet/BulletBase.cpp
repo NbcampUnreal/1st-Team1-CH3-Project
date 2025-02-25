@@ -139,20 +139,26 @@ FVector NormalImpulse, const FHitResult& Hit)
 	}
 }
 
-// void ABulletBase::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved,
-// 	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
-// {
-// 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-//
-// 	if (Other && Other != this)
-// 	{
-// 		// 언리얼의 데미지 시스템을 이용한 처리
-// 		UGameplayStatics::ApplyDamage(Other, BulletDamage, nullptr, this, UDamageType::StaticClass());
-//
-// 		// 풀링 시스템이 있으면 풀로 반환, 없으면 Destroy() 일단 풀링 안만들어서 사라지게만 함
-// 		Destroy(); // 또는 오브젝트 풀링이 있으면 ReturnBullet(this);
-// 		UE_LOG(LogTemp, Warning, TEXT("충돌체 이름: %s 충돌 위치: %s"), *Other->GetName(), *HitLocation.ToString());
-//
-// 	}
-// }
+void ABulletBase::SpawnBulletDecal(const FHitResult& Hit)
+{
+	if (!BulletDecalMaterial) return; 
+
+	// 데칼 크기 설정
+	FVector DecalSize = FVector(0.2f, 0.2f, 0.2f);  
+
+	// 탄흔을 남길 위치와 방향 설정
+	UDecalComponent* BulletDecal = UGameplayStatics::SpawnDecalAtLocation(
+		GetWorld(), 
+		BulletDecalMaterial, 
+		DecalSize,
+		Hit.ImpactPoint, 
+		Hit.ImpactNormal.Rotation(), 
+		10.0f 
+	);
+
+	if (BulletDecal)
+	{
+		BulletDecal->SetFadeScreenSize(0.001f); // 거리별 페이드 효과 적용 (선택사항)
+	}
+}
 

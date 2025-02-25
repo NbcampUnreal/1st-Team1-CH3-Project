@@ -76,7 +76,8 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		{
 			UE_LOG(LogTemp, Warning, TEXT("일반 공격! 데미지: %f"), FinalDamage);
 		}
-
+		//탄흔
+		SpawnBulletDecal(SweepResult);
 		//  ApplyPointDamage 사용 (맞은 위치 포함)
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
 
