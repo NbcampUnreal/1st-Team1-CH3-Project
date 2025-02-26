@@ -58,9 +58,12 @@ protected:
 	float BulletDamage = 0.0f;
 
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
 	UMaterial* BulletDecalMaterial;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	FVector DecalSize= {5.0f,5.0f,5.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	float DecalLifeTime = 5.0f;
 	// Test pool
 	UPROPERTY()
 	ABulletPool* BulletPool;

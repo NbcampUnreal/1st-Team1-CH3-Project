@@ -19,6 +19,20 @@ ACGunBase::ACGunBase()
 	
     WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
     WeaponMesh->SetupAttachment(RootComponent);
+
+	if (!MuzzleFlashEffect)
+	{
+		static ConstructorHelpers::FObjectFinder<UNiagaraSystem> MuzzleEffectFinder(TEXT("/Game/VFX/TakeGame/NS_MuzzleFlash.NS_MuzzleFlash"));
+		if (MuzzleEffectFinder.Succeeded())
+		{
+			MuzzleFlashEffect = MuzzleEffectFinder.Object;
+			UE_LOG(LogTemp, Warning, TEXT("MuzzleFlashEffect 로드 성공: %s"), *MuzzleFlashEffect->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("MuzzleFlashEffect 로드 실패!"));
+		}
+	}
 }
 
 
@@ -75,14 +89,18 @@ void ACGunBase::BeginPlay()
             UE_LOG(LogTemp, Warning, TEXT("BulletPool이 새로 생성되었습니다."));
         }
     }
-
+	
+	
 
 }
 
 
 void ACGunBase::Fire()
 {
-
+	if (!MuzzleFlashEffect)
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ MuzzleFlashEffect가 nullptr! 블루프린트에서 확인 필요!"));
+	}
 	if (!CanFire())
 		return;
 	
@@ -101,16 +119,35 @@ void ACGunBase::Fire()
 		UE_LOG(LogTemp, Error, TEXT("WeaponMesh 'Muzzle' 소켓이 존재하지 않습니다. 기본 위치 사용."));
 	}
 	
-	
-		
 	if (MuzzleFlashEffect)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(), 
-			MuzzleFlashEffect,  // 머즐 플래시 이펙트
-			MuzzleSpot,          // 위치 (총구)
-			WeaponMesh->GetSocketRotation(TEXT("Muzzle")) // 총구 회전 방향
+		UE_LOG(LogTemp, Warning, TEXT("발사이펙트!"));
+
+		FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle"));
+
+		UNiagaraComponent* MuzzleEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			MuzzleFlashEffect,			
+			WeaponMesh,					
+			TEXT("Muzzle"),				
+			FVector::ZeroVector,		
+			MuzzleRotation,				
+			EAttachLocation::SnapToTarget, 
+			true						
 		);
+
+		if (MuzzleEffectComp)
+		{
+			MuzzleEffectComp->SetAutoDestroy(true); 
+			MuzzleEffectComp->SetVariableFloat(FName("User.Lifetime"), 0.2f);
+			FTimerHandle EffectDestroyTimer;
+			GetWorld()->GetTimerManager().SetTimer(EffectDestroyTimer, [MuzzleEffectComp]()
+			{
+				if (MuzzleEffectComp)
+				{
+					MuzzleEffectComp->DestroyComponent();
+				}
+			}, 0.2f, false);
+		}
 	}
 
 	
@@ -237,6 +274,7 @@ FVector ACGunBase::GetAimDirection() const
 		}
 		
 		UE_LOG(LogTemp, Warning, TEXT("총알방향: %s"), *AimDirection.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("화면 정중앙으로 발사"));
 
 		return AimDirection;
 		

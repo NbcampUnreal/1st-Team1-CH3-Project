@@ -64,10 +64,7 @@ void ABulletBase::BeginPlay()
 
 
 	BulletPool = Cast<ABulletPool>(UGameplayStatics::GetActorOfClass(GetWorld(), ABulletPool::StaticClass()));
-	if (!BulletPool)
-	{
-		UE_LOG(LogTemp, Error, TEXT("BulletPool을 찾을 수 없습니다!"));
-	}
+	
 	
 }
 
@@ -90,36 +87,19 @@ void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage
 		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 위치: %s, 방향: %s, 속도: %f"),
 			*StartLocation.ToString(), *Direction.ToString(), ProjectileMovement->InitialSpeed);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("ProjectileMovement가 존재하지 않음!"));
-	}
 }
 
 void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor || OtherActor == this) return;
+	if (OtherActor->ActorHasTag("Bullet")) return;
+	if (OtherActor->ActorHasTag("Gun")) return;
 
-	if (OtherActor->ActorHasTag("Bullet"))
-	{
-		return;
-	}
-
-	if (OtherActor->ActorHasTag("Gun"))
-	{
-		return;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("총알이 %s을(를) 맞췄음!"), *OtherActor->GetName());
 
 	if (OtherActor->ActorHasTag("Enemy"))
 	{
 		float FinalDamage = BulletDamage;
-		if (SweepResult.BoneName != NAME_None)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("총알이 본에 충돌함! BoneName: %s"), *SweepResult.BoneName.ToString());
-		}
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
 			FinalDamage *= 2.0f;
@@ -141,24 +121,13 @@ FVector NormalImpulse, const FHitResult& Hit)
 	// 벽과 충돌 시 처리
 	if (!OtherActor || OtherActor == this) return;
 	
-	if (OtherActor->ActorHasTag("Bullet"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 다른총알과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
-		return;
-	}
-	if (OtherActor->ActorHasTag("Gun"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 총(Gun)과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
-		return;
-	}
-	if (OtherActor->ActorHasTag("Enemy"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 몬스터와 충돌됨: %s"), *OtherActor->GetName());
-	}
+	if (OtherActor->ActorHasTag("Bullet")) return;
+	if (OtherActor->ActorHasTag("Gun")) return;
 	
 	if (BulletPool)
 	{
 		BulletPool->ReturnBullet(this, EAmmoType::Normal);
+		SpawnBulletDecal(Hit);
 		UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌하여 풀로 반환됨"));
 	}
 
@@ -167,10 +136,11 @@ FVector NormalImpulse, const FHitResult& Hit)
 
 void ABulletBase::SpawnBulletDecal(const FHitResult& Hit)
 {
-	if (!BulletDecalMaterial) return; 
-
-	// 데칼 크기 설정
-	FVector DecalSize = FVector(0.2f, 0.2f, 0.2f);  
+	if (!BulletDecalMaterial)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("데칼머테리얼없음"));
+		return;
+	} 
 
 	// 탄흔을 남길 위치와 방향 설정
 	UDecalComponent* BulletDecal = UGameplayStatics::SpawnDecalAtLocation(
@@ -179,8 +149,9 @@ void ABulletBase::SpawnBulletDecal(const FHitResult& Hit)
 		DecalSize,
 		Hit.ImpactPoint, 
 		Hit.ImpactNormal.Rotation(), 
-		10.0f 
+		DecalLifeTime
 	);
+		UE_LOG(LogTemp, Warning, TEXT("데칼생성"));
 
 	if (BulletDecal)
 	{

@@ -30,17 +30,6 @@ void AGun_Rifle::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!WeaponMesh)
-    {
-        return;
-    }
-
-    if (!WeaponMesh->GetSkeletalMeshAsset())
-    {
-    }
-    else
-    {
-    }
 }
 
 
