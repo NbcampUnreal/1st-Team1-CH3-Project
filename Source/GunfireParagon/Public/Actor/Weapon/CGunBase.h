@@ -15,6 +15,7 @@ enum class EWeaponType : uint8
 	Rifle UMETA(DisplayName = "Rifle"),
 	Shotgun UMETA(DisplayName = "Shotgun"),
 	Sniper UMETA(DisplayName = "Sniper"),
+	Rocket UMETA(DisplayName = "Rocket"),
 	Default UMETA(DisplayName = "Default")  // 기본값
 };
 

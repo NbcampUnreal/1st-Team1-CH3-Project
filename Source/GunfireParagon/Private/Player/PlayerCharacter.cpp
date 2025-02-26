@@ -20,24 +20,30 @@ APlayerCharacter::APlayerCharacter()
 	DefaultWeaponClass = AGun_Rifle::StaticClass();
 }
 
+//ReturnHPValue();
+//ReturnShieldValue();
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	CurrentHealth = MaxHealth;
 	CurrentShield = MaxShield;
-	ReturnHPValue();
-	ReturnShieldValue();
+
 	if (DefaultWeaponClass)
 	{
 		ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
 
 		if (DefaultWeapon)
 		{
-			PrimaryWeapon = DefaultWeapon;
-			EquipWeapon(PrimaryWeapon, 1);
+			Inventory[0] = DefaultWeapon;
+			CurrentWeapon = Inventory[0];
 
-			UE_LOG(LogTemp, Warning, TEXT("기본 무기 장착 완료: %s"), *PrimaryWeapon->GetName());
+			CurrentWeaponSlot = 0;
+
+			AttachWeaponToHand(CurrentWeapon, 0);
+
+			UE_LOG(LogTemp, Warning, TEXT("기본 무기 장착 완료: %s"), *Inventory[0]->GetName());
 		}
 		else
 		{
@@ -48,16 +54,9 @@ void APlayerCharacter::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("DefaultWeaponClass가 설정되지 않음"));
 	}
-
-	if (PrimaryWeapon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PrimaryWeapon이 정상적으로 설정됨: %s"), *PrimaryWeapon->GetName());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("게임 시작 후 PrimaryWeapon이 nullptr 상태"));
-	}
 }
+
+
 
 
 
@@ -389,37 +388,52 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 
 
 
-
-void APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
+bool APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
 {
 	if (!NewWeapon)
 	{
 		UE_LOG(LogTemp, Error, TEXT("EquipWeapon 실패: NewWeapon이 NULL임"));
-		return;
+		return false;
 	}
 
-	FVector WeaponScale = NewWeapon->GetActorScale3D(); // ✅ 현재 스케일 저장
-
-	if (Slot == 1)
+	if (Slot == 0)
 	{
-		PrimaryWeapon = NewWeapon;
-		CurrentWeapon = PrimaryWeapon;
+		UE_LOG(LogTemp, Warning, TEXT(" EquipWeapon 오류 - 1번 무기는 변경할 수 없음!"));
+		return false;
 	}
-	else if (Slot == 2)
+
+	// 🚨 기존 무기 상태 로그 추가
+	UE_LOG(LogTemp, Warning, TEXT(" EquipWeapon 실행 - 교체 대상: %s"), *NewWeapon->GetName());
+
+	// ✅ 현재 장착된 무기가 1번 슬롯(기본 무기)이라면, 기본 무기를 숨김 처리
+	if (CurrentWeapon && CurrentWeapon == Inventory[0])
 	{
-		SecondaryWeapon = NewWeapon;
-		CurrentWeapon = SecondaryWeapon;
+		UE_LOG(LogTemp, Warning, TEXT("기본 무기 숨김 처리: %s"), *Inventory[0]->GetName());
+		Inventory[0]->SetActorHiddenInGame(true);
+		Inventory[0]->GetWeaponMesh()->SetVisibility(false);
 	}
 
-	AttachWeaponToHand(CurrentWeapon, Slot);
+	if (Inventory[1])
+	{
+		UE_LOG(LogTemp, Warning, TEXT("기존 무기 드랍 실행: %s"), *Inventory[1]->GetName());
+		DropCurrentWeapon(1);
+	}
 
-	// ✅ 스케일 유지
-	CurrentWeapon->SetActorScale3D(WeaponScale);
+	//새로운 무기를 2번 슬롯에 저장
+	Inventory[1] = NewWeapon;
+	CurrentWeapon = Inventory[1];
 
-	UE_LOG(LogTemp, Warning, TEXT("%d번 슬롯에 무기 장착 완료: %s (스케일: %s)"),
-		Slot, *NewWeapon->GetName(), *WeaponScale.ToString());
+	//현재 슬롯을 2번으로 변경
+	CurrentWeaponSlot = 1;
+
+	//새로운 무기 부착
+	AttachWeaponToHand(CurrentWeapon, 1);
+
+	//무기 장착 후 상태 확인
+	UE_LOG(LogTemp, Warning, TEXT("🚨 EquipWeapon 실행 후 CurrentWeapon: %s"), *CurrentWeapon->GetName());
+
+	return true;
 }
-
 
 
 
@@ -428,38 +442,54 @@ void APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
 
 void APlayerCharacter::DropCurrentWeapon(int32 Slot)
 {
-	ACGunBase*& WeaponSlot = (Slot == 1) ? PrimaryWeapon : SecondaryWeapon;
-	if (!WeaponSlot) return;
-
-	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
-	FVector WeaponScale = WeaponSlot->GetRootComponent()->GetComponentScale(); // ✅ RootComp의 스케일 가져오기
-
-	WeaponSlot->SetActorLocation(DropLocation);
-	WeaponSlot->GetRootComponent()->SetWorldScale3D(WeaponScale); // ✅ RootComp의 스케일 유지
-
-	UE_LOG(LogTemp, Warning, TEXT("%s 무기 드랍됨 (스케일 유지: %s)"), *WeaponSlot->GetName(), *WeaponScale.ToString());
-
-	WeaponSlot->bWasDropped = true;
-	WeaponSlot->Tags.AddUnique("DroppedWeapon");
-
-	if (WeaponSlot->WeaponMesh)
+	if (Slot == 0)
 	{
-		WeaponSlot->WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		WeaponSlot->WeaponMesh->SetSimulatePhysics(true);
-		WeaponSlot->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		WeaponSlot->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
-
-		FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, -800.0f);
-		WeaponSlot->WeaponMesh->AddImpulse(DropImpulse, NAME_None, true);
+		UE_LOG(LogTemp, Warning, TEXT("기본 무기(1번 슬롯)는 드랍할 수 없습니다."));
+		return;
 	}
 
-	WeaponSlot = nullptr;
+	if (!bCanDropWeapon) //쿨타임 중이면 실행하지 않음
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DropCurrentWeapon 실행 방지: 쿨다운 중"));
+		return;
+	}
+
+	ACGunBase*& WeaponSlot = Inventory[1]; // 2번 슬롯 무기
+	if (!WeaponSlot)
+	{
+		return;
+	}
+
+	//드랍 가능 플래그 OFF & 타이머 설정
+	bCanDropWeapon = false;
+	GetWorldTimerManager().SetTimer(DropWeaponCooldownTimer, this, &APlayerCharacter::ResetDropWeaponCooldown, 0.5f, false);
+
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f + FVector(0, 0, 50.0f);
+	FRotator DropRotation = GetActorRotation();
+
+	if (WeaponSlot->GetWeaponMesh())
+	{
+		WeaponSlot->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+		//물리 적용 활성화
+		WeaponSlot->GetWeaponMesh()->SetSimulatePhysics(true);
+		WeaponSlot->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	}
+
+	WeaponSlot->SetActorLocation(DropLocation);
+	WeaponSlot->SetActorRotation(DropRotation);
+	WeaponSlot->SetActorHiddenInGame(false);
+	WeaponSlot->SetActorEnableCollision(true);
+
+	FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, 200.0f);
+	WeaponSlot->GetWeaponMesh()->AddImpulse(DropImpulse, NAME_None, true);
+
+	DroppedWeapons.Add(WeaponSlot);
+
+	//Inventory[1]을 즉시 nullptr로 변경
+	Inventory[1] = nullptr;
 }
-
-
-
-
-
 
 
 
@@ -476,39 +506,39 @@ void APlayerCharacter::AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot)
 		return;
 	}
 
-	FVector WeaponScale = NewWeapon->GetRootComponent()->GetComponentScale(); // ✅ 기존 스케일 저장
+	//기존 무기 숨기기
+	HideCurrentWeapon();
 
-	FName HandSocket;
+	//손에 부착할 소켓 선택
+	FName HandSocket = TEXT("WeaponSocket");
 	switch (NewWeapon->WeaponType)
 	{
-	case EWeaponType::Rifle:
-		HandSocket = TEXT("RifleSocket");
-		break;
-	case EWeaponType::Shotgun:
-		HandSocket = TEXT("ShotgunSocket");
-		break;
-	default:
-		HandSocket = TEXT("WeaponSocket");
-		break;
+	case EWeaponType::Rifle: HandSocket = TEXT("RifleSocket"); break;
+	case EWeaponType::Shotgun: HandSocket = TEXT("ShotgunSocket"); break;
+	case EWeaponType::Sniper: HandSocket = TEXT("SniperSocket"); break;
+	case EWeaponType::Rocket: HandSocket = TEXT("RocketSocket"); break;
 	}
 
-	// ✅ 무기 부착
+	//무기 장착 직전 상태 확인
+	UE_LOG(LogTemp, Warning, TEXT("🚨 무기 장착 시도: %s"), *NewWeapon->GetName());
+
+	//무기를 손에 부착 (물리 적용 방지)
+	NewWeapon->GetWeaponMesh()->SetSimulatePhysics(false);
+	NewWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	NewWeapon->GetWeaponMesh()->AttachToComponent(
 		GetMesh(),
 		FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
 		HandSocket
 	);
 
-	// ✅ RootComp & WeaponMesh 스케일 강제 적용
-	NewWeapon->GetRootComponent()->SetWorldScale3D(WeaponScale);
-	NewWeapon->GetWeaponMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f)); // 상대적 스케일 초기화 방지
-
+	//무기 보이기
 	NewWeapon->SetActorHiddenInGame(false);
-	CurrentWeapon = NewWeapon;
+	NewWeapon->GetWeaponMesh()->SetVisibility(true);
 
-	UE_LOG(LogTemp, Warning, TEXT("무기 장착 완료: %s (소켓: %s, RootComp 스케일: %s)"),
-		*NewWeapon->GetName(), *HandSocket.ToString(), *WeaponScale.ToString());
+	CurrentWeapon = NewWeapon;
+	CurrentWeaponSlot = Slot;
 }
+
 
 
 
@@ -541,6 +571,7 @@ void APlayerCharacter::SwapWeaponWithDropped(ACGunBase* DroppedWeapon)
 
 	if (CurrentWeaponSlot == 2)
 	{
+		//무기 교체 전에 기존 무기를 드랍
 		if (SecondaryWeapon)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("기존 2번 무기 드랍: %s"), *SecondaryWeapon->GetName());
@@ -548,53 +579,83 @@ void APlayerCharacter::SwapWeaponWithDropped(ACGunBase* DroppedWeapon)
 			//기존 무기 부착 해제
 			SecondaryWeapon->WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 
-			//물리 시뮬레이션 활성화
+			//물리 시뮬레이션 활성화 (무기 드랍)
+			//이 부분을 EquipWeapon 이후로 이동!
+		}
+
+		//새로운 무기 장착
+		EquipWeapon(DroppedWeapon, 2);
+		UE_LOG(LogTemp, Warning, TEXT("2번 무기 교체 완료, 새로운 무기: %s"), *DroppedWeapon->GetName());
+
+		//기존 무기의 물리 활성화는 여기서 실행 (EquipWeapon 이후)
+		if (SecondaryWeapon)
+		{
 			SecondaryWeapon->WeaponMesh->SetSimulatePhysics(true);
 			SecondaryWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			SecondaryWeapon->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
 
-			//Impulse 적용 (살짝 튕겨나가게)
+			// Impulse 적용 (살짝 튕겨나가게)
 			FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, -800.0f);
 			SecondaryWeapon->WeaponMesh->AddImpulse(DropImpulse, NAME_None, true);
 
-			UE_LOG(LogTemp, Warning, TEXT("기존 무기에 Impulse 적용 완료 : % s"), *SecondaryWeapon->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("기존 무기에 Impulse 적용 완료: %s"), *SecondaryWeapon->GetName());
 		}
-
-		EquipWeapon(DroppedWeapon, 2);
-		UE_LOG(LogTemp, Warning, TEXT("2번 무기 교체 완료, 새로운 무기: %s"), *DroppedWeapon->GetName());
 	}
 }
+
+
 
 void APlayerCharacter::PickupWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 실행됨"));
+	UE_LOG(LogTemp, Warning, TEXT("G 키 입력 감지됨: 무기 줍기 시도"));
 
-	ACGunBase* NearbyWeapon = FindNearbyDroppedWeapon();
-	if (!NearbyWeapon)
+	//무기 줍기 쿨타임 체크
+	if (!bCanPickupWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없음"));
+		UE_LOG(LogTemp, Warning, TEXT("G 키 연속 입력 방지: 무기 줍기 동작이 쿨다운 중입니다!"));
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("무기 획득 성공: %s"), *NearbyWeapon->GetName());
+	//쿨타임 활성화
+	bCanPickupWeapon = false;
+	GetWorldTimerManager().SetTimer(PickupCooldownTimer, this, &APlayerCharacter::ResetPickupWeapon, 1.0f, false);
 
-	// ✅ 기존 무기 숨기기 (현재 손에 들고 있는 무기가 있으면)
-	if (CurrentWeapon)
+	//주변에 무기가 있는지 확인
+	ACGunBase* NearbyWeapon = FindNearbyDroppedWeapon();
+
+	//무기가 없을 경우 예외 방지
+	if (!NearbyWeapon)
 	{
-		CurrentWeapon->SetActorHiddenInGame(true);
-		UE_LOG(LogTemp, Warning, TEXT("기존 무기 숨김 처리: %s"), *CurrentWeapon->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없음 → 무기 교체 불가"));
+		return;
 	}
 
-	// 2번 슬롯에 장착
-	EquipWeapon(NearbyWeapon, 2);
+	//여기서부터는 NearbyWeapon이 NULL이 아님이 보장됨
+	UE_LOG(LogTemp, Warning, TEXT("무기 획득 성공: %s"), *NearbyWeapon->GetName());
+
+	ACGunBase* OldWeapon = Inventory[1];
+
+	if (EquipWeapon(NearbyWeapon, 1))
+	{
+		if (OldWeapon)
+		{
+			DropCurrentWeapon(1);
+		}
+		UE_LOG(LogTemp, Warning, TEXT("무기 줍기 완료 → 새로운 무기 장착됨"));
+	}
 }
+
+
+
+
+
 
 
 
 ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 {
 	TArray<AActor*> OverlappingActors;
-	float PickupRadius = 1000.0f;
+	float PickupRadius = 200.0f; //무기 감지 범위 조정
 
 	UKismetSystemLibrary::SphereOverlapActors(
 		this, GetActorLocation(), PickupRadius,
@@ -605,75 +666,105 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 	for (AActor* Actor : OverlappingActors)
 	{
 		ACGunBase* FoundWeapon = Cast<ACGunBase>(Actor);
-		if (FoundWeapon)
-		{
-			FVector WeaponScale = FoundWeapon->GetActorScale3D();
-			UE_LOG(LogTemp, Warning, TEXT("감지된 무기: %s | 현재 스케일: %s"),
-				*FoundWeapon->GetName(), *WeaponScale.ToString());
 
+		//현재 손에 들고 있는 무기는 무시
+		if (FoundWeapon && FoundWeapon != CurrentWeapon)
+		{
 			return FoundWeapon;
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없음"));
 	return nullptr;
 }
 
 
 
 
-
-
 void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 {
-	if (Slot == 1)
+	if (Slot == 0) //1번 무기로 변경
 	{
-		if (!PrimaryWeapon)
+		if (!Inventory[0])
 		{
-			UE_LOG(LogTemp, Error, TEXT("1번 무기가 없습니다. PrimaryWeapon이 nullptr 상태"));
+			UE_LOG(LogTemp, Error, TEXT("1번 무기가 없습니다. Inventory[0]이 nullptr 상태"));
 			return;
 		}
 
-		// 기존 무기 숨김 처리
-		if (CurrentWeapon && CurrentWeapon != PrimaryWeapon)
+		if (CurrentWeapon == Inventory[0])
 		{
-			CurrentWeapon->SetActorHiddenInGame(true);
-			UE_LOG(LogTemp, Warning, TEXT("기존 무기 숨김 처리: %s"), *CurrentWeapon->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("현재 이미 1번 무기를 들고 있음"));
+			return;
 		}
 
-		CurrentWeapon = PrimaryWeapon;
-		CurrentWeaponSlot = 1;
+		HideCurrentWeapon();
+		Inventory[0]->SetActorHiddenInGame(false);
+		Inventory[0]->GetWeaponMesh()->SetVisibility(true);
+
+		CurrentWeapon = Inventory[0];
+		CurrentWeaponSlot = 0;
+
+		AttachWeaponToHand(CurrentWeapon, 0);
+
+		UE_LOG(LogTemp, Warning, TEXT("무기 변경 완료: 1번 무기로 교체 (%s)"), *CurrentWeapon->GetName());
 	}
-	else if (Slot == 2)
+	else if (Slot == 1) //2번 무기로 변경
 	{
-		if (!SecondaryWeapon)
+		if (!Inventory[1])
 		{
 			UE_LOG(LogTemp, Warning, TEXT("2번 무기가 없습니다."));
 			return;
 		}
 
-		// 기존 무기 숨김 처리
-		if (CurrentWeapon && CurrentWeapon != SecondaryWeapon)
+		if (CurrentWeapon == Inventory[1])
 		{
-			CurrentWeapon->SetActorHiddenInGame(true);
-			UE_LOG(LogTemp, Warning, TEXT("기존 무기 숨김 처리: %s"), *CurrentWeapon->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("현재 이미 2번 무기를 들고 있음"));
+			return;
 		}
 
-		CurrentWeapon = SecondaryWeapon;
-		CurrentWeaponSlot = 2;
+		HideCurrentWeapon();
+		Inventory[1]->SetActorHiddenInGame(false);
+		Inventory[1]->GetWeaponMesh()->SetVisibility(true);
+
+		CurrentWeapon = Inventory[1];
+		CurrentWeaponSlot = 1;
+
+		AttachWeaponToHand(CurrentWeapon, 1);
+
+		UE_LOG(LogTemp, Warning, TEXT("무기 변경 완료: 2번 무기로 교체 (%s)"), *CurrentWeapon->GetName());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("잘못된 슬롯 번호: %d"), Slot);
-		return;
 	}
-
-	AttachWeaponToHand(CurrentWeapon, Slot);
-	UE_LOG(LogTemp, Warning, TEXT("무기 슬롯 변경 완료. 현재 무기: %s"), *CurrentWeapon->GetName());
 }
 
 
 
+void APlayerCharacter::HideCurrentWeapon()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetActorHiddenInGame(true);
+	}
+
+	//무기 Mesh도 숨김 처리
+	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+	{
+		CurrentWeapon->GetWeaponMesh()->SetVisibility(false);
+	}
+}
+
+void APlayerCharacter::ResetPickupWeapon()
+{
+	bCanPickupWeapon = true;
+	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 가능"));
+}
+
+void APlayerCharacter::ResetDropWeaponCooldown()
+{
+	bCanDropWeapon = true;
+	UE_LOG(LogTemp, Warning, TEXT("DropCurrentWeapon 쿨다운 종료, 다시 무기 드랍 가능"));
+}
 
 
 void APlayerCharacter::Landed(const FHitResult& Hit)
@@ -684,10 +775,10 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 
 void APlayerCharacter::SwitchToPrimaryWeapon()
 {
-	SwitchWeaponSlot(1);
+	SwitchWeaponSlot(0);
 }
 
 void APlayerCharacter::SwitchToSecondaryWeapon()
 {
-	SwitchWeaponSlot(2);
+	SwitchWeaponSlot(1);
 }

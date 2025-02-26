@@ -86,7 +86,7 @@ protected:
 	UFUNCTION()
 	void PickupWeaponInput(const FInputActionValue& Value);
 	UFUNCTION()
-	void EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
+	bool EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
 
@@ -100,6 +100,7 @@ protected:
 private:
 	void InitializeCharacter();
 
+	ACGunBase* Inventory[2];
 	float NormalSpeed;
 	float SprintSpeedMultiplier;
 	float SprintSpeed;
@@ -116,6 +117,10 @@ private:
 	float DashDistance = 600.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	float DashCooldown = 1.5f;
+	//드랍된 무기를 추적하는 리스트 (GC 방지)
+	bool bCanSwitchWeapon = true;
+	UPROPERTY()
+	TArray<ACGunBase*> DroppedWeapons;
 
 	//1번 슬롯 (기본 무기 포함, 교체 가능)
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
@@ -135,7 +140,15 @@ private:
 	FVector PistolOffset = FVector(-5.0f, 2.0f, 0.0f);
 	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
 	void DropCurrentWeapon(int32 Slot);
-
+	//무기 줍기 중복 방지 플래그
+	bool bCanPickupWeapon = true;
+	//무기 줍기 쿨타임 타이머
+	FTimerHandle PickupCooldownTimer;
+	//무기 줍기 쿨타임이 끝나면 다시 줍기가 가능하도록 설정
+	void ResetPickupWeapon();
+	bool bCanDropWeapon = true; 
+	FTimerHandle DropWeaponCooldownTimer; 
+	void ResetDropWeaponCooldown();
 
 	FTimerHandle DashCooldownTimer;
 	FTimerHandle DashStopTimer;
@@ -172,11 +185,11 @@ public:
 	// Ammo 관련 변수/함수 존재하지 않음. 플레이어 캐릭터 내 추가 바랍니다. 해당 형태를 Helath선언부분으로 올리셔도 괜찮습니다.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
 	float CurrentAmmo = 0;
-
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
 	float MaxAmmo = 0;
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
-	
+	void HideCurrentWeapon();
+
 	void ReturnHPValue()
 	{
 		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);

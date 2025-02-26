@@ -6,12 +6,15 @@
 #include "CGunBase.h"
 #include "Gun_Rocket.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class GUNFIREPARAGON_API AGun_Rocket : public ACGunBase
 {
 	GENERATED_BODY()
 	
+public:
+	AGun_Rocket();
+
+	virtual void BeginPlay() override;
+
+	virtual void Fire() override;
 };
