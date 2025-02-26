@@ -48,14 +48,9 @@ public:
 	virtual void Fire(FVector StartLocation, FVector Direction, float GunDamage);
 
 	float GetSpawnTime() const { return SpawnTime; } 
-	void SetSpawnTime(float Time) { SpawnTime = Time; } 
+	void SetSpawnTime(float Time) { SpawnTime = Time; }
 	
 protected:
-	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Projectile")
-	USphereComponent* CollisionComponent;
-	
-
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "BulletMesh")
 	UStaticMeshComponent* BulletMesh;
 	
@@ -76,6 +71,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties")
 	EAmmoType AmmoType; //  총알 타입을 저장
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Projectile")
+	USphereComponent* CollisionComponent;
 	
 	float SpawnTime; 
 	

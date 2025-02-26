@@ -52,10 +52,12 @@ void ABulletBase::BeginPlay()
 	{
 		ProjectileMovement->Deactivate(); //총알이 풀에서 생성될 때 기본적으로 멈추도록 설정
 	}
-
-	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); //적과만 충돌
-	CollisionComponent->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore); //물리 오브젝트 무시
-	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);//벽만 충돌 가능
+	
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
+	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // 벽과 충돌 O
+	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABulletBase::OnBulletOverlap);
 	CollisionComponent->OnComponentHit.AddDynamic(this, &ABulletBase::OnBulletHit);
@@ -71,6 +73,27 @@ void ABulletBase::BeginPlay()
 
 void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage)
 {
+	
+	SetActorLocation(StartLocation);
+	SetActorRotation(Direction.Rotation());
+	BulletDamage = GunDamage;
+
+	if (!ProjectileMovement->UpdatedComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ProjectileMovement의 UpdatedComponent가 설정되지 않음! 강제로 설정함."));
+		ProjectileMovement->SetUpdatedComponent(CollisionComponent);
+	}
+	if (ProjectileMovement)
+	{
+		ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+		ProjectileMovement->Activate();
+		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 위치: %s, 방향: %s, 속도: %f"),
+			*StartLocation.ToString(), *Direction.ToString(), ProjectileMovement->InitialSpeed);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ProjectileMovement가 존재하지 않음!"));
+	}
 }
 
 void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -93,6 +116,10 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	if (OtherActor->ActorHasTag("Enemy"))
 	{
 		float FinalDamage = BulletDamage;
+		if (SweepResult.BoneName != NAME_None)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("총알이 본에 충돌함! BoneName: %s"), *SweepResult.BoneName.ToString());
+		}
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
 			FinalDamage *= 2.0f;
@@ -102,7 +129,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		{
 			UE_LOG(LogTemp, Warning, TEXT("일반 공격! 데미지: %f"), FinalDamage);
 		}
-
+		SpawnBulletDecal(SweepResult);
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
 	}
 }
@@ -124,19 +151,18 @@ FVector NormalImpulse, const FHitResult& Hit)
 		UE_LOG(LogTemp, Warning, TEXT("총알이 총(Gun)과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
 		return;
 	}
-
+	if (OtherActor->ActorHasTag("Enemy"))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("총알이 몬스터와 충돌됨: %s"), *OtherActor->GetName());
+	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌: %s"), *OtherActor->GetName());
 	if (BulletPool)
 	{
 		BulletPool->ReturnBullet(this, EAmmoType::Normal);
 		UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌하여 풀로 반환됨"));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("총알 삭제됨"));
-		Destroy();
-	}
+
+	
 }
 
 void ABulletBase::SpawnBulletDecal(const FHitResult& Hit)
