@@ -26,9 +26,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Animation")
 	bool bIsHoldingRifle = false;
 
-	//void SwitchWeaponSlot(int32 Slot);
-	//void SwitchToPrimaryWeapon();
-	//void SwitchToSecondaryWeapon();
+	void SwitchWeaponSlot(int32 Slot);
+	void SwitchToPrimaryWeapon();
+	void SwitchToSecondaryWeapon();
 	
 
 protected:
@@ -83,10 +83,10 @@ protected:
 	void PickupWeapon();
 
 
-	//UFUNCTION()
-	//void HandleSwapWeaponInput(const FInputActionValue& Value);
-	//UFUNCTION()
-	//void EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
+	UFUNCTION()
+	void PickupWeaponInput(const FInputActionValue& Value);
+	UFUNCTION()
+	void EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
 
@@ -94,7 +94,7 @@ protected:
 	void StartShieldRegen();
 	void RegenerateShield();
 	//void SwitchWeapon(ACGunBase* NewWeapon);
-	//void SwapWeaponWithDropped(ACGunBase* NewWeapon);
+	void SwapWeaponWithDropped(ACGunBase* NewWeapon);
 	virtual void Landed(const FHitResult& Hit) override;
 
 private:
@@ -134,7 +134,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	FVector PistolOffset = FVector(-5.0f, 2.0f, 0.0f);
 	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
-	//void DropCurrentWeapon(int32 Slot);
+	void DropCurrentWeapon(int32 Slot);
 
 
 	FTimerHandle DashCooldownTimer;

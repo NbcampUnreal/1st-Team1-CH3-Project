@@ -12,7 +12,7 @@ AMyPlayerController::AMyPlayerController()
 	FireAction(nullptr),
 	SwitchToPrimaryWeaponAction(nullptr),
 	SwitchToSecondaryWeaponAction(nullptr),
-	SwapWeaponAction(nullptr),
+	PickupWeaponAction(nullptr),
 	DebugDamageAction(nullptr)
 {
 }

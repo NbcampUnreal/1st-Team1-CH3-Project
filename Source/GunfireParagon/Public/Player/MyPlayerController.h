@@ -36,7 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SwitchToSecondaryWeaponAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* SwapWeaponAction;
+	UInputAction* PickupWeaponAction;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
