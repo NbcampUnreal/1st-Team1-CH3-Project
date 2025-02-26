@@ -26,8 +26,8 @@ void APlayerCharacter::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 	CurrentShield = MaxShield;
-	//ReturnHPValue();
-	//ReturnShieldValue();
+	ReturnHPValue();
+	ReturnShieldValue();
 	if (DefaultWeaponClass)
 	{
 		ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
@@ -358,6 +358,8 @@ void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float&
 	{
 		CurrentAmmo = UpdateCurrentAmmo;
 		MaxAmmo = UpdateMaxAmmo;
+
+		OnAmmoChanged.Broadcast(CurrentAmmo, MaxAmmo);
 	}
 }
 
@@ -374,6 +376,7 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("현재 무기 Fire() 호출: %s"), *CurrentWeapon->GetName());
 		CurrentWeapon->Fire();
+		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 	}
 	else
 	{

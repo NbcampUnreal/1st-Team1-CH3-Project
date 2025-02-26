@@ -28,7 +28,6 @@ void UInGameMinimap::NativeConstruct()
 	if (GetWorld())
 	{
 		LevelEntryTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
-		UE_LOG(LogTemp, Display, TEXT("World Test, %f"),LevelEntryTime);
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_UpdateTime, this, &UInGameMinimap::UpdatePlayTime, 1.0f, true);
@@ -149,9 +148,6 @@ FVector2D UInGameMinimap::IconRenderPosition(FVector WorldLocation)
 
 	FVector2D MinimapCenter = FVector2D(RenderCanvas->GetCachedGeometry().GetLocalSize()) * 0.5f;
 	FVector2D MinimapPosition = MinimapCenter + FVector2D(RotatedY, -RotatedX);
-
-	UE_LOG(LogTemp, Warning, TEXT("WorldLocation: (%.1f, %.1f) -> MinimapPosition: (%.1f, %.1f)"),
-		WorldLocation.X, WorldLocation.Y, MinimapPosition.X, MinimapPosition.Y);
 
 	return MinimapPosition;
 }
