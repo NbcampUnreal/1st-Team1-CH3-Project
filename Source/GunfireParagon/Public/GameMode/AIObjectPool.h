@@ -25,7 +25,6 @@ public:
 	ABaseEnemy* GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<ABaseEnemy> EnemyClass);
 	void ReturnAIToPool(ABaseEnemy* Enemy);
 
-	TArray<ABaseEnemy*> EnemySave;
 	TMap<TSubclassOf<ABaseEnemy>, TSharedPtr<TArray<ABaseEnemy*>>> EnemyPools;
 	TSharedPtr<TArray<ABaseEnemy*>> Pool;
 

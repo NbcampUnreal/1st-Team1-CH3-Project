@@ -1,9 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GameMode/FPSGameInstance.h"
 #include "GameMode/AIEnemySpawnRaw.h"
 #include "GameMode/AIEnemyPoolRaw.h"
+#include "GameMode/FPSGameMode.h"
 #include "AI/NormalMeleeEnemy.h"
 #include "AI/NormalRangeEnemy.h"
 #include "Kismet/GameplayStatics.h"
@@ -23,42 +24,42 @@ void UFPSGameInstance::Init()
 }
 
 
-//void UFPSGameInstance::Init()
-//{
-//	Super::Init();
-//
-//	if (CurrentStageIndex == 0)
-//	{
-//		if (StageMapNames.IsValidIndex(CurrentStageIndex))
-//		{
-//			UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
-//		}
-//	}
-//}
-
-// LoadNextStage
 void UFPSGameInstance::StartGame()
 {
-	CurrentStageIndex = 1;
-	if (StageMapNames.IsValidIndex(CurrentStageIndex))
+	CurrentStageIndex = 0;
+
+	if (CurrentStageIndex == 0)
 	{
-		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+		if (StageMapNames.IsValidIndex(CurrentStageIndex))
+		{
+			UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+		}
 	}
+
+	// Test용으로 일단 만듦. 5초뒤 1스테이지로 이동
+	FTimerHandle TestTimer;
+	GetTimerManager().SetTimer(
+		TestTimer,
+		this,
+		&UFPSGameInstance::LoadNextStage,
+		5.0f,
+		false
+	);
+}
+
+void UFPSGameInstance::StartGame()
+{
+	LoadNextStage();
 }
 
 void UFPSGameInstance::LoadNextStage()
 {
 	CurrentStageIndex++;
 
-	if (CurrentStageIndex > 10)
-	{
-		GotoMainMenu();
-		return;
-	}
-
 	if (StageMapNames.IsValidIndex(CurrentStageIndex))
 	{
 		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
+		UE_LOG(LogTemp, Warning, TEXT("OpenStage : %s"), *StageMapNames[CurrentStageIndex].ToString());
 	}
 }
 

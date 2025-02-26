@@ -22,6 +22,8 @@ void AAIObjectPool::BeginPlay()
 
 void AAIObjectPool::InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClasses)
 {
+	EnemyPools.Empty(); // 기존 풀 초기화
+
 	for (const TPair<TSubclassOf<ABaseEnemy>, int32> Pair : EnemyClasses)
 	{
 		TSubclassOf<ABaseEnemy> EnemyClass = Pair.Key;
@@ -30,9 +32,14 @@ void AAIObjectPool::InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyCla
 		if (!EnemyClass) continue;
 			
 		Pool = EnemyPools.FindOrAdd(EnemyClass);
+		if (!Pool.IsValid())
+		{
+			Pool = MakeShared<TArray<ABaseEnemy*>>();
+			EnemyPools.Add(EnemyClass, Pool);
+		}
 		
 		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		for (int32 i = 0; i < Count; i++)
 		{
 			ABaseEnemy* NewEnemy = GetWorld()->SpawnActor<ABaseEnemy>(
@@ -45,15 +52,16 @@ void AAIObjectPool::InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyCla
 				NewEnemy->SetActorHiddenInGame(true);
 				NewEnemy->SetActorEnableCollision(false);
 				NewEnemy->SetActorTickEnabled(false);
-				UE_LOG(LogTemp, Warning, TEXT("add"));
+
 				if (Pool.IsValid())
 				{
 					Pool->Add(NewEnemy);
+					UE_LOG(LogTemp, Warning, TEXT("Pool Save Data %d"), Pool->Num())
 				}
 			}
 			
 			UE_LOG(LogTemp, Warning, TEXT("Created %d enemies of type!!!: %s"), i, *EnemyClass->GetName());
-		}	
+		}
 	}
 }
 
@@ -63,10 +71,13 @@ ABaseEnemy* AAIObjectPool::GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<AB
 
 	if (EnemyPools.Contains(EnemyClass))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("EnemyPools Contains BaseEnemyClass"));
+		
 		Pool = EnemyPools[EnemyClass];
 
 		if (Pool.IsValid())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Pool Is Valid"));	
 			for (ABaseEnemy* Enemy : *Pool)
 			{
 				if (!Enemy->IsActorTickEnabled())
@@ -74,6 +85,7 @@ ABaseEnemy* AAIObjectPool::GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<AB
 					FVector SpawnLocation = SpawnVolume->GetSafeSpawnPoint();
 					Enemy->SetActorLocation(SpawnLocation);
 					Enemy->SetActorHiddenInGame(false);
+					UE_LOG(LogTemp, Log, TEXT("%d"), Enemy->IsHidden());
 					Enemy->SetActorEnableCollision(true);
 					Enemy->SetActorTickEnabled(true);
 
@@ -81,6 +93,10 @@ ABaseEnemy* AAIObjectPool::GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<AB
 					return Enemy;
 				}
 			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pool is Nullptr"));
 		}
 	}
 	return nullptr;

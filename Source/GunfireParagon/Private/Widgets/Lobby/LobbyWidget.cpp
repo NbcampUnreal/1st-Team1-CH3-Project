@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+// #include "Kismet/KismetSystemLibrary.h"
 #include "Widgets/Lobby/LobbyWidget.h"
+#include "GameMode/FPSGameInstance.h"
 #include "Components\Button.h"
 
 void ULobbyWidget::NativeOnInitialized()
@@ -32,8 +34,12 @@ void ULobbyWidget::NativeConstruct()
 
 void ULobbyWidget::OnStartButtonClicked()
 {
-	// GameMode->OpenLevel();
+	// FPSGameInstance-> StartGame();
 	// RemoveFromParent();
+
+	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	FPSGameInstance->Init();
+	
 	UE_LOG(LogTemp, Display, TEXT("StartButton Binding Test"));
 }
 
@@ -45,4 +51,11 @@ void ULobbyWidget::OnInfoButtonClicked()
 void ULobbyWidget::OnEndButtonClicked()
 {
 	UE_LOG(LogTemp, Display, TEXT("EndButton Binding Test"));
+	/*
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UKismetSystemLibrary::QuitGame(World, nullptr, EQuitPreference::Quit, false);
+	}
+	*/
 }

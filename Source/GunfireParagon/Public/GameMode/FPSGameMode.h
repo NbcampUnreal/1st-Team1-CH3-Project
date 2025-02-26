@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "AIObjectPool.h"
+#include "GameMode/ClearPortal.h"
 #include "FPSGameMode.generated.h"
 
 
@@ -30,7 +31,11 @@ public:
 	UFUNCTION()
 	void OnStageClear();
 	UFUNCTION()
+	void SpawnPortal();
+	UFUNCTION()
 	void SpawnEnemiesForStage(int32 StageNumber);
+	UFUNCTION()
+	void ClearAllEnemies();
 	UFUNCTION()
 	void EndGame(bool bPlayWin);
 	UFUNCTION()
@@ -42,4 +47,8 @@ public:
 	UDataTable* AIDataTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Table")
 	UDataTable* EnemySpawnTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Clear Portal")
+	TSubclassOf<AClearPortal> PortalClass;
+
+	bool bIsObjectPoolReady;
 };
