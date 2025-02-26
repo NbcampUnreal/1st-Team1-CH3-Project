@@ -28,9 +28,9 @@ protected:
 	class UAIPerceptionComponent* AIPerceptionComponent;
 
 	// SightConfig: 시각 인식을 위한 설정
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	class UAISenseConfig_Sight* SightConfig;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	class UAISenseConfig_Damage* DamageConfig;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
@@ -38,5 +38,5 @@ protected:
 
 	// Actor -> 감지된 액터, Stimulus -> 감지된 자극(시야, 소리 등)
 	UFUNCTION()
-	void OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus);
+	virtual void OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus);
 };

@@ -13,7 +13,5 @@ public:
 	UBTT_DefaultAttack();
 
 protected:
-	UPROPERTY()
-	class ABaseEnemy* Enemy;
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

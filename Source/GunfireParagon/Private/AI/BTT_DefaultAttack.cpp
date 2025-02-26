@@ -1,7 +1,6 @@
 #include "AI/BTT_DefaultAttack.h"
-#include "AIController.h"
 #include "AI/BaseEnemy.h"
-#include "AI/NormalMeleeEnemy.h"
+#include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTT_DefaultAttack::UBTT_DefaultAttack()
@@ -11,10 +10,12 @@ UBTT_DefaultAttack::UBTT_DefaultAttack()
 
 EBTNodeResult::Type UBTT_DefaultAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController) return EBTNodeResult::Failed;
 
-	Enemy = Cast<ABaseEnemy>(AIController->GetPawn());
+	ABaseEnemy* Enemy = Cast<ABaseEnemy>(AIController->GetPawn());
 	if (!Enemy) return EBTNodeResult::Failed;
 
 	if (Enemy->bIsAttacking)

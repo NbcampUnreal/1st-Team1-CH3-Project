@@ -19,11 +19,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void EndAttack();
 
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void UseSkill();
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void EndSkill();
-
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void ResetEnemy();
 

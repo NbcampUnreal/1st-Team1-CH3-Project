@@ -12,6 +12,7 @@ ANormalRangeEnemy::ANormalRangeEnemy()
     AttackDelay = 0.06f;
     MaxHealth = 150.0f;
     BaseWalkSpeed = 600.0f;
+    CurrentHealth = MaxHealth;
 
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }

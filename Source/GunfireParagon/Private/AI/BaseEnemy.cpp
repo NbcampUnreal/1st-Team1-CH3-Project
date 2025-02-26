@@ -60,19 +60,6 @@ void ABaseEnemy::EndAttack()
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called: %s"), *GetName());
 }
 
-void ABaseEnemy::UseSkill()
-{
-	if (!bIsUsingSkill)
-	{
-		bIsUsingSkill = true;
-	}
-}
-
-void ABaseEnemy::EndSkill()
-{
-	bIsUsingSkill = false;
-}
-
 void ABaseEnemy::ResetEnemy()
 {
 	USkeletalMeshComponent* MeshComp = GetMesh();

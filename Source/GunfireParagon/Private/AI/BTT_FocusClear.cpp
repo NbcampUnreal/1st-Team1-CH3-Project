@@ -9,6 +9,8 @@ UBTT_FocusClear::UBTT_FocusClear()
 
 EBTNodeResult::Type UBTT_FocusClear::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController) return EBTNodeResult::Failed;
 
