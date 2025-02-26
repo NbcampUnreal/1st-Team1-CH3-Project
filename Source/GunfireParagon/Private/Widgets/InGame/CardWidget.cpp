@@ -9,11 +9,6 @@
 void UCardWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
-	if (SelectButton && !SelectButton->OnClicked.IsBound())
-	{
-		SelectButton->OnClicked.AddDynamic(this, &UCardWidget::SelectClicked);
-	}
 }
 
 void UCardWidget::NativeConstruct()
@@ -26,13 +21,6 @@ void UCardWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-
-void UCardWidget::SetCardData()
+void UCardWidget::ActivateObject()
 {
-}
-
-void UCardWidget::SelectClicked()
-{
-	UE_LOG(LogTemp, Display, TEXT("CardButton Bind Test"));
-	// Select Index에 대한 로직
 }

@@ -5,25 +5,32 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Widgets\InGame\SelectObjectBaseWidget.h"
-#include "CardWidget.generated.h"
+#include "ItemWidget.generated.h"
 
 /**
  * 
  */
-class UImage;
-class UTextBlock;
-class UButton;
-
 UCLASS()
-class GUNFIREPARAGON_API UCardWidget : public USelectObjectBaseWidget
+class GUNFIREPARAGON_API UItemWidget : public USelectObjectBaseWidget
 {
 	GENERATED_BODY()
+	
 
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
+	void OnOverlapButton();
 protected:
 	virtual void ActivateObject() override;
+	
+	//UPROPERTY(meta=(BindWidget))
+	//UImage* SoldOutImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* PriceText;
+
+
+
 };
