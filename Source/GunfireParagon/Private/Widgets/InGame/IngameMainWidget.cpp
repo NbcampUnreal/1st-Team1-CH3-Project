@@ -6,6 +6,7 @@
 #include "Widgets\InGame\IngamePlayerStatus.h"
 #include "Widgets\InGame\IngameWeaponWidget.h"
 #include "Widgets\InGame\IngameCrossHairs.h"
+#include "Widgets\InGame\DashEffectWidget.h"
 #include "Player/PlayerCharacter.h"
 #include "Widgets\MinimapTracker.h"
 
@@ -16,20 +17,28 @@ void UIngameMainWidget::NativeOnInitialized()
 	if (!PlayerStatusWidget)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PlayerStatus Missing"));
+		return;
 	}
 	if (!WeaponStatusWidget)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Missing"));
+		return;
 	}
 	if (!MinimapWidget)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Minimap Missing"));
+		return;
 	}
 	if (!CrossHairWidget)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CrossHair Missing"));
+		return;
 	}
-
+	if (!DashWidget)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DashWidget Missing"));
+		return;
+	}
 
 }
 
@@ -60,6 +69,10 @@ void UIngameMainWidget::NativeConstruct()
 		{
 			UMinimapTracker::OnActorLocation.AddDynamic(this, &UIngameMainWidget::OnMinimapUpdated);
 		}
+		if (CurrentPlayer && !CurrentPlayer->OnDashState.IsBound())
+		{
+			CurrentPlayer->OnDashState.AddDynamic(this, &UIngameMainWidget::OnPlayerIsDashBinding);
+		}
 	}
 
 }
@@ -78,6 +91,11 @@ void UIngameMainWidget::OnPlayerHealthBinding(float CurrentHP, float MaxHP)
 void UIngameMainWidget::OnPlayerShieldBinding(float CurrentShield, float MaxShield)
 {
 	PlayerStatusWidget->SetCurrentShield(CurrentShield, MaxShield);
+}
+
+void UIngameMainWidget::OnPlayerIsDashBinding(bool IsDash)
+{
+	DashWidget->ConvertVisibility(IsDash);
 }
 
 void UIngameMainWidget::OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo)

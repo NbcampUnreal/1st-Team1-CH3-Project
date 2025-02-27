@@ -31,7 +31,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UIngameCrossHairs* CrossHairWidget;
 
-
+	UPROPERTY(meta = (BindWidget))
+	class UDashEffectWidget* DashWidget;
 protected:
 	//Player Status
 	UFUNCTION()
@@ -39,6 +40,9 @@ protected:
 
 	UFUNCTION()
 	void OnPlayerShieldBinding(float CurrentShield, float MaxShield);
+
+	UFUNCTION()
+	void OnPlayerIsDashBinding(bool IsDash);
 
 	//Weapon Status
 	UFUNCTION()
