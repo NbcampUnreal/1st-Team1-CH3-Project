@@ -47,10 +47,6 @@ void UFPSGameInstance::StartGame()
 	);
 }
 
-void UFPSGameInstance::StartGame()
-{
-	LoadNextStage();
-}
 
 void UFPSGameInstance::LoadNextStage()
 {
