@@ -123,18 +123,37 @@ void ACGunBase::Fire()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("발사이펙트!"));
 
-		FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle"));
 
+		FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle")) - WeaponMesh->GetComponentRotation();
+		MuzzleRotation.Yaw -= 90.0f; // Y축 정렬 보정
+		
+		UE_LOG(LogTemp, Warning, TEXT("MuzzleRotation (Adjusted): Pitch=%f, Yaw=%f, Roll=%f"),
+			MuzzleRotation.Pitch, MuzzleRotation.Yaw, MuzzleRotation.Roll);
+
+		// 🔹 나이아가라 이펙트를 총구에 부착
 		UNiagaraComponent* MuzzleEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			MuzzleFlashEffect,			
-			WeaponMesh,					
-			TEXT("Muzzle"),				
-			FVector::ZeroVector,		
-			MuzzleRotation,				
-			EAttachLocation::SnapToTarget, 
-			true						
+			MuzzleFlashEffect,           // 나이아가라 시스템
+			WeaponMesh,                  // 부모: 무기 메쉬
+			TEXT("Muzzle"),              // 소켓 이름
+			FVector::ZeroVector,         // 상대 위치 (소켓 기준)
+			MuzzleRotation,              // 초기 회전값 (부모 회전 제거)
+			EAttachLocation::SnapToTarget, // 부모 위치 & 소켓에 정확히 부착
+			true                         // 자동 파괴
 		);
 
+		// FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle"));
+		//
+		// MuzzleRotation.Yaw -= 90.0f; // Yaw 보정
+		// UNiagaraComponent* MuzzleEffectComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		// 	GetWorld(),
+		// 	MuzzleFlashEffect,
+		// 	MuzzleSpot,
+		// 	MuzzleRotation, // 보정된 회전값 사용
+		// 	FVector(1, 1, 1), // 크기 조정
+		// 	true // 자동 파괴
+		// );
+
+		
 		if (MuzzleEffectComp)
 		{
 			MuzzleEffectComp->SetAutoDestroy(true); 
