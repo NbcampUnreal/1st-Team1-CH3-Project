@@ -73,7 +73,6 @@ void ABaseEnemy::ResetEnemy()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
 	GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
-
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
 
@@ -215,6 +214,17 @@ void ABaseEnemy::SetDeathState()
 	FVector FinalImpulse = ImpulseDirection * ImpulseStrength;
 
 	MeshComp->AddImpulseToAllBodiesBelow(FinalImpulse);
+}
+
+void ABaseEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	EndAttack();
+
+	if (OnSkillMontageEnded.IsBound())
+	{
+		OnSkillMontageEnded.Broadcast();
+		OnSkillMontageEnded.Clear();
+	}
 }
 
 

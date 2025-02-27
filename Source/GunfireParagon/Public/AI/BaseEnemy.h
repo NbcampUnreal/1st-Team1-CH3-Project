@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "BaseEnemy.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnSkillMontageEnded);
+
 UCLASS()
 class GUNFIREPARAGON_API ABaseEnemy : public ACharacter
 {
@@ -44,7 +46,8 @@ public:
 	bool bIsDead;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anim")
 	float AimPitch;
-	
+
+	FOnSkillMontageEnded OnSkillMontageEnded;
 
 protected:
 	virtual float TakeDamage(
@@ -57,9 +60,12 @@ protected:
 
 	virtual void PerformMeleeAttack(const FVector& TargetLocation) PURE_VIRTUAL(ABaseEnemy::PerformMeleeAttack, );
 	virtual void PerformRangeAttack(const FVector& TargetLocation) PURE_VIRTUAL(ABaseEnemy::PerformRangeAttack, );
+	virtual void SetDeathState();
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	void OnDeath();
-	virtual void SetDeathState();
 
 	TArray<AActor*> AlreadyHitActors;
 

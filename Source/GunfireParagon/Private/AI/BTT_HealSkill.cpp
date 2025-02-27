@@ -23,7 +23,8 @@ EBTNodeResult::Type UBTT_HealSkill::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 
     OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsAttacking", true);
 
-    Boss->OnSkillMontageEnded.BindUObject(this, &UBTT_HealSkill::OnHealFinished, &OwnerComp);
+    Boss->OnSkillMontageEnded.RemoveAll(this);
+    Boss->OnSkillMontageEnded.AddUObject(this, &UBTT_HealSkill::OnHealFinished, &OwnerComp);
 
     return EBTNodeResult::InProgress;
 }

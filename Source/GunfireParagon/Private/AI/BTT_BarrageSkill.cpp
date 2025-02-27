@@ -22,7 +22,8 @@ EBTNodeResult::Type UBTT_BarrageSkill::ExecuteTask(UBehaviorTreeComponent& Owner
 
     OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsAttacking", true);
 
-    Boss->OnSkillMontageEnded.BindUObject(this, &UBTT_BarrageSkill::OnMontageEnded, &OwnerComp);
+    Boss->OnSkillMontageEnded.RemoveAll(this);
+    Boss->OnSkillMontageEnded.AddUObject(this, &UBTT_BarrageSkill::OnMontageEnded, &OwnerComp);
 
     return EBTNodeResult::InProgress;
 }

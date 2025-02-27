@@ -31,13 +31,17 @@ EBTNodeResult::Type UBTT_DefaultAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 	
 	OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsAttacking", true);
 
-	FTimerHandle AttackTimerHandle;
-	Enemy->GetWorldTimerManager().SetTimer(AttackTimerHandle, FTimerDelegate::CreateLambda([this, &OwnerComp]()
-		{
-			OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsAttacking", false);
-
-			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		}), 1.0f, false);
+	Enemy->OnSkillMontageEnded.RemoveAll(this);
+	Enemy->OnSkillMontageEnded.AddUObject(this, &UBTT_DefaultAttack::OnMontageEnded, &OwnerComp);
 
 	return EBTNodeResult::InProgress;
+}
+
+void UBTT_DefaultAttack::OnMontageEnded(UBehaviorTreeComponent* OwnerComp)
+{
+	if (OwnerComp)
+	{
+		OwnerComp->GetBlackboardComponent()->SetValueAsBool("IsAttacking", false);
+		FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
+	}
 }

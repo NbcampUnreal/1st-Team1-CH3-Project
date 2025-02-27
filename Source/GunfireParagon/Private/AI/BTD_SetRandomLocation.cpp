@@ -21,10 +21,10 @@ bool UBTD_SetRandomLocation::CalculateRawConditionValue(UBehaviorTreeComponent& 
 
 	UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(AIPawn->GetWorld());
 	if (!NavSystem) return false;
-
-	FVector SpawnLocation = BBComp->GetValueAsVector("SpawnLocation");
+	
+	FVector PivotLocation = BBComp->GetValueAsVector(GetSelectedBlackboardKey());
 	FNavLocation RandomLocation;
-	if (NavSystem->GetRandomReachablePointInRadius(SpawnLocation, PatrolRadius, RandomLocation))
+	if (NavSystem->GetRandomReachablePointInRadius(PivotLocation, PatrolRadius, RandomLocation))
 	{
 		BBComp->SetValueAsVector("RandomLocation", RandomLocation.Location);
 

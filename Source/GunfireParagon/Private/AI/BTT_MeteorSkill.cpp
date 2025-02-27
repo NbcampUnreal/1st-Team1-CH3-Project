@@ -22,7 +22,8 @@ EBTNodeResult::Type UBTT_MeteorSkill::ExecuteTask(UBehaviorTreeComponent& OwnerC
 
     OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsAttacking", true);
 
-    Boss->OnSkillMontageEnded.BindUObject(this, &UBTT_MeteorSkill::OnMontageEnded, &OwnerComp);
+    Boss->OnSkillMontageEnded.RemoveAll(this);
+    Boss->OnSkillMontageEnded.AddUObject(this, &UBTT_MeteorSkill::OnMontageEnded, &OwnerComp);
    
     return EBTNodeResult::InProgress;
 }

@@ -12,10 +12,12 @@ class GUNFIREPARAGON_API ABaseEnemyAIController : public AAIController
 public:
 	ABaseEnemyAIController();
 
+	virtual void Tick(float DeltaTime) override;
 protected:
 	// AI가 Pawn을 소유할 때 호출되고 BeginPlay보다 먼저 호출된다.
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void BeginPlay() override;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	class UBehaviorTree* BehaviorTree;

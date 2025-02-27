@@ -24,7 +24,8 @@ EBTNodeResult::Type UBTT_TeleportSkill::ExecuteTask(UBehaviorTreeComponent& Owne
 
     OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsAttacking", true);
 
-    Boss->OnSkillMontageEnded.BindUObject(this, &UBTT_TeleportSkill::OnTeleportFinished, &OwnerComp);
+    Boss->OnSkillMontageEnded.RemoveAll(this);
+    Boss->OnSkillMontageEnded.AddUObject(this, &UBTT_TeleportSkill::OnTeleportFinished, &OwnerComp);
 
     return EBTNodeResult::InProgress;
 }

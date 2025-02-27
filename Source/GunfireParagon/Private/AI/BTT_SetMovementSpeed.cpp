@@ -24,7 +24,7 @@ EBTNodeResult::Type UBTT_SetMovementSpeed::ExecuteTask(UBehaviorTreeComponent& O
 
     bool bHasSpottedPlayer = BBcomp->GetValueAsBool(TEXT("HasSpottedPlayer"));
 
-    float NewSpeed = bHasSpottedPlayer ? Enemy->BaseWalkSpeed : Enemy->BaseWalkSpeed * 0.3f;
+    float NewSpeed = bHasSpottedPlayer ? Enemy->BaseWalkSpeed : Enemy->BaseWalkSpeed * 0.5f;
     Enemy->GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 
 

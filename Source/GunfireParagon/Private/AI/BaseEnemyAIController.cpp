@@ -16,8 +16,8 @@ ABaseEnemyAIController::ABaseEnemyAIController()
 
 	// 시각 감지 설정
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-	SightConfig->SightRadius = 5000.0f; // AI의 감지 범위
-	SightConfig->LoseSightRadius = 5500.0f; // AI가 플레이어를 잃어버리는 거리
+	SightConfig->SightRadius = 6000.0f; // AI의 감지 범위
+	SightConfig->LoseSightRadius = 6500.0f; // AI가 플레이어를 잃어버리는 거리
 	SightConfig->PeripheralVisionAngleDegrees = 160.0f; // 시야각 설정
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
@@ -69,6 +69,28 @@ void ABaseEnemyAIController::OnPossess(APawn* InPawn)
 void ABaseEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	if (PlayerPawn)
+	{
+		if (BBComp)
+		{
+			BBComp->SetValueAsObject("TargetPlayer", PlayerPawn);
+		}
+	}
+}
+
+void ABaseEnemyAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	AActor* TargetPlayer = Cast<AActor>(BBComp->GetValueAsObject("TargetPlayer"));
+	if (TargetPlayer && BBComp->GetValueAsBool("HasSpottedPlayer"))
+	{
+		FVector PlayerLocation = TargetPlayer->GetActorLocation();
+		BBComp->SetValueAsVector("PlayerLocation", PlayerLocation);
+		BBComp->ClearValue("LastKnownPlayerLocation");
+	}
 }
 
 // AI가 감지한 객체의 정보를 처리하는 함수
@@ -82,24 +104,13 @@ void ABaseEnemyAIController::OnTargetPerceived(AActor* Actor, FAIStimulus Stimul
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		BBComp->SetValueAsObject("TargetPlayer", Actor);
 		BBComp->SetValueAsBool("HasSpottedPlayer", true);
-		if (!BBComp->GetValueAsBool("PauseLastKnownUpdate"))
-		{
-			BBComp->SetValueAsVector("LastKnownPlayerLocation", Actor->GetActorLocation());
-		}
 	}
 	else
 	{
-		if (Stimulus.Type == UAISense::GetSenseID<UAISense_Damage>())
-		{
-			if (Stimulus.GetAge() < 5.0f)
-			{
-				return;
-			}
-		}
-
-		BBComp->ClearValue("TargetPlayer");
+		FVector PlayerLocation = BBComp->GetValueAsVector("PlayerLocation");
+		BBComp->SetValueAsVector("LastKnownPlayerLocation", PlayerLocation);
+		BBComp->ClearValue("PlayerLocation");
 		BBComp->SetValueAsBool("HasSpottedPlayer", false);
 	}
 }

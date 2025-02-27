@@ -9,26 +9,32 @@ ANormalRangeEnemy::ANormalRangeEnemy()
 
     Damage = 20.0f;
     AttackRange = 1000.0f;
-    AttackDelay = 0.06f;
+    AttackDelay = 3.0f;
     MaxHealth = 150.0f;
     BaseWalkSpeed = 600.0f;
     CurrentHealth = MaxHealth;
 
-    GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
 void ANormalRangeEnemy::Attack(const FVector& TargetLocation)
 {
     if (!bIsAttacking && !bIsDead)
 	{
-        StartAttack();
-		PerformRangeAttack(TargetLocation);
-	}
-}
+        if (RangeAttackMontage)
+        {
+            UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+            if (AnimInstance)
+            {
+                AnimInstance->Montage_Play(RangeAttackMontage);
+              
+                FOnMontageEnded MontageEndDelegate;
+                MontageEndDelegate.BindUObject(this, &ANormalRangeEnemy::OnAttackMontageEnded);
 
-void ANormalRangeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
-{
-	return;
+                AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, RangeAttackMontage);
+            }
+        }
+        StartAttack();
+	}
 }
 
 void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
@@ -88,36 +94,38 @@ void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
         2.0f  // 두께
     );
 
-    PlayMuzzleFlashEffect();
-    PlayBulletEffect(Start, AdjustedDirection);
-
+    PlayAttackEffect(Start, AdjustedDirection);
 }
 
-void ANormalRangeEnemy::PlayMuzzleFlashEffect()
+void ANormalRangeEnemy::PlayAttackEffect(const FVector& Start, const FVector& Direction)
 {
-    if (!MuzzleFlashEffect || !GetMesh()) return;
+    if (MuzzleFlashEffect)
+    {
+        FVector MuzzleLocation = GetMesh()->GetSocketLocation("Muzzle_Front");
+        FRotator MuzzleRotation = GetMesh()->GetSocketRotation("Muzzle_Front");
 
-    FVector MuzzleLocation = GetMesh()->GetSocketLocation("Muzzle_Front");
-    FRotator MuzzleRotation = GetMesh()->GetSocketRotation("Muzzle_Front");
+        UGameplayStatics::SpawnEmitterAtLocation(
+            GetWorld(),
+            MuzzleFlashEffect,
+            MuzzleLocation,
+            MuzzleRotation
+        );
+    }
 
-    UGameplayStatics::SpawnEmitterAtLocation(
-        GetWorld(),         
-        MuzzleFlashEffect,  
-        MuzzleLocation,     
-        MuzzleRotation      
-    );
+    if (BulletEffect)
+    {
+        FRotator BulletRotation = Direction.Rotation();
+
+        UGameplayStatics::SpawnEmitterAtLocation(
+            GetWorld(),
+            BulletEffect,
+            Start,
+            BulletRotation
+        );
+    }
 }
 
-void ANormalRangeEnemy::PlayBulletEffect(const FVector& Start, const FVector& Direction)
+void ANormalRangeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
 {
-    if (!BulletEffect || !GetWorld()) return;
-
-    FRotator BulletRotation = Direction.Rotation();
-
-    UGameplayStatics::SpawnEmitterAtLocation(
-        GetWorld(),       
-        BulletEffect,     
-        Start,            
-        BulletRotation    
-    );
+    return;
 }

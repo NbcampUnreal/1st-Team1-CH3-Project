@@ -4,8 +4,6 @@
 #include "AI/BaseEnemy.h"
 #include "BossEnemy.generated.h"
 
-DECLARE_DELEGATE(FOnSkillMontageEnded);
-
 UCLASS()
 class GUNFIREPARAGON_API ABossEnemy : public ABaseEnemy
 {
@@ -27,8 +25,6 @@ public:
 
 	FVector GetPlayerLocation() { return LastKnownPlayerLocation; }
 
-	FOnSkillMontageEnded OnSkillMontageEnded;
-
 protected:
 	virtual void PerformMeleeAttack(const FVector& TargetLocation) override;
 	virtual float TakeDamage(
@@ -37,8 +33,6 @@ protected:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
-	UFUNCTION()
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 	void FinishTeleport(UAnimMontage* Montage, bool bInterrupted);
 

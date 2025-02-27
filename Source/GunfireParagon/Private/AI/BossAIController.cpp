@@ -101,6 +101,5 @@ void ABossAIController::UpdateBlackboardValue(FName KeyName, bool Value)
 {
 	if (!BBComp) return;
 
-	GEngine->AddOnScreenDebugMessage(9, 2.0f, FColor::Green, TEXT("AIController Update Heal"));
 	BBComp->SetValueAsBool(KeyName, Value);
 }

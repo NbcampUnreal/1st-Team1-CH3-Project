@@ -49,17 +49,6 @@ void ABossEnemy::Attack(const FVector& TargetLocation)
     }
 }
 
-void ABossEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-    EndAttack();
-
-    if (OnSkillMontageEnded.IsBound()) // 델리게이트에 바인딩 되어있는지 확인
-    {
-        OnSkillMontageEnded.Execute(); // 바인딩된 함수 실행
-        OnSkillMontageEnded.Unbind();  // 한 번만 호출되도록 바인딩 해제
-    }
-}
-
 void ABossEnemy::PerformRangeAttack(const FVector& TargetLocation)
 {
     if (!FireballClass) return;

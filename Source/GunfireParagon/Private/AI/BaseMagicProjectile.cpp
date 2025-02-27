@@ -12,11 +12,7 @@ ABaseMagicProjectile::ABaseMagicProjectile()
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	SphereComp->InitSphereRadius(15.0f);
-	SphereComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	SphereComp->SetCollisionObjectType(ECC_PhysicsBody);
-	SphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-	SphereComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-	SphereComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); 
+	SphereComp->SetCollisionProfileName(TEXT("PhysicsActor"));
 	SetRootComponent(SphereComp);
 
 	ProjectileParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ProjectileParticle"));

@@ -5,8 +5,6 @@
 
 ANormalMeleeEnemy::ANormalMeleeEnemy()
 {
-    PrimaryActorTick.bCanEverTick = true;
-
     AIControllerClass = ABaseEnemyAIController::StaticClass();
 
     Damage = 20.0f;
@@ -19,30 +17,25 @@ ANormalMeleeEnemy::ANormalMeleeEnemy()
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
-void ANormalMeleeEnemy::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-
-    if (bIsAttacking)
-    {
-        PerformMeleeAttack(LastKnownPlayerLocation);
-    }
-}
-
 void ANormalMeleeEnemy::Attack(const FVector& TargetLocation)
 {
     if (!bIsAttacking && !bIsDead)
-	{
+    {
+        if (MeleeAttackMontage)
+        {
+            UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+            if (AnimInstance)
+            {
+                AnimInstance->Montage_Play(MeleeAttackMontage);
+                
+                FOnMontageEnded MontageEndDelegate;
+                MontageEndDelegate.BindUObject(this, &ANormalMeleeEnemy::OnAttackMontageEnded);
+
+                AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, MeleeAttackMontage);
+            }
+        }
         StartAttack();
-
-        LastKnownPlayerLocation = TargetLocation;
-	}
-}
-
-void ANormalMeleeEnemy::BeginPlay()
-{
-    Super::BeginPlay();
-    UE_LOG(LogTemp, Warning, TEXT("BeginPlay - NormalMeleeEnemy: MaxWalkSpeed = %f"), GetCharacterMovement()->MaxWalkSpeed);
+    }
 }
 
 void ANormalMeleeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
@@ -63,7 +56,6 @@ void ANormalMeleeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-   
     bool bHit = GetWorld()->SweepSingleByChannel
     (
         HitResult, 
