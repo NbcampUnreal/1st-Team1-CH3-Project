@@ -73,6 +73,10 @@ void UIngameMainWidget::NativeConstruct()
 		{
 			CurrentPlayer->OnDashState.AddDynamic(this, &UIngameMainWidget::OnPlayerIsDashBinding);
 		}
+		if (CurrentPlayer && !CurrentPlayer->OnDashCoolDown.IsBound())
+		{
+			CurrentPlayer->OnDashCoolDown.AddDynamic(this, &UIngameMainWidget::OnPlayerDashCooldownBinding);
+		}
 	}
 
 }
@@ -96,6 +100,11 @@ void UIngameMainWidget::OnPlayerShieldBinding(float CurrentShield, float MaxShie
 void UIngameMainWidget::OnPlayerIsDashBinding(bool IsDash)
 {
 	DashWidget->ConvertVisibility(IsDash);
+}
+
+void UIngameMainWidget::OnPlayerDashCooldownBinding(float DashCoolDown)
+{
+	WeaponStatusWidget->SetDashCoolDown(DashCoolDown);
 }
 
 void UIngameMainWidget::OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo)

@@ -4,6 +4,8 @@
 #include "Widgets/Ingame/IngameWeaponWidget.h"
 #include "Components\Image.h"
 #include "Components\TextBlock.h"
+#include "Components\ProgressBar.h"
+#include "Animation\WidgetAnimation.h"
 #include "Widgets/DataAssets/InGameStateDataAsset.h"
 
 void UIngameWeaponWidget::NativeOnInitialized()
@@ -21,7 +23,7 @@ void UIngameWeaponWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UIngameWeaponWidget::UpdateWeaponState()
+void UIngameWeaponWidget::UpdateAmmoState()
 {
 	if (AmmoTextBlock)
 	{
@@ -39,9 +41,34 @@ void UIngameWeaponWidget::UpdateWeaponState()
 	}
 }
 
+void UIngameWeaponWidget::PlayDashCoolDownAnim(float DashCoolDown)
+{
+	StopAnimation(DashCoolDownAnim);
+	
+	DashCoolDownBar->SetPercent(1.0f);
+
+	float AnimEndTime = DashCoolDownAnim->GetEndTime();
+
+	float PlayRate = AnimEndTime / DashCoolDown;
+
+	PlayAnimation(DashCoolDownAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, PlayRate);
+}
+
+
 void UIngameWeaponWidget::SetCurrentAmmo(const int32& UpdateAmmo, const int32& UpdateMaxAmmo)
 {
 	CurrentAmmo = UpdateAmmo;
 	MaxAmmo = UpdateMaxAmmo;
-	UpdateWeaponState();
+	UpdateAmmoState();
+}
+
+void UIngameWeaponWidget::SetDashCoolDown(float DashCoolDown)
+{
+	if (!DashCoolDownBar || !DashCoolDownAnim)
+	{
+		UE_LOG(LogTemp, Display, TEXT("DashCoolDownBar||Anim is Null"));
+		return;
+	}
+
+	PlayDashCoolDownAnim(DashCoolDown);
 }

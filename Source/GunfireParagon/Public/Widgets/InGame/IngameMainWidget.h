@@ -44,6 +44,8 @@ protected:
 	UFUNCTION()
 	void OnPlayerIsDashBinding(bool IsDash);
 
+	UFUNCTION()
+	void OnPlayerDashCooldownBinding(float DashCoolDown);
 	//Weapon Status
 	UFUNCTION()
 	void OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo);

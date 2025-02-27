@@ -13,6 +13,7 @@ struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangedPlayerValue, float, CurrentValue, float, MaxValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeOneValue, float, OneValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeBoolValue, bool, OneValue);
 
 UCLASS()
 class GUNFIREPARAGON_API APlayerCharacter : public ACharacter
@@ -161,6 +162,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "UI Events")
 	FOnChangedPlayerValue OnAmmoChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangeBoolValue OnDashState;
+
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangeOneValue OnDashCoolDown;
 
 	// Ammo 관련 변수/함수 존재하지 않음. 플레이어 캐릭터 내 추가 바랍니다. 해당 형태를 Helath선언부분으로 올리셔도 괜찮습니다.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")

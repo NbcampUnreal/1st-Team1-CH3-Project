@@ -11,6 +11,7 @@
  */
 class UTextBlock;
 class UImage;
+class UProgressBar;
 
 UCLASS()
 class GUNFIREPARAGON_API UIngameWeaponWidget : public UUserWidget
@@ -37,6 +38,9 @@ protected:
 	UPROPERTY(meta =(BindWidget))
 	UImage* SkillTexture;
 
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* DashCoolDownBar;
+
 	UPROPERTY(EditAnywhere, Category = "Textures")
 	class UInGameStateDataAsset* CurrentTextures;
 
@@ -53,8 +57,16 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "UITest")
 	int32 CurrentGrenade;
 
-	void UpdateWeaponState();
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* DashCoolDownAnim;
+
+	void UpdateAmmoState();
+	void PlayDashCoolDownAnim(float DashCoolDown);
+	
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentAmmo(const int32& UpdateAmmo, const int32& UpdateMaxAmmo);	
+
+	UFUNCTION(BlueprintCallable)
+	void SetDashCoolDown(float DashCoolDown);
 };

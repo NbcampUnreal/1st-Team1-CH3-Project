@@ -243,7 +243,8 @@ void APlayerCharacter::Dash(const FInputActionValue& value)
 	}
 
 	bCanDash = false;
-
+	OnDashState.Broadcast(true);
+	OnDashCoolDown.Broadcast(DashCooldown);
 	float DashTime = 0.1f;
 	float DashSpeed = DashDistance / DashTime;
 
@@ -276,6 +277,8 @@ void APlayerCharacter::StopDash()
 	{
 		GetCharacterMovement()->StopMovementImmediately();
 	}
+
+	OnDashState.Broadcast(false);
 }
 
 void APlayerCharacter::ResetDash()
@@ -597,7 +600,7 @@ void APlayerCharacter::PickupWeapon()
 	SecondaryWeapon = NearbyWeapon;
 	CurrentWeapon = SecondaryWeapon;
 	AttachWeaponToHand(SecondaryWeapon, 2);
-
+	SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 	UE_LOG(LogTemp, Warning, TEXT("새로운 무기 장착 완료: %s"), *SecondaryWeapon->GetName());
 }
 
