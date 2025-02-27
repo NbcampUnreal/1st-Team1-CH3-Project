@@ -13,7 +13,3 @@ void UIngameTargetHUD::UpdateHP(float Current, float Max)
 		MonsterHPBar->SetPercent(Current / Max);
 	}
 }
-
-void UIngameTargetHUD::UpdateScale(float Distance)
-{
-}

@@ -22,13 +22,8 @@ class GUNFIREPARAGON_API UIngameTargetHUD : public UUserWidget
 public:
 	UFUNCTION()
 	void UpdateHP(float Current, float Max);
-	UFUNCTION()
-	void UpdateScale(float Distance);
 
 private:
-	UPROPERTY(meta =(BindWidget))
-	USizeBox* HUDSizeBox;
-
 	UPROPERTY(meta =(BindWidget))
 	UProgressBar* MonsterHPBar;
 
