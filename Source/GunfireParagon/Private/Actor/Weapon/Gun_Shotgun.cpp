@@ -36,13 +36,23 @@ void AGun_Shotgun::Fire()
 	if (GunMesh && GunMesh->DoesSocketExist(TEXT("Muzzle")))
 	{
 		MuzzleSpot = GunMesh->GetSocketLocation(TEXT("Muzzle"));
+		
+		if (MuzzleFlashEffect)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(), 
+				MuzzleFlashEffect,  // 머즐 플래시 이펙트
+				MuzzleSpot,          // 위치 (총구)
+				GunMesh->GetSocketRotation(TEXT("Muzzle")) // 총구 회전 방향
+			);
+		}
 	}
 
 	//  샷건 탄환 여러 개 발사
 	for (int i = 0; i < Pellets; i++)
 	{
 		// 총알 퍼짐 방향 설정
-		FVector forwardDirection = GetActorForwardVector();
+		FVector forwardDirection = GetAimDirection();
 		forwardDirection = SpreadDirection(forwardDirection);
 	
 		//  총알을 풀에서 가져오기

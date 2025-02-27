@@ -12,20 +12,17 @@ class GUNFIREPARAGON_API ABaseEnemy : public ACharacter
 public:
 	ABaseEnemy();
 
-	virtual void Attack();
+	virtual void Attack(const FVector& TargetLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void StartAttack();
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void EndAttack();
 
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void UseSkill();
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void EndSkill();
-
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void ResetEnemy();
+
+	void UpdateAimPitch();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float Damage;
@@ -38,14 +35,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float MaxWalkSpeed;
+	float BaseWalkSpeed;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsAttacking;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsUsingSkill;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool bIsDead;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anim")
+	float AimPitch;
+	
 
 protected:
 	virtual float TakeDamage(
@@ -56,16 +55,12 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void PerformMeleeAttack() PURE_VIRTUAL(ABaseEnemy::PerformMeleeAttack, );
-	virtual void PerformRangeAttack() PURE_VIRTUAL(ABaseEnemy::PerformRangeAttack, );
+	virtual void PerformMeleeAttack(const FVector& TargetLocation) PURE_VIRTUAL(ABaseEnemy::PerformMeleeAttack, );
+	virtual void PerformRangeAttack(const FVector& TargetLocation) PURE_VIRTUAL(ABaseEnemy::PerformRangeAttack, );
 
 	void OnDeath();
 	virtual void SetDeathState();
 
 	TArray<AActor*> AlreadyHitActors;
-
-
-
-
 
 };

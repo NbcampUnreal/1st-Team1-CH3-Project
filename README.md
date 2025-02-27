@@ -1,5 +1,7 @@
 <div align = left>
-Img
+  
+![image](https://github.com/user-attachments/assets/ed012a61-eb44-4229-9184-04553671fd3e)
+
 
 <br>
 
@@ -34,3 +36,20 @@ Img
 <br>
 </div>
 
+## GameMode
+
+## Player
+
+## AIMonster
+
+## Actor
+
+## Object
+
+## UI
+<details>
+<summary>InGame UI UML Class Diagram</summary>  
+
+  ![다이어그램 인게임 UI](https://github.com/user-attachments/assets/05ae29ff-0989-4f0b-acd8-216f980428a6)
+
+</details>

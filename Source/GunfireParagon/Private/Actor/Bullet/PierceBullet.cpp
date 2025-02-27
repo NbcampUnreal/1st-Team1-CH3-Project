@@ -66,6 +66,7 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		{
 			if (BulletPool)
 			{
+				SpawnBulletDecal(SweepResult);
 				BulletPool->ReturnBullet(this, AmmoType);
 				UE_LOG(LogTemp, Warning, TEXT("%s 총알이 %s 맞춤"),*GetName() ,*OtherActor->GetName());
 				UE_LOG(LogTemp, Warning, TEXT("Normal Bullet__풀링으로 반환됨"));

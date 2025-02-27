@@ -17,29 +17,50 @@ void ANormalBullet::BeginPlay()
 
 void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
 {
-	Super::Fire(StartLocation, Direction, GunDamage);
-
 	SetActorLocation(StartLocation);
 	SetActorRotation(Direction.Rotation());
 	BulletDamage = GunDamage;
 
-	if (ProjectileMovement)
+	if (!ProjectileMovement)
 	{
-		ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
-		ProjectileMovement->Activate();
-		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 위치: %s, 방향: %s, 속도: %f"),
-			*StartLocation.ToString(), *Direction.ToString(), ProjectileMovement->InitialSpeed);
+		UE_LOG(LogTemp, Error, TEXT("❌ ProjectileMovement가 nullptr!"));
+		return;
+	}
+	if (CollisionComponent)
+	{
+		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		UE_LOG(LogTemp, Warning, TEXT("✅ CollisionComponent가 활성화됨"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("ProjectileMovement가 존재하지 않음!"));
+		UE_LOG(LogTemp, Error, TEXT("❌ CollisionComponent가 nullptr!"));
 	}
-	//
-	// SetOwner(GetInstigator());
-	// CollisionComponent->MoveIgnoreActors.Add(GetOwner());
-	
+	UE_LOG(LogTemp, Warning, TEXT("🚀 Fire() 실행 - 위치: %s, 방향: %s"), *StartLocation.ToString(), *Direction.ToString());
+
+	// ✅ 추가: ProjectileMovement가 비활성화 상태인지 확인
+	if (!ProjectileMovement->bSimulationEnabled)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("⚠️ ProjectileMovement가 비활성화 상태! 다시 활성화함."));
+		ProjectileMovement->bSimulationEnabled = true;
+		ProjectileMovement->SetUpdatedComponent(CollisionComponent);
+	}
+
+	ProjectileMovement->StopMovementImmediately();
+	ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+	ProjectileMovement->Activate();
+
+	// ✅ 추가: 속도 확인
+	if (ProjectileMovement->Velocity.IsNearlyZero())
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ Velocity가 (0,0,0)!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("✅ 총알 발사! 속도: %s"), *ProjectileMovement->Velocity.ToString());
+	}
 }
 
+UE_DISABLE_OPTIMIZATION
 void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -64,7 +85,7 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	
 	float FinalDamage = BulletDamage;
 	
-	if (OtherActor->ActorHasTag("Enemy"))
+	if (OtherActor->ActorHasTag("Monster"))
 	{
 		// 맞은 부위가 "head"인지 확인 (Skeleton Bone Name 사용)
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
@@ -76,7 +97,8 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		{
 			UE_LOG(LogTemp, Warning, TEXT("일반 공격! 데미지: %f"), FinalDamage);
 		}
-
+		//탄흔
+		SpawnBulletDecal(SweepResult);
 		//  ApplyPointDamage 사용 (맞은 위치 포함)
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
 
@@ -94,5 +116,5 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	
 	
 }
-
+UE_ENABLE_OPTIMIZATION
 

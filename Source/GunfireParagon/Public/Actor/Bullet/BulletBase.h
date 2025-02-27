@@ -4,6 +4,9 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "NiagaraComponent.h"  
+#include "NiagaraFunctionLibrary.h"  
+#include "Components/DecalComponent.h"
 #include "BulletBase.generated.h"
 
 
@@ -38,23 +41,16 @@ protected:
 	UFUNCTION()
 	virtual void OnBulletHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
 	FVector NormalImpulse, const FHitResult& Hit);
-	// virtual void NotifyHit(
-	// 		UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, 
-	// 		bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, 
-	// 		const FHitResult& Hit) override;
+
+	void SpawnBulletDecal(const FHitResult& Hit);
 
 public:
 	virtual void Fire(FVector StartLocation, FVector Direction, float GunDamage);
 
 	float GetSpawnTime() const { return SpawnTime; } 
-	void SetSpawnTime(float Time) { SpawnTime = Time; } 
+	void SetSpawnTime(float Time) { SpawnTime = Time; }
 	
 protected:
-	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Projectile")
-	USphereComponent* CollisionComponent;
-	
-
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "BulletMesh")
 	UStaticMeshComponent* BulletMesh;
 	
@@ -62,7 +58,12 @@ protected:
 	float BulletDamage = 0.0f;
 
 	
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UMaterial* BulletDecalMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	FVector DecalSize= {5.0f,5.0f,5.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	float DecalLifeTime = 5.0f;
 	// Test pool
 	UPROPERTY()
 	ABulletPool* BulletPool;
@@ -73,6 +74,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties")
 	EAmmoType AmmoType; //  총알 타입을 저장
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Projectile")
+	USphereComponent* CollisionComponent;
 	
 	float SpawnTime; 
 	

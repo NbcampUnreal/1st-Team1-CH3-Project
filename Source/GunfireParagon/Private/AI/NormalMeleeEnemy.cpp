@@ -1,6 +1,7 @@
 #include "AI/NormalMeleeEnemy.h"
 #include "AI/BaseEnemyAIController.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ANormalMeleeEnemy::ANormalMeleeEnemy()
 {
@@ -12,7 +13,10 @@ ANormalMeleeEnemy::ANormalMeleeEnemy()
     AttackRange = 200.0f;
     AttackDelay = 0.0f;
     MaxHealth = 200.0f;
-    MaxWalkSpeed = 700.0f;
+    BaseWalkSpeed = 900.0f;
+    CurrentHealth = MaxHealth;
+
+    GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
 void ANormalMeleeEnemy::Tick(float DeltaTime)
@@ -21,19 +25,27 @@ void ANormalMeleeEnemy::Tick(float DeltaTime)
 
     if (bIsAttacking)
     {
-        PerformMeleeAttack();
+        PerformMeleeAttack(LastKnownPlayerLocation);
     }
 }
 
-void ANormalMeleeEnemy::Attack()
+void ANormalMeleeEnemy::Attack(const FVector& TargetLocation)
 {
     if (!bIsAttacking && !bIsDead)
 	{
         StartAttack();
+
+        LastKnownPlayerLocation = TargetLocation;
 	}
 }
 
-void ANormalMeleeEnemy::PerformMeleeAttack()
+void ANormalMeleeEnemy::BeginPlay()
+{
+    Super::BeginPlay();
+    UE_LOG(LogTemp, Warning, TEXT("BeginPlay - NormalMeleeEnemy: MaxWalkSpeed = %f"), GetCharacterMovement()->MaxWalkSpeed);
+}
+
+void ANormalMeleeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
 {
     if (!GetMesh() || !bIsAttacking || bIsDead) return; 
 
@@ -81,7 +93,7 @@ void ANormalMeleeEnemy::PerformMeleeAttack()
     DrawDebugCapsule(GetWorld(), MidPoint, CapsuleHalfHeight, CapsuleRadius, SwordRotation, FColor::Red, false, 0.5f, 0, 2.0f);
 }
 
-void ANormalMeleeEnemy::PerformRangeAttack()
+void ANormalMeleeEnemy::PerformRangeAttack(const FVector& TargetLocation)
 {
 	return;
 }

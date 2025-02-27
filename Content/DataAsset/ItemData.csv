@@ -1,0 +1,13 @@
+,Name,Key,AttackPower,Attackspeed,MaxAmmo,GunDelay,Grade
+NormalRifle,1001,10,2000,40,0.15,normal
+NormalShotgun,2001,5,1000,12,2,normal
+NormalSniper,3001,40,4000,5,3,normal
+NormalRocket,4001,30,500,5,3,normal
+RareRifle,1101,20,2000,50,0.15,rare
+RareShotgun,2101,10,1000,18,2,rare
+RareSniper,3101,80,4000,5,2,rare
+RareRocket,4101,60,500,5,2,rare
+LegendRifle,1201,44,3000,444,0.12,legendery
+Legendhotgun,2201,22,1111,111,1.1,legendery
+LegendSniper,3201,777,7777,77,0.77,legendery
+LegendRocket,4201,555,555,55,0.55,legendery

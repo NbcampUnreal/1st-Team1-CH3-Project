@@ -13,10 +13,12 @@ public:
 	ANormalMeleeEnemy();
 
 	virtual void Tick(float DeltaTime) override;
-	virtual void Attack() override;
+	virtual void Attack(const FVector& TargetLocation) override;
+	virtual void PerformMeleeAttack(const FVector& TargetLocation) override;
 
 protected:
-	virtual void PerformMeleeAttack() override;
-	virtual void PerformRangeAttack() override;
+	virtual void BeginPlay() override;
+	virtual void PerformRangeAttack(const FVector& TargetLocation) override;
 
+	FVector LastKnownPlayerLocation;
 };

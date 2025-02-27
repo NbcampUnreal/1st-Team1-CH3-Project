@@ -1,6 +1,8 @@
 #include "Actor/Weapon/CGunBase.h"
 #include "Actor/Bullet/BulletBase.h"  
 #include "Actor/BulletPool.h" 
+#include "Player/MyPlayerController.h" 
+#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -8,9 +10,29 @@ ACGunBase::ACGunBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComp"));
+	
+	USceneComponent* SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+
+	RootComponent = SceneComponent;
+	GunMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunMesh"));
+	GunMesh->SetupAttachment(RootComponent);
+	
     WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
     WeaponMesh->SetupAttachment(RootComponent);
+
+	if (!MuzzleFlashEffect)
+	{
+		static ConstructorHelpers::FObjectFinder<UNiagaraSystem> MuzzleEffectFinder(TEXT("/Game/VFX/TakeGame/NS_MuzzleFlash.NS_MuzzleFlash"));
+		if (MuzzleEffectFinder.Succeeded())
+		{
+			MuzzleFlashEffect = MuzzleEffectFinder.Object;
+			UE_LOG(LogTemp, Warning, TEXT("MuzzleFlashEffect 로드 성공: %s"), *MuzzleFlashEffect->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("MuzzleFlashEffect 로드 실패!"));
+		}
+	}
 }
 
 
@@ -26,6 +48,16 @@ void ACGunBase::BeginPlay()
     CurrentAmmo = MaxAmmo;
 
     UE_LOG(LogTemp, Warning, TEXT("총기 장착됨: %s, 초기 탄약: %d"), *GetName(), CurrentAmmo);
+
+	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
+	{
+		MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
+		UE_LOG(LogTemp, Warning, TEXT("총구 위치 설정됨: %s"), *MuzzleSpot.ToString());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("WeaponMesh 'Muzzle' 소켓이 존재하지 않습니다. 기본 위치 사용."));
+	}
 
     if (WeaponMesh)
     {
@@ -56,83 +88,98 @@ void ACGunBase::BeginPlay()
         {
             UE_LOG(LogTemp, Warning, TEXT("BulletPool이 새로 생성되었습니다."));
         }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("BulletPool 생성 실패! 총알 풀링이 동작하지 않을 수 있습니다."));
-        }
     }
-
+	
+	
 
 }
 
 
 void ACGunBase::Fire()
 {
+	if (!MuzzleFlashEffect)
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ MuzzleFlashEffect가 nullptr! 블루프린트에서 확인 필요!"));
+	}
+	if (!CanFire())
+		return;
+	
     UE_LOG(LogTemp, Warning, TEXT("CGunBase::Fire() 실행됨 - 현재 탄약: %d"), CurrentAmmo);
 
-    if (!CanFire())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("발사 불가! 탄약 부족 또는 발사 타이머 동작 중"));
-        return;
-    }
+	
+	bCanFire = false; //발사 후 즉시 다음 발사 방지
+	GetWorldTimerManager().SetTimer(FireTimer, this, &ACGunBase::SetIsFire, GunDelay, false); //딜레이 적용
+	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
+	{
+		MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
+		UE_LOG(LogTemp, Warning, TEXT("총구 위치 설정됨: %s"), *MuzzleSpot.ToString());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("WeaponMesh 'Muzzle' 소켓이 존재하지 않습니다. 기본 위치 사용."));
+	}
+	
+	if (MuzzleFlashEffect)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("발사이펙트!"));
 
-    bCanFire = false; //발사 후 즉시 다음 발사 방지
-    GetWorldTimerManager().SetTimer(FireTimer, this, &ACGunBase::SetIsFire, GunDelay, false); //딜레이 적용
+		FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle"));
 
-    UE_LOG(LogTemp, Warning, TEXT("Fire() 호출됨 - 현재 탄약: %d"), CurrentAmmo);
+		UNiagaraComponent* MuzzleEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			MuzzleFlashEffect,			
+			WeaponMesh,					
+			TEXT("Muzzle"),				
+			FVector::ZeroVector,		
+			MuzzleRotation,				
+			EAttachLocation::SnapToTarget, 
+			true						
+		);
 
-    CurrentAmmo--;
+		if (MuzzleEffectComp)
+		{
+			MuzzleEffectComp->SetAutoDestroy(true); 
+			MuzzleEffectComp->SetVariableFloat(FName("User.Lifetime"), 0.2f);
+			FTimerHandle EffectDestroyTimer;
+			GetWorld()->GetTimerManager().SetTimer(EffectDestroyTimer, [MuzzleEffectComp]()
+			{
+				if (MuzzleEffectComp)
+				{
+					MuzzleEffectComp->DestroyComponent();
+				}
+			}, 0.2f, false);
+		}
+	}
 
-    if (IsAmmoEmpty())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("탄약 부족! 자동 재장전 실행"));
-        Reload();
-        return;
-    }
+	
+	FVector forwardDirection = GetAimDirection();
 
-    FVector FireDirection;
-    if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
-    {
-        MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
-        FireDirection = WeaponMesh->GetSocketRotation(TEXT("Muzzle")).Vector();
-        FireDirection.Normalize(); //방향 벡터 정규화
-        UE_LOG(LogTemp, Warning, TEXT("Muzzle 위치: %s, 발사 방향: %s"),
-            *MuzzleSpot.ToString(), *FireDirection.ToString());
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Muzzle 소켓이 존재하지 않음! 기본 전방 방향 사용"));
-        FireDirection = GetActorForwardVector();
-    }
+	//FVector forwardDirection = GetActorForwardVector();
+	
+	//  총알을 풀에서 가져오기
+	ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
+	if (Bullet)
+	{
+		Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
+		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 속도: %f"), Bullet->ProjectileMovement->InitialSpeed);
 
-    if (!BulletPool)
-    {
-        UE_LOG(LogTemp, Error, TEXT("BulletPool이 없음! 총알을 생성할 수 없음"));
-        return;
-    }
-
-    ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
-
-    if (Bullet)
-    {
-        Bullet->Fire(MuzzleSpot, FireDirection, Damage);
-        UE_LOG(LogTemp, Warning, TEXT("총알 발사 완료! 탄환 타입: %d"), (int32)AmmoType);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없음!"));
-    }
+		CurrentAmmo--;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없습니다!"));
+	}
+	
 }
 
 
 
 
-bool ACGunBase::CanFire() const
+bool ACGunBase::CanFire() 
 {
 	//bCanFire가 false면 발사 불가능 (GunDelay 동안 발사 막기)
 	if (!bCanFire)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("발사 대기 중!"));
+		UE_LOG(LogTemp, Warning, TEXT("GunDelay중!"));
 		return false;
 	}
 
@@ -154,8 +201,11 @@ void ACGunBase::SetIsFire()
 	bCanFire = true;
 }
 
-bool ACGunBase::IsAmmoEmpty() const
+bool ACGunBase::IsAmmoEmpty() 
 {
+	//테스트용 리로드
+	Reload();
+	UE_LOG(LogTemp, Warning, TEXT("탄약 부족! 자동 재장전 실행"));
 	return CurrentAmmo <= 0;
 }
 
@@ -172,6 +222,68 @@ void ACGunBase::Reload()
 	CurrentAmmo = MaxAmmo;
 	UE_LOG(LogTemp, Warning, TEXT("재장전 완료! 현재 탄약: %d"), CurrentAmmo);
 }
+
+FVector ACGunBase::GetAimDirection() const
+{
+
+	FVector MuzzleLocation = FVector::ZeroVector;
+	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
+	{
+		MuzzleLocation = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
+		UE_LOG(LogTemp, Warning, TEXT("총구 위치 설정됨: %s"), *MuzzleSpot.ToString());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("WeaponMesh 'Muzzle' 소켓이 존재하지 않습니다. 기본 위치 사용."));
+	}
+	
+	//싱글플레이어라 0번을 가져옴
+	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	if (!PlayerCharacter)
+		return GetActorForwardVector(); // 기본값: 총이 향하는 방향
+
+	//  2. 플레이어의 컨트롤러 가져오기
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(PlayerCharacter->GetController());
+	if (!PlayerController)
+		return GetActorForwardVector();
+
+
+	
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	FVector TraceStart = CameraLocation;
+	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * 10000.0f); // 먼 거리까지 라인 트레이스
+
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.AddIgnoredActor(PlayerCharacter);
+	QueryParams.AddIgnoredActor(GetOwner());
+
+	
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	{
+		FVector AimDirection = (HitResult.ImpactPoint - MuzzleSpot).GetSafeNormal();
+		UE_LOG(LogTemp, Warning, TEXT("MuzzleSpot: %s, ImpactPoint: %s"), *MuzzleSpot.ToString(), *HitResult.ImpactPoint.ToString());
+		if (FVector::DistSquared(HitResult.ImpactPoint, MuzzleSpot) < 100.0f) 
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AimDirection 너무 가까움! 기본 방향 사용"));
+			return CameraRotation.Vector();  
+		}
+		
+		UE_LOG(LogTemp, Warning, TEXT("총알방향: %s"), *AimDirection.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("화면 정중앙으로 발사"));
+
+		return AimDirection;
+		
+	}
+
+	return CameraRotation.Vector();
+}
+
+
 
 FVector ACGunBase::SpreadDirection(const FVector OriginDirection) const
 {

@@ -52,43 +52,50 @@ void ABulletBase::BeginPlay()
 	{
 		ProjectileMovement->Deactivate(); //총알이 풀에서 생성될 때 기본적으로 멈추도록 설정
 	}
-
-	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); //적과만 충돌
-	CollisionComponent->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore); //물리 오브젝트 무시
-	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);//벽만 충돌 가능
+	
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
+	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // 벽과 충돌 O
+	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABulletBase::OnBulletOverlap);
 	CollisionComponent->OnComponentHit.AddDynamic(this, &ABulletBase::OnBulletHit);
 
 
 	BulletPool = Cast<ABulletPool>(UGameplayStatics::GetActorOfClass(GetWorld(), ABulletPool::StaticClass()));
-	if (!BulletPool)
-	{
-		UE_LOG(LogTemp, Error, TEXT("BulletPool을 찾을 수 없습니다!"));
-	}
+	
 	
 }
 
 void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage)
 {
+	
+	SetActorLocation(StartLocation);
+	SetActorRotation(Direction.Rotation());
+	BulletDamage = GunDamage;
+
+	if (!ProjectileMovement->UpdatedComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ProjectileMovement의 UpdatedComponent가 설정되지 않음! 강제로 설정함."));
+		ProjectileMovement->SetUpdatedComponent(CollisionComponent);
+	}
+	if (ProjectileMovement)
+	{
+		ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+		ProjectileMovement->Activate();
+		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 위치: %s, 방향: %s, 속도: %f"),
+			*StartLocation.ToString(), *Direction.ToString(), ProjectileMovement->InitialSpeed);
+	}
 }
 
 void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor || OtherActor == this) return;
+	if (OtherActor->ActorHasTag("Bullet")) return;
+	if (OtherActor->ActorHasTag("Gun")) return;
 
-	if (OtherActor->ActorHasTag("Bullet"))
-	{
-		return;
-	}
-
-	if (OtherActor->ActorHasTag("Gun"))
-	{
-		return;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("총알이 %s을(를) 맞췄음!"), *OtherActor->GetName());
 
 	if (OtherActor->ActorHasTag("Enemy"))
 	{
@@ -102,7 +109,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		{
 			UE_LOG(LogTemp, Warning, TEXT("일반 공격! 데미지: %f"), FinalDamage);
 		}
-
+		SpawnBulletDecal(SweepResult);
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
 	}
 }
@@ -114,45 +121,41 @@ FVector NormalImpulse, const FHitResult& Hit)
 	// 벽과 충돌 시 처리
 	if (!OtherActor || OtherActor == this) return;
 	
-	if (OtherActor->ActorHasTag("Bullet"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 다른총알과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
-		return;
-	}
-	if (OtherActor->ActorHasTag("Gun"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 총(Gun)과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
-		return;
-	}
-
+	if (OtherActor->ActorHasTag("Bullet")) return;
+	if (OtherActor->ActorHasTag("Gun")) return;
 	
-	UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌: %s"), *OtherActor->GetName());
 	if (BulletPool)
 	{
 		BulletPool->ReturnBullet(this, EAmmoType::Normal);
+		SpawnBulletDecal(Hit);
 		UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌하여 풀로 반환됨"));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("총알 삭제됨"));
-		Destroy();
-	}
+
+	
 }
 
-// void ABulletBase::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved,
-// 	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
-// {
-// 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-//
-// 	if (Other && Other != this)
-// 	{
-// 		// 언리얼의 데미지 시스템을 이용한 처리
-// 		UGameplayStatics::ApplyDamage(Other, BulletDamage, nullptr, this, UDamageType::StaticClass());
-//
-// 		// 풀링 시스템이 있으면 풀로 반환, 없으면 Destroy() 일단 풀링 안만들어서 사라지게만 함
-// 		Destroy(); // 또는 오브젝트 풀링이 있으면 ReturnBullet(this);
-// 		UE_LOG(LogTemp, Warning, TEXT("충돌체 이름: %s 충돌 위치: %s"), *Other->GetName(), *HitLocation.ToString());
-//
-// 	}
-// }
+void ABulletBase::SpawnBulletDecal(const FHitResult& Hit)
+{
+	if (!BulletDecalMaterial)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("데칼머테리얼없음"));
+		return;
+	} 
+
+	// 탄흔을 남길 위치와 방향 설정
+	UDecalComponent* BulletDecal = UGameplayStatics::SpawnDecalAtLocation(
+		GetWorld(), 
+		BulletDecalMaterial, 
+		DecalSize,
+		Hit.ImpactPoint, 
+		Hit.ImpactNormal.Rotation(), 
+		DecalLifeTime
+	);
+		UE_LOG(LogTemp, Warning, TEXT("데칼생성"));
+
+	if (BulletDecal)
+	{
+		BulletDecal->SetFadeScreenSize(0.001f); // 거리별 페이드 효과 적용 (선택사항)
+	}
+}
 

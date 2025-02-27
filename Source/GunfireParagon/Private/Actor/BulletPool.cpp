@@ -119,12 +119,27 @@ ABulletBase* ABulletPool::GetPooledBullet(EAmmoType AmmoType)
 			Bullet->SetActorEnableCollision(true);
 			Bullet->SetActorHiddenInGame(false);
 			Bullet->SetActorTickEnabled(true);
-			Bullet->SetActorRotation(FRotator::ZeroRotator); // 🔄 회전 초기화
-			Bullet->ProjectileMovement->Velocity = FVector::ZeroVector; // 🔄 속도 초기화
+			Bullet->SetActorRotation(FRotator::ZeroRotator); // 회전 초기화
+			Bullet->ProjectileMovement->Velocity = FVector::ZeroVector; // 속도 초기화
 			Bullet->ProjectileMovement->StopMovementImmediately();
+			Bullet->ProjectileMovement->bSimulationEnabled = true;
+			
+			if (Bullet->ProjectileMovement)
+			{
+				Bullet->ProjectileMovement->bSimulationEnabled = true;
+				Bullet->ProjectileMovement->SetUpdatedComponent(Bullet->CollisionComponent);
+				UE_LOG(LogTemp, Warning, TEXT("✅ ProjectileMovement 활성화됨!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("❌ ProjectileMovement가 nullptr 상태!"));
+			}
+			
 			return Bullet;
 		}
+		
 	}
+	
 
 	// 새 총알 생성
 	ABulletBase* NewBullet = nullptr;
@@ -159,13 +174,14 @@ void ABulletPool::ReturnBullet(ABulletBase* Bullet, EAmmoType AmmoType)
 		Bullet->SetActorLocation(FVector(0, 0, -1000)); // 안 보이는 곳으로 이동, 일종의 꼼수
 		Bullet->SetActorRotation(FRotator::ZeroRotator);
 
-		
 		if (Bullet->ProjectileMovement)
 		{
 			Bullet->ProjectileMovement->StopMovementImmediately();
 			Bullet->ProjectileMovement->Velocity = FVector::ZeroVector;
-			Bullet->ProjectileMovement->SetUpdatedComponent(nullptr);
 		}
+
+		
+
 		
 		if (ActiveBullets.Contains(Bullet))
 		{

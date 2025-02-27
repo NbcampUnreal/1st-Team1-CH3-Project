@@ -11,6 +11,8 @@ UBTT_SetMovementSpeed::UBTT_SetMovementSpeed()
 
 EBTNodeResult::Type UBTT_SetMovementSpeed::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+    Super::ExecuteTask(OwnerComp, NodeMemory);
+
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (!AIController) return EBTNodeResult::Failed;
 
@@ -22,8 +24,14 @@ EBTNodeResult::Type UBTT_SetMovementSpeed::ExecuteTask(UBehaviorTreeComponent& O
 
     bool bHasSpottedPlayer = BBcomp->GetValueAsBool(TEXT("HasSpottedPlayer"));
 
-    float NewSpeed = bHasSpottedPlayer ? Enemy->MaxWalkSpeed : Enemy->MaxWalkSpeed * 0.5f;
+    float NewSpeed = bHasSpottedPlayer ? Enemy->BaseWalkSpeed : Enemy->BaseWalkSpeed * 0.3f;
     Enemy->GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+
+
+    UE_LOG(LogTemp, Warning, TEXT("SetMovementSpeed 실행! Enemy: %s, HasSpottedPlayer: %s, 기존 MaxWalkSpeed: %f, 새로운 속도: %f"),
+        *Enemy->GetName(),
+        bHasSpottedPlayer ? TEXT("True") : TEXT("False"),
+        Enemy->GetCharacterMovement()->MaxWalkSpeed, NewSpeed);
 
     return EBTNodeResult::Succeeded;
 }

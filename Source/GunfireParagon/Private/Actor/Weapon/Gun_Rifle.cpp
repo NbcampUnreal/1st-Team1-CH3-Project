@@ -7,6 +7,8 @@ AGun_Rifle::AGun_Rifle()
 
     WeaponType = EWeaponType::Rifle;
 
+    AmmoType =EAmmoType::Normal;
+    
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
     if (!WeaponMesh)
@@ -28,17 +30,6 @@ void AGun_Rifle::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!WeaponMesh)
-    {
-        return;
-    }
-
-    if (!WeaponMesh->GetSkeletalMeshAsset())
-    {
-    }
-    else
-    {
-    }
 }
 
 

@@ -4,12 +4,6 @@
 #include "AIController.h"
 #include "BaseEnemyAIController.generated.h"
 
-/**
- * ABaseEnemyAIController: 적 AI를 제어하는 AI 컨트롤러 클래스
- * AI Perception을 사용하여 플레이어를 감지하고, Behavior Tree와 블랙보드를 활용하여 AI의 행동을 결정함.
- */
-
-
 UCLASS()
 class GUNFIREPARAGON_API ABaseEnemyAIController : public AAIController
 {
@@ -34,13 +28,15 @@ protected:
 	class UAIPerceptionComponent* AIPerceptionComponent;
 
 	// SightConfig: 시각 인식을 위한 설정
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	class UAISenseConfig_Sight* SightConfig;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	class UAISenseConfig_Damage* DamageConfig;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class UBlackboardComponent* BBComp;
 
 	// Actor -> 감지된 액터, Stimulus -> 감지된 자극(시야, 소리 등)
 	UFUNCTION()
-	void OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus);
+	virtual void OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus);
 };

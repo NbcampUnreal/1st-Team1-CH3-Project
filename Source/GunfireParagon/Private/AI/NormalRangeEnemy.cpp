@@ -1,6 +1,7 @@
 #include "AI/NormalRangeEnemy.h"
 #include "AI/BaseEnemyAIController.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ANormalRangeEnemy::ANormalRangeEnemy()
 {
@@ -8,49 +9,59 @@ ANormalRangeEnemy::ANormalRangeEnemy()
 
     Damage = 20.0f;
     AttackRange = 1000.0f;
-    AttackDelay = 0.07f;
+    AttackDelay = 0.06f;
     MaxHealth = 150.0f;
-    MaxWalkSpeed = 400.0f;
+    BaseWalkSpeed = 600.0f;
+    CurrentHealth = MaxHealth;
+
+    GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
-void ANormalRangeEnemy::Attack()
+void ANormalRangeEnemy::Attack(const FVector& TargetLocation)
 {
     if (!bIsAttacking && !bIsDead)
 	{
         StartAttack();
-		PerformRangeAttack();
+		PerformRangeAttack(TargetLocation);
 	}
 }
 
-void ANormalRangeEnemy::PerformMeleeAttack()
+void ANormalRangeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
 {
 	return;
 }
 
-void ANormalRangeEnemy::PerformRangeAttack()
+void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
 {
     if (!GetMesh() || bIsDead) return;
 
+    UpdateAimPitch(); 
+
     FVector Start = GetMesh()->GetSocketLocation("Muzzle_Front");
-    FVector ForwardVector = GetActorForwardVector(); 
-    FVector End = Start + (ForwardVector * AttackRange); 
+    FVector ToTarget = (TargetLocation - Start).GetSafeNormal();
+    FVector ForwardDirection = GetActorForwardVector();
+
+    FRotator AdjustedRotation = ForwardDirection.Rotation();
+    AdjustedRotation.Pitch += AimPitch;
+
+    FVector AdjustedDirection = AdjustedRotation.Vector();
+    AdjustedDirection.Normalize();
 
     float CapsuleRadius = 5.0f;
-    float CapsuleHalfHeight = AttackRange * 0.5f;  
+    float CapsuleHalfHeight = AttackRange * 0.5f;
 
-    FVector CapsuleCenter = Start + (ForwardVector * CapsuleHalfHeight); // 캡슐을 총구에서 시작하도록 설정
-    FQuat CapsuleRotation = FQuat::FindBetweenVectors(FVector::UpVector, ForwardVector);
+    FVector CapsuleCenter = Start + (AdjustedDirection * CapsuleHalfHeight);
+    FQuat CapsuleRotation = FQuat::FindBetweenVectors(FVector::UpVector, AdjustedDirection);
 
     FHitResult HitResult;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
-    
-    bool bHit = GetWorld()->SweepSingleByChannel
-    (
-        HitResult, 
-        CapsuleCenter, 
-        CapsuleCenter + (ForwardVector * AttackRange),
-        CapsuleRotation, 
+
+    bool bHit = GetWorld()->SweepSingleByChannel(
+        HitResult,
+        CapsuleCenter,
+        CapsuleCenter + (AdjustedDirection * AttackRange),
+        CapsuleRotation,
         ECC_Pawn,
         FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
         QueryParams
@@ -65,6 +76,48 @@ void ANormalRangeEnemy::PerformRangeAttack()
             UGameplayStatics::ApplyDamage(HitActor, Damage, GetController(), this, UDamageType::StaticClass());
         }
     }
+    DrawDebugCapsule(GetWorld(),
+        CapsuleCenter,
+        CapsuleHalfHeight,
+        CapsuleRadius,
+        CapsuleRotation,
+        bHit ? FColor::Red : FColor::Green, // 히트 여부에 따라 색상 변경
+        false,
+        2.0f,  // 지속 시간
+        0,
+        2.0f  // 두께
+    );
 
-    DrawDebugCapsule(GetWorld(), CapsuleCenter, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Blue, false, 1.0f, 0, 2.0f);
+    PlayMuzzleFlashEffect();
+    PlayBulletEffect(Start, AdjustedDirection);
+
+}
+
+void ANormalRangeEnemy::PlayMuzzleFlashEffect()
+{
+    if (!MuzzleFlashEffect || !GetMesh()) return;
+
+    FVector MuzzleLocation = GetMesh()->GetSocketLocation("Muzzle_Front");
+    FRotator MuzzleRotation = GetMesh()->GetSocketRotation("Muzzle_Front");
+
+    UGameplayStatics::SpawnEmitterAtLocation(
+        GetWorld(),         
+        MuzzleFlashEffect,  
+        MuzzleLocation,     
+        MuzzleRotation      
+    );
+}
+
+void ANormalRangeEnemy::PlayBulletEffect(const FVector& Start, const FVector& Direction)
+{
+    if (!BulletEffect || !GetWorld()) return;
+
+    FRotator BulletRotation = Direction.Rotation();
+
+    UGameplayStatics::SpawnEmitterAtLocation(
+        GetWorld(),       
+        BulletEffect,     
+        Start,            
+        BulletRotation    
+    );
 }

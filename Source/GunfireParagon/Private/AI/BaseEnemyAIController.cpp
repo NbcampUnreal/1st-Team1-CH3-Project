@@ -3,10 +3,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Damage.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 
-// AI 컨트롤러의 기본 생성자
+
 ABaseEnemyAIController::ABaseEnemyAIController()
 {
 	// AI Perception 설정
@@ -22,9 +23,15 @@ ABaseEnemyAIController::ABaseEnemyAIController()
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
+	// 피격 감지 설정
+	DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
+	DamageConfig->SetMaxAge(5.0f);
+	
 	// Perception 컴포넌트 설정
 	PerceptionComponent->ConfigureSense(*SightConfig);
+	PerceptionComponent->ConfigureSense(*DamageConfig);
 	PerceptionComponent->SetDominantSense(*SightConfig->GetSenseImplementation());
+	PerceptionComponent->RequestStimuliListenerUpdate();
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseEnemyAIController::OnTargetPerceived);
 
 	// 기본 변수 초기화
@@ -70,13 +77,28 @@ void ABaseEnemyAIController::OnTargetPerceived(AActor* Actor, FAIStimulus Stimul
 	if (!BBComp) return;
 	if (!Actor || !Actor->ActorHasTag("Player")) return; 
 
+	ABaseEnemy* Enemy = Cast<ABaseEnemy>(GetPawn());
+	if (!Enemy) return;
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		BBComp->SetValueAsObject("TargetPlayer", Actor);
 		BBComp->SetValueAsBool("HasSpottedPlayer", true);
+		if (!BBComp->GetValueAsBool("PauseLastKnownUpdate"))
+		{
+			BBComp->SetValueAsVector("LastKnownPlayerLocation", Actor->GetActorLocation());
+		}
 	}
 	else
 	{
+		if (Stimulus.Type == UAISense::GetSenseID<UAISense_Damage>())
+		{
+			if (Stimulus.GetAge() < 5.0f)
+			{
+				return;
+			}
+		}
+
 		BBComp->ClearValue("TargetPlayer");
 		BBComp->SetValueAsBool("HasSpottedPlayer", false);
 	}

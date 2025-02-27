@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Actor/Bullet/BulletBase.h"
+#include "NiagaraComponent.h"  
+#include "NiagaraFunctionLibrary.h"  
 #include "CGunBase.generated.h"
 
 class ABulletPool;
@@ -40,33 +42,36 @@ protected:
 	USceneComponent* RootComp;
 
 
-
-
 protected:
 	virtual void BeginPlay() override;
 
 	//총기 딜레이에 따라 발사 가능 여부 확인
-	bool CanFire() const;
+	bool CanFire();
 
 	//나중에 바인딩할때 마우스 떼면 그만 쏘도록
 	void StopFire();
 	void SetIsFire(); 
 	//탄창이 비었는지 확인
-	bool IsAmmoEmpty() const;
+	bool IsAmmoEmpty() ;
 
-	//탄창을 재장전
 	virtual void Reload();
 	
 	FVector SpreadDirection(const FVector OriginDirection) const;
 
+	FVector GetAimDirection() const;
 
+
+	// Ammo 관련 Player에게 전달해야하는 값들이 존재. Getter 생성했습니다. 필요시 해당 Type,CallName,ReturnValue 유지 상태의 리팩토링 부탁드립니다.
+public:
+	UFUNCTION()
+	float GetCurrentAmmo() { return CurrentAmmo; }
+
+	UFUNCTION()
+	float GetMaxAmmo() { return MaxAmmo; }
+	
 //총기의 스텟관련 변수들,assetraw에서 데이터 받아와서저장시킬예정
 protected:
 
-
-	
-
-	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
 	FVector MuzzleSpot;
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
@@ -99,16 +104,11 @@ protected:
 	FTimerHandle AutoFireTimer;
 	UPROPERTY()
 	FTimerHandle TestFireTimer;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Properties")
 	EAmmoType AmmoType; 
-	
-	// Ammo 관련 Player에게 전달해야하는 값들이 존재. Getter 생성했습니다. 필요시 해당 Type,CallName,ReturnValue 유지 상태의 리팩토링 부탁드립니다.
-public:
-	UFUNCTION()
-	float GetCurrentAmmo() { return CurrentAmmo; }
 
-	UFUNCTION()
-	float GetMaxAmmo() { return MaxAmmo; }
-
+	//총기발사 화염이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	UNiagaraSystem* MuzzleFlashEffect;
 };
