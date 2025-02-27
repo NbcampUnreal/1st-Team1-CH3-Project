@@ -17,45 +17,7 @@ void ABulletPool::BeginPlay()
 
 	// 탄환 타입별로 풀을 생성
 	//  탄환 타입별로 풀을 생성 (블루프린트 클래스를 사용하여 스폰)
-	for (int32 i = 0; i < PoolSize; i++)
-	{
-		if (NormalBulletClass) // 블루프린트 클래스가 설정된 경우에만 생성
-		{
-			ABulletBase* NormalBullet = GetWorld()->SpawnActor<ABulletBase>(NormalBulletClass);
-			if (NormalBullet)
-			{
-				NormalBullet->SetActorEnableCollision(false);
-				NormalBullet->SetActorHiddenInGame(true);
-				NormalBullet->SetActorTickEnabled(false);
-				NormalBullet->ProjectileMovement->StopMovementImmediately();
-				BulletPools.FindOrAdd(EAmmoType::Normal).Add(NormalBullet);
-			}
-		}
-		if (NormalBulletClass) // 블루프린트 클래스가 설정된 경우에만 생성
-		{
-			ABulletBase* PierceBullet = GetWorld()->SpawnActor<ABulletBase>(PierceBulletClass);
-			if (PierceBullet)
-			{
-				PierceBullet->SetActorEnableCollision(false);
-				PierceBullet->SetActorHiddenInGame(true);
-				PierceBullet->SetActorTickEnabled(false);
-				PierceBullet->ProjectileMovement->StopMovementImmediately();
-				BulletPools.FindOrAdd(EAmmoType::Pierce).Add(PierceBullet);
-			}
-		}
-		if (NormalBulletClass) // 블루프린트 클래스가 설정된 경우에만 생성
-		{
-			ABulletBase* BombBullet = GetWorld()->SpawnActor<ABulletBase>(BombBulletClass);
-			if (BombBullet)
-			{
-				BombBullet->SetActorEnableCollision(false);
-				BombBullet->SetActorHiddenInGame(true);
-				BombBullet->SetActorTickEnabled(false);
-				BombBullet->ProjectileMovement->StopMovementImmediately();
-				BulletPools.FindOrAdd(EAmmoType::Bomb).Add(BombBullet);
-			}
-		}
-	}
+	
 	
 	//GetWorldTimerManager().SetTimer(BulletCheckTimer, this, &ABulletPool::CheckBulletLifetime, MaxBulletLifetime, true);
 }
@@ -189,6 +151,49 @@ void ABulletPool::ReturnBullet(ABulletBase* Bullet, EAmmoType AmmoType)
 		}
         UE_LOG(LogTemp, Warning, TEXT("총알이 풀로 반환됨: %s"), *Bullet->GetName());
 		
+	}
+}
+
+void ABulletPool::InitializePooled()
+{
+	for (int32 i = 0; i < PoolSize; i++)
+	{
+		if (NormalBulletClass) // 블루프린트 클래스가 설정된 경우에만 생성
+		{
+			ABulletBase* NormalBullet = GetWorld()->SpawnActor<ABulletBase>(NormalBulletClass);
+			if (NormalBullet)
+			{
+				NormalBullet->SetActorEnableCollision(false);
+				NormalBullet->SetActorHiddenInGame(true);
+				NormalBullet->SetActorTickEnabled(false);
+				NormalBullet->ProjectileMovement->StopMovementImmediately();
+				BulletPools.FindOrAdd(EAmmoType::Normal).Add(NormalBullet);
+			}
+		}
+		if (NormalBulletClass) // 블루프린트 클래스가 설정된 경우에만 생성
+		{
+			ABulletBase* PierceBullet = GetWorld()->SpawnActor<ABulletBase>(PierceBulletClass);
+			if (PierceBullet)
+			{
+				PierceBullet->SetActorEnableCollision(false);
+				PierceBullet->SetActorHiddenInGame(true);
+				PierceBullet->SetActorTickEnabled(false);
+				PierceBullet->ProjectileMovement->StopMovementImmediately();
+				BulletPools.FindOrAdd(EAmmoType::Pierce).Add(PierceBullet);
+			}
+		}
+		if (NormalBulletClass) // 블루프린트 클래스가 설정된 경우에만 생성
+		{
+			ABulletBase* BombBullet = GetWorld()->SpawnActor<ABulletBase>(BombBulletClass);
+			if (BombBullet)
+			{
+				BombBullet->SetActorEnableCollision(false);
+				BombBullet->SetActorHiddenInGame(true);
+				BombBullet->SetActorTickEnabled(false);
+				BombBullet->ProjectileMovement->StopMovementImmediately();
+				BulletPools.FindOrAdd(EAmmoType::Bomb).Add(BombBullet);
+			}
+		}
 	}
 }
 

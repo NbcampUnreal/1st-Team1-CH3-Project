@@ -32,7 +32,7 @@ FVector ASpawnVolume::GetRandomPointInVolume() const
 FVector ASpawnVolume::GetSafeSpawnPoint() const
 {
     FVector SpawnPoint;
-    int32 MaxAttempts = 10;
+    int32 MaxAttempts = 20;
     UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 
     for (int32 i = 0; i < MaxAttempts; i++)

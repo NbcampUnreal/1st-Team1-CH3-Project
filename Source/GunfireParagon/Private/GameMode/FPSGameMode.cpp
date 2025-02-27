@@ -30,6 +30,8 @@ void AFPSGameMode::BeginPlay()
 	
 
 	InitializeObjectPool();
+	InitializeBulletPool();
+
 
 	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GetGameInstance());
 	if (FPSGameInstance)
@@ -71,6 +73,26 @@ void AFPSGameMode::InitializeObjectPool()
 			TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClassCount = GetPoolInitializationData();
 
 			ObjectPoolInstance->InitializePool(EnemyClassCount);
+		}
+	}
+}
+
+void AFPSGameMode::InitializeBulletPool()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	if (BulletPoolInstance)
+	{
+		return;
+	}
+
+	if (IsValid(BulletPoolClass))
+	{
+		BulletPoolInstance = World->SpawnActor<ABulletPool>(BulletPoolClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		if (BulletPoolInstance)
+		{
+			BulletPoolInstance->InitializePooled();
 		}
 	}
 }

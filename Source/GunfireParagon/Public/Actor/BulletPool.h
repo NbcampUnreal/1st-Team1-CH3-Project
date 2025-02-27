@@ -26,6 +26,8 @@ public:
 	UFUNCTION()
 	void ReturnBullet(ABulletBase* Bullet,EAmmoType AmmoType);
 
+	UFUNCTION()
+	void InitializePooled();
 	/*UFUNCTION()
 	void CheckBulletLifetime();*/
 
@@ -48,7 +50,7 @@ public:
 	
 	TMap<EAmmoType, TArray<ABulletBase*>> BulletPools; //  탄환 종류별로 풀을 관리
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Bullet Pool")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Bullet Pool")
 	int32 PoolSize = 100;
 
 	

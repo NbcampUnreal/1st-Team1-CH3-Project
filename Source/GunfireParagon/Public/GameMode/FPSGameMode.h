@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "AIObjectPool.h"
+#include "Actor/BulletPool.h"
 #include "GameMode/ClearPortal.h"
 #include "FPSGameMode.generated.h"
 
@@ -20,6 +21,7 @@ public:
 	virtual void BeginPlay() override;
 	// void ClearAllEnemies();
 	void InitializeObjectPool();
+	void InitializeBulletPool();
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetPoolInitializationData();
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetEnemySpawnData(int32 StageNumber);
 
@@ -43,6 +45,10 @@ public:
 	
 	UPROPERTY()
 	AAIObjectPool* ObjectPoolInstance;
+	UPROPERTY()
+	ABulletPool* BulletPoolInstance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet Pool")
+	TSubclassOf<ABulletPool> BulletPoolClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Table")
 	UDataTable* AIDataTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Table")
