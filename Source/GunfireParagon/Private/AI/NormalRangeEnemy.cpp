@@ -39,7 +39,7 @@ void ANormalRangeEnemy::Attack(const FVector& TargetLocation)
 
 void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
 {
-    if (!GetMesh() || bIsDead) return;
+    if (!GetMesh() || !bIsAttacking || bIsDead) return;
 
     UpdateAimPitch(); 
 
@@ -49,7 +49,7 @@ void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
 
     FRotator AdjustedRotation = ForwardDirection.Rotation();
     AdjustedRotation.Pitch += AimPitch;
-
+   
     FVector AdjustedDirection = AdjustedRotation.Vector();
     AdjustedDirection.Normalize();
 

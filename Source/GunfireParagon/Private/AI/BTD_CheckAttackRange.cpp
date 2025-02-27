@@ -27,7 +27,6 @@ bool UBTD_CheckAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& O
 	float DistanceToPlayer = FVector::Dist(Enemy->GetActorLocation(), TargetPlayer->GetActorLocation());
 
 	bool bCanAttack = DistanceToPlayer <= Enemy->AttackRange;
-	UE_LOG(LogTemp, Warning, TEXT("CheckAttackRange: %s, Distance: %f, AttackRange: %f"), bCanAttack ? TEXT("True") : TEXT("False"), DistanceToPlayer, Enemy->AttackRange);
 
 	return bCanAttack;
 }

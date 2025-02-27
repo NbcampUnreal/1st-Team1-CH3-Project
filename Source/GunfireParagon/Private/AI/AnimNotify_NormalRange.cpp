@@ -6,8 +6,8 @@ void UAnimNotify_NormalRange::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
     if (!MeshComp) return;
 
     ANormalRangeEnemy* Enemy = Cast<ANormalRangeEnemy>(MeshComp->GetOwner());
-    if (Enemy)
-    {
-        Enemy->PerformRangeAttack(FVector::ZeroVector);
-    }
+    if (!Enemy) return;
+    
+    Enemy->PerformRangeAttack(FVector::ZeroVector);
+    
 }

@@ -56,8 +56,6 @@ protected:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
-	virtual void BeginPlay() override;
-
 	virtual void PerformMeleeAttack(const FVector& TargetLocation) PURE_VIRTUAL(ABaseEnemy::PerformMeleeAttack, );
 	virtual void PerformRangeAttack(const FVector& TargetLocation) PURE_VIRTUAL(ABaseEnemy::PerformRangeAttack, );
 	virtual void SetDeathState();
@@ -66,6 +64,7 @@ protected:
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	void OnDeath();
+	void ReturnToPool();
 
 	TArray<AActor*> AlreadyHitActors;
 

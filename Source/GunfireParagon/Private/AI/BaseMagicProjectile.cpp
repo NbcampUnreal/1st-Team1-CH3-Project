@@ -1,4 +1,5 @@
 #include "AI/BaseMagicProjectile.h"
+#include "AI/BaseEnemy.h"
 #include "AI/BossEnemy.h"
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -51,10 +52,10 @@ void ABaseMagicProjectile::CheckDestroyCondition()
 	AActor* OwnerActor = GetOwner();
 	if (!OwnerActor) return;
 
-	ABossEnemy* Boss = Cast<ABossEnemy>(OwnerActor);
-	if (!Boss) return;
+	ABaseEnemy* Enemy = Cast<ABaseEnemy>(OwnerActor);
+	if (!Enemy) return;
 
-	float BossAttackRange = Boss->AttackRange;
+	float BossAttackRange = Enemy->AttackRange;
 	if (FVector::Dist(InitialLocation, GetActorLocation()) >= BossAttackRange)
 	{
 		Destroy();
@@ -70,17 +71,19 @@ void ABaseMagicProjectile::CheckDestroyCondition()
 
 void ABaseMagicProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (OtherActor && OtherActor->ActorHasTag("Monster")) return;
+
 	if (OtherActor && OtherActor->ActorHasTag("Player"))
 	{
 		AActor* OwnerActor = GetOwner();
 		if (!OwnerActor || OwnerActor == OtherActor || OtherActor == this) return;
 
-		ABossEnemy* Boss = Cast<ABossEnemy>(OwnerActor);
-		if (!Boss) return;
+		ABaseEnemy* Enemy = Cast<ABaseEnemy>(OwnerActor);
+		if (!Enemy) return;
 
-		float FinalDamage = Boss->Damage * DamageMultiplier;
+		float FinalDamage = Enemy->Damage * DamageMultiplier;
 		UGameplayStatics::ApplyDamage(OtherActor, FinalDamage, GetInstigatorController(), this, UDamageType::StaticClass());
-		GEngine->AddOnScreenDebugMessage(3, 2.0f, FColor::Green, FString::Printf(TEXT("Boss Attack Hit Damage %f"), FinalDamage));
+		GEngine->AddOnScreenDebugMessage(3, 2.0f, FColor::Green, FString::Printf(TEXT("Projectile Attack Hit Damage %f"), FinalDamage));
 	}
 
 	if (HitImpactEffect)

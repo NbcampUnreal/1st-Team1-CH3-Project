@@ -30,9 +30,9 @@ protected:
 	class UAIPerceptionComponent* AIPerceptionComponent;
 
 	// SightConfig: 시각 인식을 위한 설정
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class UAISenseConfig_Sight* SightConfig;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class UAISenseConfig_Damage* DamageConfig;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")

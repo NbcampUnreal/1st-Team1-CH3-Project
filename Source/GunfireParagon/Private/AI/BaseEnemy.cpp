@@ -8,6 +8,8 @@
 #include "Perception/AISense_Damage.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameMode/FPSGameState.h"
+#include "GameMode/AIObjectPool.h"
 
 ABaseEnemy::ABaseEnemy()
 {
@@ -18,7 +20,7 @@ ABaseEnemy::ABaseEnemy()
 	if (SkeletalMesh)
 	{
 		SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		SkeletalMesh->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+		SkeletalMesh->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel2);
 		SkeletalMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 	}
@@ -72,7 +74,7 @@ void ABaseEnemy::ResetEnemy()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
-	GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_EngineTraceChannel2);
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
 
@@ -108,19 +110,13 @@ void ABaseEnemy::UpdateAimPitch()
 	USkeletalMeshComponent* PlayerMesh = Cast<USkeletalMeshComponent>(Player->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 	if (PlayerMesh)
 	{
-		Target = PlayerMesh->GetSocketLocation("upperarm_l");
+		Target = PlayerMesh->GetSocketLocation("upperarm_r");
 	}
 
 	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Start, Target);
 
 	AimPitch = FMath::Clamp(LookAtRotation.Pitch, -60.0f, 60.0f);
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("AimPitch: %f"), AimPitch));
-}
-
-void ABaseEnemy::BeginPlay()
-{
-	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay - ABaseEnemy: MaxWalkSpeed = %f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
 float ABaseEnemy::TakeDamage
@@ -175,7 +171,29 @@ void ABaseEnemy::OnDeath()
 	SetActorTickEnabled(false);
 	SetDeathState();
 	
-	// GameMode 쪽 메서드로 사망처리 구현 필요
+	AFPSGameState* FPSGameState = Cast<AFPSGameState>(GetWorld()->GetGameState());
+	if (FPSGameState)
+	{
+		FPSGameState->OnEnemyKilled();
+	}
+
+	FTimerHandle InvisibleTimer;
+	GetWorldTimerManager().SetTimer(InvisibleTimer, this, &ABaseEnemy::ReturnToPool, 3.0f, false);
+}
+
+void ABaseEnemy::ReturnToPool()
+{
+	TArray<AActor*> FoundAIPool;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAIObjectPool::StaticClass(), FoundAIPool);
+	if (FoundAIPool.Num() == 0) return;
+	else
+	{
+		AAIObjectPool* AIobjectPool = Cast<AAIObjectPool>(FoundAIPool[0]);
+		if (AIobjectPool)
+		{
+			AIobjectPool->ReturnAIToPool(this);
+		}
+	}
 }
 
 void ABaseEnemy::SetDeathState()
