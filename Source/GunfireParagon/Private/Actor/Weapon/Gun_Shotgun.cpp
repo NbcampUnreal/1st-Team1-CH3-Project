@@ -13,7 +13,6 @@ AGun_Shotgun::AGun_Shotgun()
 	
 	bIsAutoFire = false;
 	Pellets = 6; //  샷건 탄환 개수 설정 (한 번 발사 시 발사될 총알 개수)
-	MaxAmmo =100;
 	AmmoType = EAmmoType::Normal;
 }
 
@@ -49,24 +48,46 @@ void AGun_Shotgun::Fire()
 	}
 
 	//  샷건 탄환 여러 개 발사
-	for (int i = 0; i < Pellets; i++)
+	if ( CurrentAmmo<Pellets)
 	{
-		// 총알 퍼짐 방향 설정
-		FVector forwardDirection = GetAimDirection();
-		forwardDirection = SpreadDirection(forwardDirection);
+		for (int i = 0; i < CurrentAmmo; i++)
+		{
+			// 총알 퍼짐 방향 설정
+			FVector forwardDirection = GetAimDirection();
+			forwardDirection = SpreadDirection(forwardDirection);
 	
-		//  총알을 풀에서 가져오기
-		ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
-		if (Bullet)
-		{
-			Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없습니다!"));
+			//  총알을 풀에서 가져오기
+			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
+			if (Bullet)
+			{
+				Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없습니다!"));
+			}
 		}
 	}
-
+	else
+	{
+		for (int i = 0; i < Pellets; i++)
+		{
+			// 총알 퍼짐 방향 설정
+			FVector forwardDirection = GetAimDirection();
+			forwardDirection = SpreadDirection(forwardDirection);
+	
+			//  총알을 풀에서 가져오기
+			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
+			if (Bullet)
+			{
+				Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없습니다!"));
+			}
+		}
+	}
 	//  발사 후 일정 시간 동안 추가 발사 금지 (샷건은 단발 무기)
 	bCanFire = false;
 	GetWorldTimerManager().SetTimer(FireTimer, this, &AGun_Shotgun::SetIsFire, GunDelay-0.01f, false);

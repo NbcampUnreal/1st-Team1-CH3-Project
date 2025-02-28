@@ -4,15 +4,17 @@
 #include "Player/MyPlayerController.h" 
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "FPSDataTables.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
 
 
 ACGunBase::ACGunBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
 	
 	USceneComponent* SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
+	
 	RootComponent = SceneComponent;
 	GunMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunMesh"));
 	GunMesh->SetupAttachment(RootComponent);
@@ -28,17 +30,9 @@ ACGunBase::ACGunBase()
 		if (MuzzleEffectFinder.Succeeded())
 		{
 			MuzzleFlashEffect = MuzzleEffectFinder.Object;
-			UE_LOG(LogTemp, Warning, TEXT("MuzzleFlashEffect 로드 성공: %s"), *MuzzleFlashEffect->GetName());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("MuzzleFlashEffect 로드 실패!"));
 		}
 	}
 }
-
-
-
 
 
 
@@ -48,9 +42,6 @@ void ACGunBase::BeginPlay()
     Super::BeginPlay();
 
     CurrentAmmo = MaxAmmo;
-
-    UE_LOG(LogTemp, Warning, TEXT("총기 장착됨: %s, 초기 탄약: %d"), *GetName(), CurrentAmmo);
-
 	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
 	{
 		MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
@@ -82,31 +73,73 @@ void ACGunBase::BeginPlay()
 
     if (!BulletPool)
     {
-        UE_LOG(LogTemp, Warning, TEXT("BulletPool이 월드에 없음. 새로 생성합니다."));
-
         BulletPool = GetWorld()->SpawnActor<ABulletPool>(ABulletPool::StaticClass());
-
-        if (BulletPool)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("BulletPool이 새로 생성되었습니다."));
-        }
     }
-	
-	
+
+	AFPSDataTables* DataTables = Cast<AFPSDataTables>(UGameplayStatics::GetActorOfClass(GetWorld(), AFPSDataTables::StaticClass()));
+
+	if (!DataTables)
+	{
+		DataTables = GetWorld()->SpawnActor<AFPSDataTables>();
+	}
+	if (DataTables)
+	{
+		FWeaponData* WeaponData = DataTables->GetWeaponDataByKey(WeaponDataKey);
+		if (WeaponData)
+		{
+			Damage = WeaponData->AttackPower;
+			GunDelay = WeaponData->GunDelay;
+			MaxAmmo = WeaponData->MaxAmmo;
+			GunSpeed = WeaponData->AttackSpeed;
+			CurrentAmmo = MaxAmmo;
+			DropEffect = Cast<UNiagaraSystem>(WeaponData->DropEffectPath.TryLoad());
+
+			if (WeaponData->DropEffectPath.IsValid())
+			{
+				FString AssetPath = WeaponData->DropEffectPath.ToString();
+
+				UObject* LoadedObject = StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr, *AssetPath);
+				if (LoadedObject)
+				{
+					DropEffect = Cast<UNiagaraSystem>(LoadedObject);
+				}
+			}
+		}
+	}
+
+	SetIsDrop(true);
 
 }
-
+void ACGunBase::SetIsDrop(bool isDrop)
+{
+	bISDrop = isDrop;
+	if (bISDrop)
+	{
+		if (DropEffect)
+		{
+			DropEffectComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				DropEffect,
+				GetActorLocation(),  
+				FRotator::ZeroRotator,  
+				FVector(1, 1, 1),  
+				true
+			);
+		}
+	}
+	else
+	{
+		DropEffectComp->DestroyComponent();
+	}
+		
+}
 
 void ACGunBase::Fire()
 {
-	if (!MuzzleFlashEffect)
-	{
-		UE_LOG(LogTemp, Error, TEXT("❌ MuzzleFlashEffect가 nullptr! 블루프린트에서 확인 필요!"));
-	}
+	
 	if (!CanFire())
 		return;
 	
-    UE_LOG(LogTemp, Warning, TEXT("CGunBase::Fire() 실행됨 - 현재 탄약: %d"), CurrentAmmo);
 
 	
 	bCanFire = false; //발사 후 즉시 다음 발사 방지
@@ -123,16 +156,12 @@ void ACGunBase::Fire()
 	
 	if (MuzzleFlashEffect)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("발사이펙트!"));
-
-
 		FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle")) - WeaponMesh->GetComponentRotation();
 		MuzzleRotation.Yaw -= 90.0f; // Y축 정렬 보정
 		
 		UE_LOG(LogTemp, Warning, TEXT("MuzzleRotation (Adjusted): Pitch=%f, Yaw=%f, Roll=%f"),
 			MuzzleRotation.Pitch, MuzzleRotation.Yaw, MuzzleRotation.Roll);
 
-		// 🔹 나이아가라 이펙트를 총구에 부착
 		UNiagaraComponent* MuzzleEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			MuzzleFlashEffect,           // 나이아가라 시스템
 			WeaponMesh,                  // 부모: 무기 메쉬
@@ -142,18 +171,6 @@ void ACGunBase::Fire()
 			EAttachLocation::SnapToTarget, // 부모 위치 & 소켓에 정확히 부착
 			true                         // 자동 파괴
 		);
-
-		// FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle"));
-		//
-		// MuzzleRotation.Yaw -= 90.0f; // Yaw 보정
-		// UNiagaraComponent* MuzzleEffectComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		// 	GetWorld(),
-		// 	MuzzleFlashEffect,
-		// 	MuzzleSpot,
-		// 	MuzzleRotation, // 보정된 회전값 사용
-		// 	FVector(1, 1, 1), // 크기 조정
-		// 	true // 자동 파괴
-		// );
 
 		
 		if (MuzzleEffectComp)
@@ -173,9 +190,6 @@ void ACGunBase::Fire()
 
 	
 	FVector forwardDirection = GetAimDirection();
-
-	//FVector forwardDirection = GetActorForwardVector();
-	
 	//  총알을 풀에서 가져오기
 	ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
 	if (Bullet)
@@ -261,15 +275,17 @@ FVector ACGunBase::GetAimDirection() const
 	//싱글플레이어라 0번을 가져옴
 	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (!PlayerCharacter)
-		return GetActorForwardVector(); // 기본값: 총이 향하는 방향
-
-	//  2. 플레이어의 컨트롤러 가져오기
+	{
+		UE_LOG(LogTemp, Error, TEXT("AimDirection :캐릭터가 없다"));
+		return GetActorForwardVector(); 
+	}
 	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(PlayerCharacter->GetController());
 	if (!PlayerController)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AimDirection :플레이어캐릭터컨트롤러가없다."));
 		return GetActorForwardVector();
+	}
 
-
-	
 	FVector CameraLocation;
 	FRotator CameraRotation;
 	PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);

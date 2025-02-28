@@ -14,7 +14,4 @@ class GUNFIREPARAGON_API AGun_Rifle : public ACGunBase
 public:
 	AGun_Rifle();
 
-	virtual void BeginPlay() override;
-
-	virtual void Fire() override;	
 };

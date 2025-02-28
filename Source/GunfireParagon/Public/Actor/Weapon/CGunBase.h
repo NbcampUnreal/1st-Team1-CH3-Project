@@ -30,7 +30,6 @@ public:
 	virtual void Fire();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunMesh")
 	UStaticMeshComponent* GunMesh;
-	bool bWasDropped = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	EWeaponType WeaponType;
 	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
@@ -38,6 +37,10 @@ public:
 	USkeletalMeshComponent* WeaponMesh;
 	//탄창을 재장전
 	virtual void Reload();
+
+	bool bISDrop = false;
+
+	void SetIsDrop(bool isDrop);
 
 protected:
 	
@@ -117,4 +120,14 @@ protected:
 	//총기발사 화염이펙트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	UNiagaraSystem* MuzzleFlashEffect;
+protected:
+	// 무기 데이터 키 (DataTable에서 찾을 Key)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Data")
+	int32 WeaponDataKey = 1001; // 기본값 :NormalRifle
+	
+	//드롭이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	UNiagaraSystem* DropEffect;
+	
+	UNiagaraComponent* DropEffectComp;
 };

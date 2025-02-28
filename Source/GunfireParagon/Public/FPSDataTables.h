@@ -29,6 +29,8 @@ public:
 	float GunDelay;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Grade;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FSoftObjectPath DropEffectPath;
 };
 
 UCLASS()
@@ -36,14 +38,13 @@ class GUNFIREPARAGON_API AFPSDataTables : public AActor
 {
 	GENERATED_BODY()
 
-
+	AFPSDataTables();
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	// CSV에서 DataTable을 로드하는 함수
 	void LoadWeaponDataFromCSV();
-	void LoadWeaponDataFromJSON();
 
 
 public:

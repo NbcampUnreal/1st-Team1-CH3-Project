@@ -56,12 +56,11 @@ void ABombBullet::ApplyExplosionDamage()
 
 	TArray<AActor*> IgnoreActors;
     
-	// 플레이어를 찾아서 예외 목록에 추가
-	// AActor* PlayerActor = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	// if (PlayerActor)
-	// {
-	// 	IgnoreActors.Add(PlayerActor);
-	// }
+	AActor* PlayerActor = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (PlayerActor)
+	{
+		IgnoreActors.Add(PlayerActor);
+	}
 
 	// 플레이어를 제외한 모든 적에게 폭발 데미지 적용
 	UGameplayStatics::ApplyRadialDamage(

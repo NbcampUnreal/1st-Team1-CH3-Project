@@ -7,11 +7,27 @@
 #include "Serialization/JsonSerializer.h"
 
 
+AFPSDataTables::AFPSDataTables()
+{
+	static ConstructorHelpers::FObjectFinder<UDataTable> WeaponDataTableFinder(TEXT("/Game/DataAsset/ItemTable.ItemTable"));
+	if (WeaponDataTableFinder.Succeeded())
+	{
+		WeaponDataTable = WeaponDataTableFinder.Object;
+		UE_LOG(LogTemp, Warning, TEXT("✅ 데이터 테이블 로드 성공: %s"), *WeaponDataTable->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ 데이터 테이블 로드 실패! 경로를 확인하세요."));
+		return;
+	}
+}
+
 void AFPSDataTables::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	
 	LoadWeaponDataFromCSV();
-	//LoadWeaponDataFromJSON();
 }
 
 void AFPSDataTables::LoadWeaponDataFromCSV()
@@ -36,46 +52,6 @@ void AFPSDataTables::LoadWeaponDataFromCSV()
 	}
 }
 
-void AFPSDataTables::LoadWeaponDataFromJSON()
-{
-	// FString FilePath = FPaths::ProjectContentDir() + TEXT("DataAsset/WeaponData.json");
-	//
-	// FString JsonString;
-	// if (!FFileHelper::LoadFileToString(JsonString, *FilePath))
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("JSON 파일을 읽을 수 없습니다: %s"), *FilePath);
-	// 	return;
-	// }
-	//
-	// TSharedPtr<FJsonObject> JsonObject;
-	// TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonString);
-	//
-	// if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("JSON 파싱 실패!"));
-	// 	return;
-	// }
-	//
-	// TArray<TSharedPtr<FJsonValue>> WeaponArray = JsonObject->GetArrayField("Weapons");
-	//
-	// for (TSharedPtr<FJsonValue> Value : WeaponArray)
-	// {
-	// 	TSharedPtr<FJsonObject> WeaponObject = Value->AsObject();
-	// 	if (!WeaponObject) continue;
-	//
-	// 	FWeaponData WeaponData;
-	// 	WeaponData.Name = WeaponObject->GetStringField("Name");
-	// 	WeaponData.Key = WeaponObject->GetIntegerField("Key");
-	// 	WeaponData.AttackPower = WeaponObject->GetNumberField("AttackPower");
-	// 	WeaponData.AttackSpeed = WeaponObject->GetNumberField("AttackSpeed");
-	// 	WeaponData.MaxAmmo = WeaponObject->GetIntegerField("MaxAmmo");
-	// 	WeaponData.GunDelay = WeaponObject->GetNumberField("GunDelay");
-	// 	WeaponData.Grade = WeaponObject->GetStringField("Grade");
-	//
-	// 	WeaponDataMap.Add(WeaponData.Key, &WeaponData);
-	// 	UE_LOG(LogTemp, Warning, TEXT("무기 데이터 추가됨: Key = %d, Name = %s"), WeaponData.Key, *WeaponData.Name);
-	// }
-}
 
 
 // 데이터 테이블에서 특정 키를 가진 무기 정보를 가져오는 함수
