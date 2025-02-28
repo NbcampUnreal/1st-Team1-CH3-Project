@@ -4,7 +4,7 @@
 AMeteorProjectile::AMeteorProjectile()
 {
 	DamageMultiplier = 3.0f;
-	Speed = 2000.0f;
+	Speed = 2500.0f;
 
 	ProjectileMovement->InitialSpeed = Speed;
 	ProjectileMovement->MaxSpeed = Speed;

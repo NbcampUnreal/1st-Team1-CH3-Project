@@ -18,7 +18,7 @@ ABaseEnemyAIController::ABaseEnemyAIController()
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 	SightConfig->SightRadius = 6000.0f; // AI의 감지 범위
 	SightConfig->LoseSightRadius = 6500.0f; // AI가 플레이어를 잃어버리는 거리
-	SightConfig->PeripheralVisionAngleDegrees = 160.0f; // 시야각 설정
+	SightConfig->PeripheralVisionAngleDegrees = 170.0f; // 시야각 설정
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
@@ -59,8 +59,11 @@ void ABaseEnemyAIController::OnPossess(APawn* InPawn)
 		{
 			BBComp = GetBlackboardComponent();
 			BBComp->SetValueAsVector("SpawnLocation", InPawn->GetActorLocation());
-			BBComp->SetValueAsFloat("AttackRange", ControlledEnemy->AttackRange - 100.0f);
 			BBComp->SetValueAsFloat("AttackDelay", ControlledEnemy->AttackDelay);
+
+			float AttackRange = ControlledEnemy->AttackRange;
+			BBComp->SetValueAsFloat("AttackRange", AttackRange);
+			BBComp->SetValueAsFloat("AcceptableRadius", AttackRange - 50.0f);
 
 			APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 			if (PlayerPawn)

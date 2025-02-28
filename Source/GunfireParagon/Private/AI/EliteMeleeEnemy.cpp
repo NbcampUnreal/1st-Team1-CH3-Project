@@ -12,6 +12,7 @@ AEliteMeleeEnemy::AEliteMeleeEnemy()
     MaxHealth = 400.0f;
     BaseWalkSpeed = 700.0f;
     CurrentHealth = MaxHealth;
+    EXP = 20.0f;
 
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 

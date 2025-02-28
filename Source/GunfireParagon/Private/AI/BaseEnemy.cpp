@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameMode/FPSGameState.h"
 #include "GameMode/AIObjectPool.h"
+#include "Player/PlayerCharacter.h"
 
 ABaseEnemy::ABaseEnemy()
 {
@@ -189,6 +190,8 @@ void ABaseEnemy::OnDeath()
 	{
 		FPSGameState->OnEnemyKilled();
 	}
+
+	//AddExperience(EXP);
 
 	FTimerHandle InvisibleTimer;
 	GetWorldTimerManager().SetTimer(InvisibleTimer, this, &ABaseEnemy::ReturnToPool, 3.0f, false);

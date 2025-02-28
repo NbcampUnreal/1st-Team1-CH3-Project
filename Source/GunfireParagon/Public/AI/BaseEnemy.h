@@ -42,6 +42,8 @@ public:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float BaseWalkSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float EXP;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsAttacking;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")

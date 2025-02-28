@@ -12,6 +12,7 @@ ANormalMeleeEnemy::ANormalMeleeEnemy()
     AttackDelay = 0.0f;
     MaxHealth = 200.0f;
     BaseWalkSpeed = 800.0f;
+    EXP = 10.0f;
     CurrentHealth = MaxHealth;
 
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;

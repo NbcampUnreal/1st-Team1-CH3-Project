@@ -14,6 +14,9 @@ AEliteRangeEnemy::AEliteRangeEnemy()
     MaxHealth = 300.0f;
     BaseWalkSpeed = 600.0f;
     CurrentHealth = MaxHealth;
+    EXP = 20.0f;
+
+    GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
     EnemyName = "EliteRange";
 }
