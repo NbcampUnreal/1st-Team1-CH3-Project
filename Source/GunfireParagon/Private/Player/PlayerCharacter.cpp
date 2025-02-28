@@ -106,6 +106,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			BIND_INPUT_ACTION(JumpAction, ETriggerEvent::Completed, StopJump);
 			BIND_INPUT_ACTION(DashAction, ETriggerEvent::Triggered, Dash);
 			BIND_INPUT_ACTION(FireAction, ETriggerEvent::Triggered, FireWeapon);
+			BIND_INPUT_ACTION(ReloadAction, ETriggerEvent::Triggered, ReloadWeapon);
 			BIND_INPUT_ACTION(SwitchToPrimaryWeaponAction, ETriggerEvent::Triggered, SwitchToPrimaryWeapon);
 			BIND_INPUT_ACTION(SwitchToSecondaryWeaponAction, ETriggerEvent::Triggered, SwitchToSecondaryWeapon);
 			BIND_INPUT_ACTION(PickupWeaponAction, ETriggerEvent::Triggered, PickupWeaponInput);
@@ -690,6 +691,14 @@ void APlayerCharacter::SetMouseSensitivity(float NewSensitivity)
 {
 	MouseSensitivity = FMath::Clamp(NewSensitivity, 0.1f, 5.0f);
 	UE_LOG(LogTemp, Warning, TEXT("마우스 감도 변경: %f"), MouseSensitivity);
+}
+
+void APlayerCharacter::ReloadWeapon()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Reload();
+	}
 }
 
 

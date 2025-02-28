@@ -13,8 +13,8 @@ AMyPlayerController::AMyPlayerController()
 	SwitchToSecondaryWeaponAction(nullptr),
 	PickupWeaponAction(nullptr),
 	IncreaseSensitivityAction(nullptr),
-	DecreaseSensitivityAction(nullptr)
-
+	DecreaseSensitivityAction(nullptr),
+	ReloadAction(nullptr)
 	//DebugDamageAction(nullptr)
 {
 }

@@ -55,10 +55,11 @@ protected:
 	float ShieldRegenDelay = 3.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* MoveAction;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	float MouseSensitivity = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* MoveAction;
 
 	
 	UFUNCTION()
@@ -89,6 +90,10 @@ protected:
 	void IncreaseMouseSensitivity();
 	UFUNCTION()
 	void DecreaseMouseSensitivity();
+	UFUNCTION()
+	void ReloadWeapon();
+
+
 
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,

@@ -39,6 +39,9 @@ public:
 	UInputAction* IncreaseSensitivityAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* DecreaseSensitivityAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* ReloadAction;
+	
 
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* DebugDamageAction;*/
