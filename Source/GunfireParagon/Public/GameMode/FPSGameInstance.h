@@ -16,6 +16,12 @@ class GUNFIREPARAGON_API UFPSGameInstance : public UGameInstance
 public:
 	UFPSGameInstance();
 	virtual void Init() override;
+	void SavePlayerStats(ACharacter* PlayerCharacter);
+	void LoadPlayerStats(ACharacter* PlayerCharacter);
+	void SetPreviousLevel(const FString& LevelName);
+	FString GetPreviousLevel() const;
+	void SavePlayerLocation(const FVector& Location);
+	FVector GetPlayerLocation() const;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;
@@ -27,6 +33,13 @@ public:
 	int32 CurrentStageIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
 	TArray<FName> StageMapNames;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TrapLevel")
+	FString PreviousLevelName;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TrapLevel")
+	bool bTrapPortalUsed = false;
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "TrapLevel")
+	FVector StoredPlayerLocation;
+
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
@@ -39,8 +52,7 @@ public:
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PassiveInventory")
 	// TArray<FPassiveInventory> PlayerPassiveInventory;
 
-	// void SavePlayerStats(ACharacter* PlayerCharacter);
-	// void LoadPlayerStats(ACharacter* PlayerCharacter);
+
 	// void AddPassive(FPassiveInventory NewPassive);
 	// void RemovePassive(FString PassiveName)
 };

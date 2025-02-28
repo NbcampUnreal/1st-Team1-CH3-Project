@@ -7,7 +7,8 @@
 #include "GameMode/AIEnemyPoolRaw.h"
 #include "GameMode/AIEnemySpawnRaw.h"
 #include "GameMode/SpawnVolume.h"
-#include "GameMode/ClearPortal.h"
+#include "GameMode/ClearPortalPoint.h"
+#include "GameMode/TrapPortalPoint.h"
 #include "Engine/TargetPoint.h"
 #include "Player/MyPlayerController.h"
 #include "Player/PlayerCharacter.h"
@@ -18,6 +19,8 @@
 
 AFPSGameMode::AFPSGameMode()
 {
+	bUseSeamlessTravel = true;
+
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = APlayerCharacter::StaticClass();
 	GameStateClass = AFPSGameState::StaticClass();
@@ -27,6 +30,7 @@ void AFPSGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	SpawnTrapPortals();
 	InitializeObjectPool();
 	InitializeBulletPool();
 
@@ -93,6 +97,8 @@ void AFPSGameMode::InitializeBulletPool()
 		}
 	}
 }
+
+
 
 TMap<TSubclassOf<ABaseEnemy>, int32> AFPSGameMode::GetPoolInitializationData()
 {
@@ -210,12 +216,12 @@ void AFPSGameMode::SpawnPortal()
 {
 	AActor* PortalSpawnPoint = nullptr;
 	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATargetPoint::StaticClass(), FoundActors);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AClearPortalPoint::StaticClass(), FoundActors);
 	UE_LOG(LogTemp, Warning, TEXT("Found %d PortalSpawnPoints"), FoundActors.Num());
 
 	for (AActor* Actor : FoundActors)
 	{
-		if (Actor->ActorHasTag(FName("ClearPortalPoint")))
+		if (Actor && Actor->ActorHasTag(FName("ClearPortalPoint")))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Found Actor: %s"), *Actor->GetFName().ToString());
 			PortalSpawnPoint = Actor;
@@ -241,6 +247,128 @@ void AFPSGameMode::SpawnPortal()
 		{
 			UE_LOG(LogTemp, Error, TEXT("Portal Spawn Failed!"));
 		}
+	}
+}
+
+void AFPSGameMode::TravelToLevel(FName LevelName)
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
+	if (FPSGameInstance)
+	{
+		FString CurrentLevel = World->GetMapName();
+		CurrentLevel.RemoveFromStart(World->StreamingLevelsPrefix);
+		FPSGameInstance->SetPreviousLevel(CurrentLevel);
+
+		UE_LOG(LogTemp, Warning, TEXT("Saved Previous Level: %s"), *CurrentLevel);
+	}
+	
+	World->ServerTravel(LevelName.ToString(), true);
+}
+
+void AFPSGameMode::ReturnToPreviousLevel()
+{
+	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
+	if (FPSGameInstance)
+	{
+		FString PreviousLevel = FPSGameInstance->GetPreviousLevel();
+		if (!PreviousLevel.IsEmpty())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Returning to Level: %s"), *PreviousLevel);
+			GetWorld()->ServerTravel(PreviousLevel, true);
+			GetWorld()->GetTimerManager().SetTimerForNextTick(this, &AFPSGameMode::RestorePlayerLocation);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PreviousLevel is Empthy"));
+		}
+	}
+}
+
+void AFPSGameMode::SpawnTrapPortals()
+{
+	UFPSGameInstance* FPSGameInstnace = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
+	if (!FPSGameInstnace) return;
+
+	if (FPSGameInstnace->bTrapPortalUsed) return;
+
+	AActor* TrapPortalSpawnPoint = nullptr;
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATrapPortalPoint::StaticClass(), FoundActors);
+	for (AActor* Actor : FoundActors)
+	{
+		if (Actor && Actor->ActorHasTag(FName("TrapPortalPoint")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Found Actor: %s"), *Actor->GetFName().ToString());
+			TrapPortalSpawnPoint = Actor;
+			break;
+		}
+	}
+
+	if (TrapPortalSpawnPoint)
+	{
+		FActorSpawnParameters SpawnParams;
+		ATrapPortal* SpawnedPortal = GetWorld()->SpawnActor<ATrapPortal>(
+			TrapPortalClass,
+			TrapPortalSpawnPoint->GetActorLocation(),
+			FRotator::ZeroRotator,
+			SpawnParams
+			);
+
+		if (SpawnedPortal)
+		{
+			if (ATrapPortalPoint* TrapPortalPoint = Cast<ATrapPortalPoint>(TrapPortalSpawnPoint))
+			{
+				if (TrapPortalPoint->PortalAction == ETrapPortalAction::Entry)
+				{
+					SpawnedPortal->PortalType = ETrapPortalTypes::TravelToTrap;
+				}
+				else if (TrapPortalPoint->PortalAction == ETrapPortalAction::Exit)
+				{
+					SpawnedPortal->PortalType = ETrapPortalTypes::ReturnToStage;
+				}
+			}
+		}
+	}
+}
+
+void AFPSGameMode::SavePlayerLocation()
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		AMyPlayerController* FPSPlayerController = Cast<AMyPlayerController>(PlayerController);
+		if (!FPSPlayerController || !FPSPlayerController->GetPawn()) return;
+
+		UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
+		
+		if (FPSGameInstance)
+		{
+			FPSGameInstance->StoredPlayerLocation = FPSPlayerController->GetPawn()->GetActorLocation();
+			UE_LOG(LogTemp, Warning, TEXT("Saved Player Location: %s"), *FPSGameInstance->StoredPlayerLocation.ToString());
+		}
+		
+	}	
+}
+
+void AFPSGameMode::RestorePlayerLocation()
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		AMyPlayerController* FPSPlayerController = Cast<AMyPlayerController>(PlayerController);
+		if (!FPSPlayerController || !FPSPlayerController->GetPawn()) return;
+
+		UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
+		
+		if (FPSGameInstance)
+		{
+			FVector SavedLocation = FPSGameInstance->StoredPlayerLocation;
+			FPSPlayerController->GetPawn()->SetActorLocation(SavedLocation);
+			UE_LOG(LogTemp, Warning, TEXT("Restored Player Location: %s"), *SavedLocation.ToString());
+		}	
 	}
 }
 

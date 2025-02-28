@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/TargetPoint.h"
+#include "GameMode/TrapPortalTypes.h"
+#include "GameMode/TrapPortalAction.h"
 #include "TrapPortalPoint.generated.h"
 
 
@@ -14,4 +16,9 @@ class GUNFIREPARAGON_API ATrapPortalPoint : public ATargetPoint
 
 public:
 	ATrapPortalPoint();
+
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal")
+	// ETrapPortalTypes PortalType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal")
+	ETrapPortalAction PortalAction;
 };

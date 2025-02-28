@@ -7,6 +7,7 @@
 #include "GameMode/FPSGameMode.h"
 #include "AI/NormalMeleeEnemy.h"
 #include "AI/NormalRangeEnemy.h"
+#include "Player/PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 UFPSGameInstance::UFPSGameInstance()
@@ -15,6 +16,7 @@ UFPSGameInstance::UFPSGameInstance()
 	ExperiencePoints = 0.f;
 	PlayerHealth = 1000.0f;
 	CurrentStageIndex = 0; 
+	PreviousLevelName = TEXT("");
 }
 
 void UFPSGameInstance::Init()
@@ -63,6 +65,8 @@ void UFPSGameInstance::LoadNextStage()
 
 		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
 		UE_LOG(LogTemp, Warning, TEXT("OpenStage : %s"), *StageMapNames[CurrentStageIndex].ToString());
+
+		bTrapPortalUsed = false;
 	}
 }
 
@@ -76,7 +80,6 @@ void UFPSGameInstance::GotoMainMenu()
 }
 
 
-/*
 void UFPSGameInstance::SavePlayerStats(ACharacter* PlayerCharacter)
 {
 	if (PlayerCharacter)
@@ -84,9 +87,9 @@ void UFPSGameInstance::SavePlayerStats(ACharacter* PlayerCharacter)
 		APlayerCharacter* Char = Cast<APlayerCharacter>(PlayerCharacter);
 		if (Char)
 		{
-			PlayerLevel = Char->PlayerLevel;
-			ExperiencePoints = Char->CurrentExperience;
-			PlayerHealth = Char->CurrentHealth;
+			//변수명 모름
+			//PlayerLevel = Char->PlayerLevel;
+			//ExperiencePoints = Char->CurrentExperience;
 		}
 	}
 }
@@ -98,13 +101,33 @@ void UFPSGameInstance::LoadPlayerStats(ACharacter* PlayerCharacter)
 		APlayerCharacter* Char = Cast<APlayerCharacter>(PlayerCharacter);
 		if (Char)
 		{
-			Char->PlayerLevel = PlayerLevel;
-			Char->CurrentExperience = ExperiencePoints;
-			Char->CurrentHealth = PlayerHealth;
+			//변수명 모름
+			//Char->PlayerLevel = PlayerLevel;
+			//Char->CurrentExperience = ExperiencePoints;
 		}
 	}
 }
-*/
+
+void UFPSGameInstance::SetPreviousLevel(const FString& LevelName)
+{
+	PreviousLevelName = LevelName;
+}
+
+FString UFPSGameInstance::GetPreviousLevel() const
+{
+	return PreviousLevelName;
+}
+
+void UFPSGameInstance::SavePlayerLocation(const FVector& Location)
+{
+	StoredPlayerLocation = Location;
+}
+
+FVector UFPSGameInstance::GetPlayerLocation() const
+{
+	return StoredPlayerLocation;
+}
+
 
 
 /*

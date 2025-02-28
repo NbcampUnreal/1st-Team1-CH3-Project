@@ -3,7 +3,9 @@
 
 #include "GameMode/TrapPortalPoint.h"
 
+
 ATrapPortalPoint::ATrapPortalPoint()
 {
 	Tags.Add(FName("TrapPortalPoint"));
+	PortalAction = ETrapPortalAction::Entry;
 }

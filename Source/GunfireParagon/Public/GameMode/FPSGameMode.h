@@ -7,6 +7,7 @@
 #include "AIObjectPool.h"
 #include "Actor/BulletPool.h"
 #include "GameMode/ClearPortal.h"
+#include "GameMode/TrapPortal.h"
 #include "FPSGameMode.generated.h"
 
 
@@ -21,6 +22,11 @@ public:
 	virtual void BeginPlay() override;
 	void InitializeObjectPool();
 	void InitializeBulletPool();
+	void TravelToLevel(FName LevelName);
+	void ReturnToPreviousLevel();
+	void SpawnTrapPortals();
+	void SavePlayerLocation();
+	void RestorePlayerLocation();
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetPoolInitializationData();
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetEnemySpawnData(int32 StageNumber);
 
@@ -56,6 +62,8 @@ public:
 	UDataTable* EnemySpawnTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Clear Portal")
 	TSubclassOf<AClearPortal> PortalClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Clear Portal")
+	TSubclassOf<ATrapPortal> TrapPortalClass;
 
 	bool bIsObjectPoolReady;
 };
