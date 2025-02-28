@@ -26,8 +26,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SprintAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* CrouchAction;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* DashAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* FireAction;
@@ -37,10 +35,13 @@ public:
 	UInputAction* SwitchToSecondaryWeaponAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* PickupWeaponAction;
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* DebugDamageAction;
+	UInputAction* IncreaseSensitivityAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* DecreaseSensitivityAction;
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* DebugDamageAction;*/
 	
 
 protected:

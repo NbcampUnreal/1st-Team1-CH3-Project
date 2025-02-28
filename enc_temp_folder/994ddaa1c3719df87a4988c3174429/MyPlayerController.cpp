@@ -11,10 +11,7 @@ AMyPlayerController::AMyPlayerController()
 	FireAction(nullptr),
 	SwitchToPrimaryWeaponAction(nullptr),
 	SwitchToSecondaryWeaponAction(nullptr),
-	PickupWeaponAction(nullptr),
-	IncreaseSensitivityAction(nullptr),
-	DecreaseSensitivityAction(nullptr)
-
+	PickupWeaponAction(nullptr)
 	//DebugDamageAction(nullptr)
 {
 }

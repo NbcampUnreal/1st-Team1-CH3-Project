@@ -181,8 +181,7 @@ void APlayerCharacter::Dash(const FInputActionValue& value)
 	}
 
 	bCanDash = false;
-	OnDashState.Broadcast(true);
-	OnDashCoolDown.Broadcast(DashCooldown);
+
 	float DashTime = 0.1f;
 	float DashSpeed = DashDistance / DashTime;
 
@@ -212,8 +211,6 @@ void APlayerCharacter::StopDash()
 	{
 		GetCharacterMovement()->StopMovementImmediately();
 	}
-
-	OnDashState.Broadcast(false);
 }
 
 void APlayerCharacter::ResetDash()
@@ -230,12 +227,12 @@ void APlayerCharacter::ResetDash()
 
 void APlayerCharacter::IncreaseMouseSensitivity()
 {
-	SetMouseSensitivity(MouseSensitivity + 0.005f);
+	SetMouseSensitivity(MouseSensitivity + 0.1f);
 }
 
 void APlayerCharacter::DecreaseMouseSensitivity()
 {
-	SetMouseSensitivity(MouseSensitivity - 0.005f);
+	SetMouseSensitivity(MouseSensitivity - 0.1f);
 }
 
 
@@ -307,8 +304,6 @@ void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float&
 	{
 		CurrentAmmo = UpdateCurrentAmmo;
 		MaxAmmo = UpdateMaxAmmo;
-
-		OnAmmoChanged.Broadcast(CurrentAmmo, MaxAmmo);
 	}
 }
 
@@ -317,7 +312,6 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->Fire();
-		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 	}
 }
 
@@ -546,14 +540,6 @@ void APlayerCharacter::PickupWeapon()
 		return;
 	}
 
-	//이미 가지고 있는 무기인지 확인
-	if ((Inventory[0] && Inventory[0]->GetClass() == NearbyWeapon->GetClass()) ||
-		(Inventory[1] && Inventory[1]->GetClass() == NearbyWeapon->GetClass()))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("이미 가지고 있는 무기입니다! 줍기 불가"));
-		return;
-	}
-
 	//여기서부터는 NearbyWeapon이 NULL이 아님이 보장됨
 	UE_LOG(LogTemp, Warning, TEXT("무기 획득 성공: %s"), *NearbyWeapon->GetName());
 
@@ -572,7 +558,7 @@ void APlayerCharacter::PickupWeapon()
 ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 {
 	TArray<AActor*> OverlappingActors;
-	float PickupRadius = 200.0f; // 무기 감지 범위 조정
+	float PickupRadius = 200.0f; //무기 감지 범위 조정
 
 	UKismetSystemLibrary::SphereOverlapActors(
 		this, GetActorLocation(), PickupRadius,
@@ -584,21 +570,15 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 	{
 		ACGunBase* FoundWeapon = Cast<ACGunBase>(Actor);
 
-		//이미 가지고 있는 무기는 무시
-		if (FoundWeapon && FoundWeapon != CurrentWeapon &&
-			((Inventory[0] && Inventory[0]->GetClass() == FoundWeapon->GetClass()) ||
-				(Inventory[1] && Inventory[1]->GetClass() == FoundWeapon->GetClass())))
+		//현재 손에 들고 있는 무기는 무시
+		if (FoundWeapon && FoundWeapon != CurrentWeapon)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("이미 가지고 있는 무기: %s → 줍기 불가"), *FoundWeapon->GetName());
-			continue;
+			return FoundWeapon;
 		}
-
-		return FoundWeapon;
 	}
 
 	return nullptr;
 }
-
 
 void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 {
