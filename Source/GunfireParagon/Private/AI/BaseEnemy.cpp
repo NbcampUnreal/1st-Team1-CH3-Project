@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameMode/FPSGameState.h"
 #include "GameMode/AIObjectPool.h"
+#include "Player/PlayerCharacter.h"
 
 ABaseEnemy::ABaseEnemy()
 {
@@ -41,6 +42,17 @@ ABaseEnemy::ABaseEnemy()
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	EnemyName = "BaseMonster";
+}
+
+void ABaseEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//OnTargetName.Broadcast(GetClass()->GetName());
+	OnTargetName.Broadcast(EnemyName);
+	OnTargetHPChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
 void ABaseEnemy::Attack(const FVector& TargetLocation)
@@ -158,6 +170,8 @@ float ABaseEnemy::TakeDamage
 		OnDeath();
 	}
 
+	OnTargetHPChanged.Broadcast(CurrentHealth, MaxHealth);
+
 	return ActualDamage;
 }
 
@@ -176,6 +190,8 @@ void ABaseEnemy::OnDeath()
 	{
 		FPSGameState->OnEnemyKilled();
 	}
+
+	//AddExperience(EXP);
 
 	FTimerHandle InvisibleTimer;
 	GetWorldTimerManager().SetTimer(InvisibleTimer, this, &ABaseEnemy::ReturnToPool, 3.0f, false);

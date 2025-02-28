@@ -6,6 +6,16 @@
 #include "Components\ProgressBar.h"
 #include "Components\SizeBox.h"
 
+void UIngameTargetHUD::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+}
+
+void UIngameTargetHUD::NativeConstruct()
+{
+	Super::NativeConstruct();
+}
+
 void UIngameTargetHUD::UpdateHP(float Current, float Max)
 {
 	if (MonsterHPBar)
@@ -14,6 +24,10 @@ void UIngameTargetHUD::UpdateHP(float Current, float Max)
 	}
 }
 
-void UIngameTargetHUD::UpdateScale(float Distance)
+void UIngameTargetHUD::UpdateTargetName(FString TargetName)
 {
+	if (MonsterTextBlock)
+	{
+		MonsterTextBlock->SetText(FText::FromString(TargetName));
+	}
 }

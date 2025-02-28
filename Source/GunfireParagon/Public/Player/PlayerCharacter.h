@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "InputAction.h"
 #include "TimerManager.h"
 #include "Actor/Weapon/CGunBase.h"
 #include "Components/CapsuleComponent.h"
@@ -13,6 +14,7 @@ struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangedPlayerValue, float, CurrentValue, float, MaxValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeOneValue, float, OneValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeBoolValue, bool, OneValue);
 
 UCLASS()
 class GUNFIREPARAGON_API APlayerCharacter : public ACharacter
@@ -25,9 +27,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Animation")
 	bool bIsHoldingRifle = false;
 
-	//void SwitchWeaponSlot(int32 Slot);
-	//void SwitchToPrimaryWeapon();
-	//void SwitchToSecondaryWeapon();
+	void SwitchWeaponSlot(int32 Slot);
+	void SwitchToPrimaryWeapon();
+	void SwitchToSecondaryWeapon();
 	
 
 protected:
@@ -39,8 +41,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ACGunBase> DefaultWeaponClass;
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MaxHealth = 100.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
@@ -56,8 +56,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MouseSensitivity = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* MoveAction;
 
-
+	
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 	UFUNCTION()
@@ -66,44 +70,48 @@ protected:
 	void StartJump(const FInputActionValue& Value);
 	UFUNCTION()
 	void StopJump(const FInputActionValue& Value);
-	UFUNCTION()
+	/*UFUNCTION()
 	void StartSprint(const FInputActionValue& Value);
 	UFUNCTION()
-	void StopSprint(const FInputActionValue& Value);
-	UFUNCTION()
-	void StartCrouch(const FInputActionValue& Value);
-	UFUNCTION()
-	void StopCrouch(const FInputActionValue& Value);
+	void StopSprint(const FInputActionValue& Value);*/
 	UFUNCTION()
 	void Dash(const FInputActionValue& Value);
 	UFUNCTION()
 	void FireWeapon(const FInputActionValue& Value);
 	UFUNCTION()
 	void PickupWeapon();
+	UFUNCTION()
+	void PickupWeaponInput(const FInputActionValue& Value);
+	UFUNCTION()
+	bool EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void SetMouseSensitivity(float NewSensitivity);
+	UFUNCTION()
+	void IncreaseMouseSensitivity();
+	UFUNCTION()
+	void DecreaseMouseSensitivity();
+	UFUNCTION()
+	void ReloadWeapon();
 
 
-	//UFUNCTION()
-	//void HandleSwapWeaponInput(const FInputActionValue& Value);
-	//UFUNCTION()
-	//void EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
+
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
-
 	void Heal(float HealAmount);
 	void StartShieldRegen();
 	void RegenerateShield();
-	//void SwitchWeapon(ACGunBase* NewWeapon);
-	//void SwapWeaponWithDropped(ACGunBase* NewWeapon);
+	void SwapWeaponWithDropped(ACGunBase* NewWeapon);
 	virtual void Landed(const FHitResult& Hit) override;
 
 private:
 	void InitializeCharacter();
 
+	ACGunBase* Inventory[2];
 	float NormalSpeed;
 	float SprintSpeedMultiplier;
 	float SprintSpeed;
 	float DefaultCapsuleHalfHeight;
-	bool bIsCrouched = false;
 	int32 JumpCount = 0;
 	int32 MaxJumpCount = 2;
 
@@ -115,17 +123,16 @@ private:
 	float DashDistance = 600.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	float DashCooldown = 1.5f;
+	bool bCanSwitchWeapon = true;
+	UPROPERTY()
+	TArray<ACGunBase*> DroppedWeapons;
 
-	//1번 슬롯 (기본 무기 포함, 교체 가능)
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	ACGunBase* PrimaryWeapon = nullptr;
-	//2번 슬롯 (교체 가능)
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	ACGunBase* SecondaryWeapon = nullptr;
-	//현재 들고 있는 무기 (1번 또는 2번)
 	ACGunBase* CurrentWeapon = nullptr;
     int32 CurrentWeaponSlot = 1;
-	//무기 소켓
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	FName WeaponSocketName = "WeaponSocket";
 	UPROPERTY(EditAnywhere, Category = "Weapon")
@@ -133,8 +140,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	FVector PistolOffset = FVector(-5.0f, 2.0f, 0.0f);
 	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
-	//void DropCurrentWeapon(int32 Slot);
-
+	void DropCurrentWeapon(int32 Slot);
+	bool bCanPickupWeapon = true;
+	FTimerHandle PickupCooldownTimer;
+	void ResetPickupWeapon();
+	bool bCanDropWeapon = true; 
+	FTimerHandle DropWeaponCooldownTimer; 
+	void ResetDropWeaponCooldown();
 
 	FTimerHandle DashCooldownTimer;
 	FTimerHandle DashStopTimer;
@@ -145,8 +157,6 @@ private:
 	void ResetDash();
 	UFUNCTION()
 	void StopDash();
-	//UFUNCTION()
-	//void SmoothCameraTransition(FVector TargetLocation, float Duration);
 	ACGunBase* FindNearbyDroppedWeapon();
 
 // Event Binding To WBP - KGW
@@ -162,14 +172,20 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "UI Events")
 	FOnChangedPlayerValue OnAmmoChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangeBoolValue OnDashState;
+
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangeOneValue OnDashCoolDown;
+
 	// Ammo 관련 변수/함수 존재하지 않음. 플레이어 캐릭터 내 추가 바랍니다. 해당 형태를 Helath선언부분으로 올리셔도 괜찮습니다.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
 	float CurrentAmmo = 0;
-
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
 	float MaxAmmo = 0;
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
-	
+	void HideCurrentWeapon();
+
 	void ReturnHPValue()
 	{
 		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);

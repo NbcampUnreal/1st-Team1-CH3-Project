@@ -20,9 +20,12 @@ ABossEnemy::ABossEnemy()
     CurrentHealth = MaxHealth;
     LastKnownPlayerLocation = FVector::ZeroVector;
     TeleportLocation = FVector::ZeroVector;
+    EXP = 100.0f;
     bUsedHealSkill = false;
 
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+
+    EnemyName = "Boss";
 }
 
 void ABossEnemy::Attack(const FVector& TargetLocation)
@@ -66,11 +69,11 @@ void ABossEnemy::PerformRangeAttack(const FVector& TargetLocation)
     FVector PlayerLocation = TargetActor->GetActorLocation();
 
     // 예측 시간
-    float PredictionTime = 0.35f; 
+    float PredictionTime = 0.3f; 
     // 현재 위치에 플레이어의 속도 * 시간으로 거리를 더해 예측 위치 계산
     FVector PredictedLocation = PlayerLocation + (PlayerVelocity * PredictionTime);
     // 상체 조준하도록 Z축 조정
-    PredictedLocation.Z += 55.0f; 
+    PredictedLocation.Z += 60.0f; 
 
     FRotator FireRotation = (PredictedLocation - SpawnLocation).Rotation();
     AFireballProjectile* Fireball = GetWorld()->SpawnActor<AFireballProjectile>(FireballClass, SpawnLocation, FireRotation);

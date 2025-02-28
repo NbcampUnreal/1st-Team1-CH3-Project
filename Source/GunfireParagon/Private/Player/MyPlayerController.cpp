@@ -6,14 +6,16 @@ AMyPlayerController::AMyPlayerController()
 	MoveAction(nullptr),
 	LookAction(nullptr),
 	JumpAction(nullptr),
-	SprintAction(nullptr),
-	CrouchAction(nullptr),
+	//SprintAction(nullptr),
 	DashAction(nullptr),
 	FireAction(nullptr),
 	SwitchToPrimaryWeaponAction(nullptr),
 	SwitchToSecondaryWeaponAction(nullptr),
-	SwapWeaponAction(nullptr),
-	DebugDamageAction(nullptr)
+	PickupWeaponAction(nullptr),
+	IncreaseSensitivityAction(nullptr),
+	DecreaseSensitivityAction(nullptr),
+	ReloadAction(nullptr)
+	//DebugDamageAction(nullptr)
 {
 }
 

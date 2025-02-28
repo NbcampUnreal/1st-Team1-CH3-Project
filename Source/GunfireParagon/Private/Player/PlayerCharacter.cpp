@@ -18,7 +18,12 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 
 	DefaultWeaponClass = AGun_Rifle::StaticClass();
+
+	Tags.Add("Player");
 }
+
+//ReturnHPValue();
+//ReturnShieldValue();
 
 void APlayerCharacter::BeginPlay()
 {
@@ -26,39 +31,36 @@ void APlayerCharacter::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 	CurrentShield = MaxShield;
-	//ReturnHPValue();
-	//ReturnShieldValue();
+
+	NormalSpeed = 1000.0f;
+	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+
+
 	if (DefaultWeaponClass)
 	{
 		ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
 
 		if (DefaultWeapon)
 		{
-			CurrentWeapon = DefaultWeapon;
-			AttachWeaponToHand(CurrentWeapon, 1);
-		}
-	}
+			Inventory[0] = DefaultWeapon;
+			CurrentWeapon = Inventory[0];
 
-	// ✅ 게임 시작 후 현재 무기 상태 확인
-	if (CurrentWeapon)
-	{
-		if (CurrentWeapon->WeaponMesh && CurrentWeapon->WeaponMesh->GetSkeletalMeshAsset())
-		{
+			CurrentWeaponSlot = 0;
+
+			AttachWeaponToHand(CurrentWeapon, 0);
+
+			UE_LOG(LogTemp, Warning, TEXT("기본 무기 장착 완료: %s"), *Inventory[0]->GetName());
 		}
 		else
 		{
+			UE_LOG(LogTemp, Error, TEXT("기본 무기 스폰 실패"));
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("DefaultWeaponClass가 설정되지 않음"));
+	}
 }
-
-
-
-
-
-
-
-
-
 
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -77,15 +79,8 @@ void APlayerCharacter::InitializeCharacter()
 	CameraComp->SetupAttachment(RootComponent);
 	bUseControllerRotationPitch = true;
 
-
-
-	NormalSpeed = 800.0f;
 	SprintSpeedMultiplier = 1.7f;
 	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
-	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
-
-	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
-	GetCharacterMovement()->SetCrouchedHalfHeight(40.0f);
 
 	DefaultCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 	MeshOffset = GetMesh()->GetRelativeLocation();
@@ -109,17 +104,19 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			BIND_INPUT_ACTION(LookAction, ETriggerEvent::Triggered, Look);
 			BIND_INPUT_ACTION(JumpAction, ETriggerEvent::Started, StartJump);
 			BIND_INPUT_ACTION(JumpAction, ETriggerEvent::Completed, StopJump);
-			BIND_INPUT_ACTION(SprintAction, ETriggerEvent::Triggered, StartSprint);
-			BIND_INPUT_ACTION(SprintAction, ETriggerEvent::Completed, StopSprint);
-			BIND_INPUT_ACTION(CrouchAction, ETriggerEvent::Triggered, StartCrouch);
-			BIND_INPUT_ACTION(CrouchAction, ETriggerEvent::Completed, StopCrouch);
 			BIND_INPUT_ACTION(DashAction, ETriggerEvent::Triggered, Dash);
 			BIND_INPUT_ACTION(FireAction, ETriggerEvent::Triggered, FireWeapon);
-			//BIND_INPUT_ACTION(SwitchToPrimaryWeaponAction, ETriggerEvent::Triggered, SwitchToPrimaryWeapon);
-			//BIND_INPUT_ACTION(SwitchToSecondaryWeaponAction, ETriggerEvent::Triggered, SwitchToSecondaryWeapon);
-			//BIND_INPUT_ACTION(SwapWeaponAction, ETriggerEvent::Triggered, HandleSwapWeaponInput);
+			BIND_INPUT_ACTION(ReloadAction, ETriggerEvent::Triggered, ReloadWeapon);
+			BIND_INPUT_ACTION(SwitchToPrimaryWeaponAction, ETriggerEvent::Triggered, SwitchToPrimaryWeapon);
+			BIND_INPUT_ACTION(SwitchToSecondaryWeaponAction, ETriggerEvent::Triggered, SwitchToSecondaryWeapon);
+			BIND_INPUT_ACTION(PickupWeaponAction, ETriggerEvent::Triggered, PickupWeaponInput);
+			BIND_INPUT_ACTION(IncreaseSensitivityAction, ETriggerEvent::Triggered, IncreaseMouseSensitivity);
+			BIND_INPUT_ACTION(DecreaseSensitivityAction, ETriggerEvent::Triggered, DecreaseMouseSensitivity);
+			//BIND_INPUT_ACTION(SprintAction, ETriggerEvent::Triggered, StartSprint);
+			//BIND_INPUT_ACTION(SprintAction, ETriggerEvent::Completed, StopSprint);
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("입력 바인딩 완료: G 키가 PickupWeaponInput()에 연결됨"));
 }
 
 
@@ -158,116 +155,56 @@ void APlayerCharacter::Look(const FInputActionValue& value)
 {
 	FVector2D LookInput = value.Get<FVector2D>();
 
-	AddControllerYawInput(LookInput.X);
-	AddControllerPitchInput(LookInput.Y);
-}
-void APlayerCharacter::StartSprint(const FInputActionValue& value)
-{
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-	}
-}
-void APlayerCharacter::StopSprint(const FInputActionValue& value)
-{
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
-	}
+	AddControllerYawInput(LookInput.X * MouseSensitivity);
+	AddControllerPitchInput(LookInput.Y * MouseSensitivity);
 }
 
-void APlayerCharacter::StartCrouch(const FInputActionValue& Value)
-{
-	if (GetCharacterMovement()->IsMovingOnGround() && !GetCharacterMovement()->IsCrouching())
-	{
-		GetCharacterMovement()->SetCrouchedHalfHeight(40.0f);
-		Crouch();
-
-		FVector NewMeshLocation = MeshOffset;
-		NewMeshLocation.Z -= 40.0f;
-		GetMesh()->SetRelativeLocation(NewMeshLocation, false, nullptr, ETeleportType::TeleportPhysics);
-	}
-}
-
-void APlayerCharacter::StopCrouch(const FInputActionValue& Value)
-{
-	if (GetCharacterMovement()->IsCrouching())
-	{
-		UnCrouch();
-		GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHalfHeight, true);
-
-		GetMesh()->SetRelativeLocation(MeshOffset);
-
-		FVector TargetLocation = CameraComp->GetRelativeLocation();
-		TargetLocation.Z += 40.0f;
-	}
-}
-
-
-//void APlayerCharacter::SmoothCameraTransition(FVector TargetLocation, float Duration)
+//void APlayerCharacter::StartSprint(const FInputActionValue& value)
 //{
-//	FVector StartLocation = CameraComp->GetRelativeLocation();
-//	float ElapsedTime = 0.0f;
-//
-//	float TimerInterval = 0.02f;
-//	GetWorldTimerManager().SetTimer(CameraTimer, FTimerDelegate::CreateLambda([this, StartLocation, TargetLocation, Duration, &ElapsedTime]()
-//		{
-//			float DeltaTime = GetWorld()->GetDeltaSeconds();
-//			ElapsedTime += DeltaTime;
-//
-//			float Alpha = FMath::InterpEaseOut(0.0f, 1.0f, ElapsedTime / Duration, 2.5f);
-//
-//			FVector NewLocation = FMath::Lerp(StartLocation, TargetLocation, Alpha);
-//			CameraComp->SetRelativeLocation(NewLocation);
-//
-//
-//			if (Alpha >= 1.0f)
-//			{
-//				GetWorldTimerManager().ClearTimer(CameraTimer);
-//			}
-//		}), TimerInterval, true);
+//	if (GetCharacterMovement())
+//	{
+//		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+//	}
 //}
-
-
+//void APlayerCharacter::StopSprint(const FInputActionValue& value)
+//{
+//	if (GetCharacterMovement())
+//	{
+//		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+//	}
+//}
 
 void APlayerCharacter::Dash(const FInputActionValue& value)
 {
-	if (!GetWorld())
-	{
-		return;
-	}
-
-	if (!bCanDash || !Controller)
+	if (!GetWorld() || !bCanDash || !Controller)
 	{
 		return;
 	}
 
 	bCanDash = false;
-
+	OnDashState.Broadcast(true);
+	OnDashCoolDown.Broadcast(DashCooldown);
 	float DashTime = 0.1f;
 	float DashSpeed = DashDistance / DashTime;
 
-	FVector DashDirection = GetActorForwardVector();
-	FVector DashVelocity = DashDirection * DashSpeed;
+	FVector DashDirection = GetLastMovementInputVector();
 
+	if (DashDirection.IsNearlyZero())
+	{
+		DashDirection = GetActorForwardVector();
+	}
+
+	DashDirection.Normalize();
+
+	FVector DashVelocity = DashDirection * DashSpeed;
 	LaunchCharacter(DashVelocity, true, true);
 
 	GetWorldTimerManager().SetTimer(DashStopTimer, this, &APlayerCharacter::StopDash, DashTime, false);
 
-	
-
 	GetWorldTimerManager().SetTimer(DashCooldownTimer, this, &APlayerCharacter::ResetDash, DashCooldown, false);
 
-	if (GetWorldTimerManager().IsTimerActive(DashCooldownTimer))
-	{
-	}
-	else
-	{
-		ResetDash();
-	}
+	UE_LOG(LogTemp, Warning, TEXT("대시 실행: 방향 = %s, 속도 = %f"), *DashDirection.ToString(), DashSpeed);
 }
-
-
 
 
 void APlayerCharacter::StopDash()
@@ -276,17 +213,32 @@ void APlayerCharacter::StopDash()
 	{
 		GetCharacterMovement()->StopMovementImmediately();
 	}
+
+	OnDashState.Broadcast(false);
 }
 
 void APlayerCharacter::ResetDash()
 {
-	bCanDash = true; 
+	bCanDash = true;
 
 	if (GetWorldTimerManager().IsTimerActive(DashCooldownTimer))
 	{
 		GetWorldTimerManager().ClearTimer(DashCooldownTimer);
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("대시 쿨다운 종료, 다시 대시 가능"));
 }
+
+void APlayerCharacter::IncreaseMouseSensitivity()
+{
+	SetMouseSensitivity(MouseSensitivity + 0.005f);
+}
+
+void APlayerCharacter::DecreaseMouseSensitivity()
+{
+	SetMouseSensitivity(MouseSensitivity - 0.005f);
+}
+
 
 
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -350,122 +302,129 @@ void APlayerCharacter::RegenerateShield()
 	UE_LOG(LogTemp, Warning, TEXT("실드 회복 중... 현재 실드: %f"), CurrentShield);
 }
 
-
-
 void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo)
 {
 	if (IsValid(CurrentWeapon))
 	{
 		CurrentAmmo = UpdateCurrentAmmo;
 		MaxAmmo = UpdateMaxAmmo;
+
+		OnAmmoChanged.Broadcast(CurrentAmmo, MaxAmmo);
 	}
 }
-
-//void APlayerCharacter::SwitchWeapon(ACGunBase* NewWeapon)
-//{
-//	EquipWeapon(NewWeapon, 2);
-//}
 
 void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("FireWeapon() 호출됨!"));
-
 	if (CurrentWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("현재 무기 Fire() 호출: %s"), *CurrentWeapon->GetName());
 		CurrentWeapon->Fire();
+		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 	}
-	else
+}
+
+
+bool APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
+{
+	if (!NewWeapon)
 	{
-		UE_LOG(LogTemp, Error, TEXT("현재 장착된 무기가 없음!"));
+		UE_LOG(LogTemp, Error, TEXT("EquipWeapon 실패: NewWeapon이 NULL임"));
+		return false;
 	}
+
+	if (Slot == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" EquipWeapon 오류 - 1번 무기는 변경할 수 없음!"));
+		return false;
+	}
+
+	//기존 무기 상태 로그 추가
+	UE_LOG(LogTemp, Warning, TEXT(" EquipWeapon 실행 - 교체 대상: %s"), *NewWeapon->GetName());
+
+	//현재 장착된 무기가 1번 슬롯(기본 무기)이라면, 기본 무기를 숨김 처리
+	if (CurrentWeapon && CurrentWeapon == Inventory[0])
+	{
+		UE_LOG(LogTemp, Warning, TEXT("기본 무기 숨김 처리: %s"), *Inventory[0]->GetName());
+		Inventory[0]->SetActorHiddenInGame(true);
+		Inventory[0]->GetWeaponMesh()->SetVisibility(false);
+	}
+
+	if (Inventory[1])
+	{
+		UE_LOG(LogTemp, Warning, TEXT("기존 무기 드랍 실행: %s"), *Inventory[1]->GetName());
+		DropCurrentWeapon(1);
+	}
+
+	//새로운 무기를 2번 슬롯에 저장
+	Inventory[1] = NewWeapon;
+	CurrentWeapon = Inventory[1];
+
+	//현재 슬롯을 2번으로 변경
+	CurrentWeaponSlot = 1;
+
+	//새로운 무기 부착
+	AttachWeaponToHand(CurrentWeapon, 1);
+
+	//무기 장착 후 상태 확인
+	UE_LOG(LogTemp, Warning, TEXT("🚨 EquipWeapon 실행 후 CurrentWeapon: %s"), *CurrentWeapon->GetName());
+
+	return true;
 }
 
 
 
 
-//void APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
-//{
-//	if (!NewWeapon)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("EquipWeapon 실패: NewWeapon이 NULL임"));
-//		return;
-//	}
 
-//	//  기존 무기를 손에서 제거 후 슬롯을 비움
-//	if (Slot == 1 && PrimaryWeapon)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("1번 슬롯의 기존 무기 삭제 시도: %s"), *PrimaryWeapon->GetName());
-//		DropCurrentWeapon(1);
-//		PrimaryWeapon = nullptr;
-//	}
-//	else if (Slot == 2 && SecondaryWeapon)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("2번 슬롯의 기존 무기 삭제 시도: %s"), *SecondaryWeapon->GetName());
-//		DropCurrentWeapon(2);
-//		SecondaryWeapon = nullptr;
-//	}
-//
-//	if (Slot == 1)
-//	{
-//		PrimaryWeapon = NewWeapon;
-//		CurrentWeapon = PrimaryWeapon;
-//		UE_LOG(LogTemp, Warning, TEXT("1번 무기 장착 완료 및 현재 무기로 설정: %s"), *NewWeapon->GetName());
-//	}
-//	else if (Slot == 2)
-//	{
-//		SecondaryWeapon = NewWeapon;
-//		CurrentWeapon = SecondaryWeapon;
-//		UE_LOG(LogTemp, Warning, TEXT("2번 무기 장착 완료 및 현재 무기로 설정: %s"), *NewWeapon->GetName());
-//	}
-//}
-//
-//
-//
-//
-//void APlayerCharacter::DropCurrentWeapon(int32 Slot)
-//{
-//	ACGunBase*& WeaponSlot = (Slot == 1) ? PrimaryWeapon : SecondaryWeapon;
-//	if (!WeaponSlot) return;
-//
-//	UE_LOG(LogTemp, Warning, TEXT("무기 드랍 시도: %s (슬롯: %d)"), *WeaponSlot->GetName(), Slot);
-//
-//	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
-//
-//	if (WeaponSlot->WeaponMesh)
-//	{
-//		//먼저 부착 해제 (Detach)
-//		WeaponSlot->WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-//
-//		//물리 시뮬레이션 활성화
-//		WeaponSlot->WeaponMesh->SetSimulatePhysics(true);
-//		WeaponSlot->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-//		WeaponSlot->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
-//
-//		//Impulse 적용 (살짝 튕겨나가게)
-//		FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, -800.0f);
-//		WeaponSlot->WeaponMesh->AddImpulse(DropImpulse, NAME_None, true);
-//
-//		UE_LOG(LogTemp, Warning, TEXT("무기에 Impulse 적용 후 드랍: %s"), *WeaponSlot->GetName());
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Error, TEXT("WeaponMesh가 존재하지 않습니다!"));
-//	}
-//
-//	// 슬롯에서 무기 제거
-//	WeaponSlot = nullptr;
-//	UE_LOG(LogTemp, Warning, TEXT("무기 드랍 완료"));
-//}
-//
-//
-//
-//
-//
-//
-//
-//
-//
+
+void APlayerCharacter::DropCurrentWeapon(int32 Slot)
+{
+	if (Slot == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("기본 무기(1번 슬롯)는 드랍할 수 없습니다."));
+		return;
+	}
+
+	if (!bCanDropWeapon) //쿨타임 중이면 실행하지 않음
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DropCurrentWeapon 실행 방지: 쿨다운 중"));
+		return;
+	}
+
+	ACGunBase*& WeaponSlot = Inventory[1]; // 2번 슬롯 무기
+	if (!WeaponSlot)
+	{
+		return;
+	}
+
+	//드랍 가능 플래그 OFF & 타이머 설정
+	bCanDropWeapon = false;
+	GetWorldTimerManager().SetTimer(DropWeaponCooldownTimer, this, &APlayerCharacter::ResetDropWeaponCooldown, 0.5f, false);
+
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f + FVector(0, 0, 50.0f);
+	FRotator DropRotation = GetActorRotation();
+
+	if (WeaponSlot->GetWeaponMesh())
+	{
+		WeaponSlot->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+		//물리 적용 활성화
+		WeaponSlot->GetWeaponMesh()->SetSimulatePhysics(true);
+		WeaponSlot->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+
+	WeaponSlot->SetActorLocation(DropLocation);
+	WeaponSlot->SetActorRotation(DropRotation);
+	WeaponSlot->SetActorHiddenInGame(false);
+	WeaponSlot->SetActorEnableCollision(true);
+
+	FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, 200.0f);
+	WeaponSlot->GetWeaponMesh()->AddImpulse(DropImpulse, NAME_None, true);
+
+	DroppedWeapons.Add(WeaponSlot);
+
+	//Inventory[1]을 즉시 nullptr로 변경
+	Inventory[1] = nullptr;
+}
+
 
 void APlayerCharacter::AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot)
 {
@@ -475,135 +434,149 @@ void APlayerCharacter::AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot)
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("AttachWeaponToHand 실행됨 - 장착할 무기: %s"), *NewWeapon->GetName());
+	//기존 무기 숨기기
+	HideCurrentWeapon();
 
-	//무기 타입에 따라 다른 소켓을 할당
-	FName HandSocket;
+	//손에 부착할 소켓 선택
+	FName HandSocket = TEXT("WeaponSocket");
 	switch (NewWeapon->WeaponType)
 	{
-	case EWeaponType::Rifle:
-		HandSocket = TEXT("RifleSocket");  //라이플 소켓
-		break;
-	case EWeaponType::Shotgun:
-		HandSocket = TEXT("ShotgunSocket");  //샷건 소켓
-		break;
-	default:
-		HandSocket = TEXT("WeaponSocket");  //기본 소켓
-		break;
+	case EWeaponType::Rifle: HandSocket = TEXT("RifleSocket"); break;
+	case EWeaponType::Shotgun: HandSocket = TEXT("ShotgunSocket"); break;
+	case EWeaponType::Sniper: HandSocket = TEXT("SniperSocket"); break;
+	case EWeaponType::Rocket: HandSocket = TEXT("RocketSocket"); break;
 	}
 
+	//무기 장착 직전 상태 확인
+	UE_LOG(LogTemp, Warning, TEXT("🚨 무기 장착 시도: %s"), *NewWeapon->GetName());
+
+	//무기를 손에 부착 (물리 적용 방지)
+	NewWeapon->GetWeaponMesh()->SetSimulatePhysics(false);
+	NewWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	NewWeapon->GetWeaponMesh()->AttachToComponent(
 		GetMesh(),
 		FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
 		HandSocket
 	);
 
-	//무기 위치 조정 (필요한 경우)
-	NewWeapon->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	NewWeapon->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-
-	//숨김 해제
+	//무기 보이기
 	NewWeapon->SetActorHiddenInGame(false);
-	UE_LOG(LogTemp, Warning, TEXT("✅ %s가 %s에 장착됨"), *NewWeapon->GetName(), *HandSocket.ToString());
+	NewWeapon->GetWeaponMesh()->SetVisibility(true);
+
+	CurrentWeapon = NewWeapon;
+	CurrentWeaponSlot = Slot;
+}
+
+void APlayerCharacter::PickupWeaponInput(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("G 키 입력 감지됨: 무기 줍기 시도"));
+
+	PickupWeapon();
 }
 
 
 
-
-//void APlayerCharacter::HandleSwapWeaponInput(const FInputActionValue& Value)
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("키 입력 감지됨: 무기 주울 시도 중"));
-//
-//	ACGunBase* DroppedWeapon = FindNearbyDroppedWeapon();
-//	if (!DroppedWeapon)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없습니다."));
-//		return;
-//	}
-//
-//	if (!SecondaryWeapon)
-//	{
-//		EquipWeapon(DroppedWeapon, 2);
-//		SwitchToSecondaryWeapon();
-//		UE_LOG(LogTemp, Warning, TEXT("2번 슬롯이 비어 있어 자동 장착 및 전환됨: %s"), *DroppedWeapon->GetName());
-//		return;
-//	}
-//
-//	SwapWeaponWithDropped(DroppedWeapon);
-//}
-//
-//
-//void APlayerCharacter::SwapWeaponWithDropped(ACGunBase* DroppedWeapon)
-//{
-//	if (!DroppedWeapon)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("교체할 무기가 없습니다."));
-//		return;
-//	}
-//
-//	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
-//
-//	if (CurrentWeaponSlot == 2)
-//	{
-//		if (SecondaryWeapon)
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("기존 2번 무기 드랍: %s"), *SecondaryWeapon->GetName());
-//
-//			//기존 무기 부착 해제
-//			SecondaryWeapon->WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-//
-//			//물리 시뮬레이션 활성화
-//			SecondaryWeapon->WeaponMesh->SetSimulatePhysics(true);
-//			SecondaryWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-//			SecondaryWeapon->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
-//
-//			//Impulse 적용 (살짝 튕겨나가게)
-//			FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, -800.0f);
-//			SecondaryWeapon->WeaponMesh->AddImpulse(DropImpulse, NAME_None, true);
-//
-//			UE_LOG(LogTemp, Warning, TEXT(기존 무기에 Impulse 적용 완료: %s"), *SecondaryWeapon->GetName());
-//		}
-//
-//		EquipWeapon(DroppedWeapon, 2);
-//		UE_LOG(LogTemp, Warning, TEXT("2번 무기 교체 완료, 새로운 무기: %s"), *DroppedWeapon->GetName());
-//	}
-//}
-//
-void APlayerCharacter::PickupWeapon()
+void APlayerCharacter::SwapWeaponWithDropped(ACGunBase* DroppedWeapon)
 {
-	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 시도 중..."));
-
-	ACGunBase* NearbyWeapon = FindNearbyDroppedWeapon();
-	if (!NearbyWeapon)
+	if (!DroppedWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("근처에 주울 무기가 없음"));
+		UE_LOG(LogTemp, Warning, TEXT("교체할 무기가 없습니다."));
 		return;
 	}
 
-	// 기존 2번 슬롯 무기가 있다면 교체
-	if (SecondaryWeapon)
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
+
+	if (CurrentWeaponSlot == 2)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("기존 2번 슬롯 무기 교체: %s -> %s"), *SecondaryWeapon->GetName(), *NearbyWeapon->GetName());
+		//무기 교체 전에 기존 무기를 드랍
+		if (SecondaryWeapon)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("기존 2번 무기 드랍: %s"), *SecondaryWeapon->GetName());
+
+			//기존 무기 부착 해제
+			SecondaryWeapon->WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+			//물리 시뮬레이션 활성화 (무기 드랍)
+			//이 부분을 EquipWeapon 이후로 이동!
+		}
+
+		//새로운 무기 장착
+		EquipWeapon(DroppedWeapon, 2);
+		UE_LOG(LogTemp, Warning, TEXT("2번 무기 교체 완료, 새로운 무기: %s"), *DroppedWeapon->GetName());
+
+		//기존 무기의 물리 활성화는 여기서 실행 (EquipWeapon 이후)
+		if (SecondaryWeapon)
+		{
+			SecondaryWeapon->WeaponMesh->SetSimulatePhysics(true);
+			SecondaryWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			SecondaryWeapon->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
+
+			// Impulse 적용 (살짝 튕겨나가게)
+			FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, -800.0f);
+			SecondaryWeapon->WeaponMesh->AddImpulse(DropImpulse, NAME_None, true);
+
+			UE_LOG(LogTemp, Warning, TEXT("기존 무기에 Impulse 적용 완료: %s"), *SecondaryWeapon->GetName());
+		}
 	}
-	else
+}
+
+
+
+void APlayerCharacter::PickupWeapon()
+{
+	UE_LOG(LogTemp, Warning, TEXT("G 키 입력 감지됨: 무기 줍기 시도"));
+
+	// 무기 줍기 쿨타임 체크
+	if (!bCanPickupWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("2번 슬롯이 비어 있음. 무기 장착: %s"), *NearbyWeapon->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("G 키 연속 입력 방지: 무기 줍기 동작이 쿨다운 중입니다!"));
+		return;
 	}
 
-	// 2번 슬롯에 새로운 무기 장착
-	SecondaryWeapon = NearbyWeapon;
-	CurrentWeapon = SecondaryWeapon;
-	AttachWeaponToHand(SecondaryWeapon, 2);
+	// 쿨타임 활성화
+	bCanPickupWeapon = false;
+	GetWorldTimerManager().SetTimer(PickupCooldownTimer, this, &APlayerCharacter::ResetPickupWeapon, 1.0f, false);
 
-	UE_LOG(LogTemp, Warning, TEXT("새로운 무기 장착 완료: %s"), *SecondaryWeapon->GetName());
+	// 주변에 무기가 있는지 확인
+	ACGunBase* NearbyWeapon = FindNearbyDroppedWeapon();
+
+	// 무기가 없을 경우 예외 방지
+	if (!NearbyWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없음 → 무기 교체 불가"));
+		return;
+	}
+
+	//이미 같은 무기 카테고리를 가지고 있는지 확인
+	if ((Inventory[0] && Inventory[0]->WeaponType == NearbyWeapon->WeaponType) ||
+		(Inventory[1] && Inventory[1]->WeaponType == NearbyWeapon->WeaponType))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("이미 같은 타입의 무기를 소지하고 있음: %d → 줍기 불가"), (int32)NearbyWeapon->WeaponType);
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("무기 획득 성공: %s"), *NearbyWeapon->GetName());
+
+	ACGunBase* OldWeapon = Inventory[1];
+
+	if (EquipWeapon(NearbyWeapon, 1))
+	{
+		if (OldWeapon)
+		{
+			DropCurrentWeapon(1);
+		}
+		UE_LOG(LogTemp, Warning, TEXT("무기 줍기 완료 → 새로운 무기 장착됨"));
+	}
 }
 
 
 ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 {
 	TArray<AActor*> OverlappingActors;
+	float PickupRadius = 200.0f; // 무기 감지 범위 조정
+
 	UKismetSystemLibrary::SphereOverlapActors(
-		this, GetActorLocation(), 200.0f,
+		this, GetActorLocation(), PickupRadius,
 		{ UEngineTypes::ConvertToObjectType(ECC_WorldDynamic) },
 		ACGunBase::StaticClass(), {}, OverlappingActors
 	);
@@ -611,66 +584,136 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 	for (AActor* Actor : OverlappingActors)
 	{
 		ACGunBase* FoundWeapon = Cast<ACGunBase>(Actor);
-		if (FoundWeapon)
+
+		//이미 같은 무기 카테고리가 있다면 무시
+		if (FoundWeapon &&
+			((Inventory[0] && Inventory[0]->WeaponType == FoundWeapon->WeaponType) ||
+				(Inventory[1] && Inventory[1]->WeaponType == FoundWeapon->WeaponType)))
 		{
-			return FoundWeapon;
+			UE_LOG(LogTemp, Warning, TEXT("이미 소지한 무기 카테고리와 동일: %d → 줍기 불가"), (int32)FoundWeapon->WeaponType);
+			continue;
 		}
+
+		return FoundWeapon;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("근처에 드랍된 무기가 없음"));
-
-	return nullptr; // nullptr 반환 추가
+	return nullptr;
 }
 
 
-//void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
-//{
-//	if (Slot == 1)
-//	{
-//		if (!PrimaryWeapon)
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("1번 무기가 없습니다."));
-//			return;
-//		}
-//
-//		CurrentWeapon = PrimaryWeapon;
-//		CurrentWeaponSlot = 1;
-//	}
-//	else if (Slot == 2)
-//	{
-//		if (!SecondaryWeapon)
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("2번 무기가 없습니다."));
-//			return;
-//		}
-//
-//		CurrentWeapon = SecondaryWeapon;
-//		CurrentWeaponSlot = 2;
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("잘못된 슬롯 번호: %d"), Slot);
-//		return;
-//	}
-//
-//	AttachWeaponToHand(CurrentWeapon, CurrentWeaponSlot);
-//
-//	UE_LOG(LogTemp, Warning, TEXT("무기 슬롯 변경 완료. 현재 무기: %s"), *CurrentWeapon->GetName());
-//}
-//
-//
+
+void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
+{
+	if (Slot == 0) //1번 무기로 변경
+	{
+		if (!Inventory[0])
+		{
+			UE_LOG(LogTemp, Error, TEXT("1번 무기가 없습니다. Inventory[0]이 nullptr 상태"));
+			return;
+		}
+
+		if (CurrentWeapon == Inventory[0])
+		{
+			UE_LOG(LogTemp, Warning, TEXT("현재 이미 1번 무기를 들고 있음"));
+			return;
+		}
+
+		HideCurrentWeapon();
+		Inventory[0]->SetActorHiddenInGame(false);
+		Inventory[0]->GetWeaponMesh()->SetVisibility(true);
+
+		CurrentWeapon = Inventory[0];
+		CurrentWeaponSlot = 0;
+
+		AttachWeaponToHand(CurrentWeapon, 0);
+
+		UE_LOG(LogTemp, Warning, TEXT("무기 변경 완료: 1번 무기로 교체 (%s)"), *CurrentWeapon->GetName());
+	}
+	else if (Slot == 1) //2번 무기로 변경
+	{
+		if (!Inventory[1])
+		{
+			UE_LOG(LogTemp, Warning, TEXT("2번 무기가 없습니다."));
+			return;
+		}
+
+		if (CurrentWeapon == Inventory[1])
+		{
+			UE_LOG(LogTemp, Warning, TEXT("현재 이미 2번 무기를 들고 있음"));
+			return;
+		}
+
+		HideCurrentWeapon();
+		Inventory[1]->SetActorHiddenInGame(false);
+		Inventory[1]->GetWeaponMesh()->SetVisibility(true);
+
+		CurrentWeapon = Inventory[1];
+		CurrentWeaponSlot = 1;
+
+		AttachWeaponToHand(CurrentWeapon, 1);
+
+		UE_LOG(LogTemp, Warning, TEXT("무기 변경 완료: 2번 무기로 교체 (%s)"), *CurrentWeapon->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("잘못된 슬롯 번호: %d"), Slot);
+	}
+}
+
+
+void APlayerCharacter::HideCurrentWeapon()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetActorHiddenInGame(true);
+	}
+
+	//무기 Mesh도 숨김 처리
+	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+	{
+		CurrentWeapon->GetWeaponMesh()->SetVisibility(false);
+	}
+}
+
+void APlayerCharacter::ResetPickupWeapon()
+{
+	bCanPickupWeapon = true;
+	UE_LOG(LogTemp, Warning, TEXT("무기 줍기 가능"));
+}
+
+void APlayerCharacter::ResetDropWeaponCooldown()
+{
+	bCanDropWeapon = true;
+	UE_LOG(LogTemp, Warning, TEXT("DropCurrentWeapon 쿨다운 종료, 다시 무기 드랍 가능"));
+}
+
+void APlayerCharacter::SetMouseSensitivity(float NewSensitivity)
+{
+	MouseSensitivity = FMath::Clamp(NewSensitivity, 0.1f, 5.0f);
+	UE_LOG(LogTemp, Warning, TEXT("마우스 감도 변경: %f"), MouseSensitivity);
+}
+
+void APlayerCharacter::ReloadWeapon()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Reload();
+	}
+}
+
+
 void APlayerCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	JumpCount = 0;
 }
-//
-//void APlayerCharacter::SwitchToPrimaryWeapon()
-//{
-//	SwitchWeaponSlot(1);
-//}
-//
-//void APlayerCharacter::SwitchToSecondaryWeapon()
-//{
-//	SwitchWeaponSlot(2);
-//}
+
+void APlayerCharacter::SwitchToPrimaryWeapon()
+{
+	SwitchWeaponSlot(0);
+}
+
+void APlayerCharacter::SwitchToSecondaryWeapon()
+{
+	SwitchWeaponSlot(1);
+}

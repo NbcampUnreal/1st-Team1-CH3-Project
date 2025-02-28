@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Widgets\InGame\SelectObjectBaseWidget.h"
 #include "CardWidget.generated.h"
 
 /**
@@ -14,33 +15,15 @@ class UTextBlock;
 class UButton;
 
 UCLASS()
-class GUNFIREPARAGON_API UCardWidget : public UUserWidget
+class GUNFIREPARAGON_API UCardWidget : public USelectObjectBaseWidget
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+
 protected:
-	UPROPERTY(meta = (BindWidget))
-	UImage* CardTexture;
-
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* CardName;
-
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* CardDescription;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* SelectButton;
-	
-public:
-	// DataAsset/DataTable을 사용한 데이터 참조
-	// Card(Passive) FString Contains를 사용한 비교, 존재시 해당 데이터테이블 값 참조 
-	void SetCardData();
-
-private:
-	UFUNCTION()
-	void SelectClicked();
+	virtual void ActivateObject() override;
 };

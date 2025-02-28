@@ -15,6 +15,7 @@ enum class EWeaponType : uint8
 	Rifle UMETA(DisplayName = "Rifle"),
 	Shotgun UMETA(DisplayName = "Shotgun"),
 	Sniper UMETA(DisplayName = "Sniper"),
+	Rocket UMETA(DisplayName = "Rocket"),
 	Default UMETA(DisplayName = "Default")  // 기본값
 };
 
@@ -35,6 +36,8 @@ public:
 	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	USkeletalMeshComponent* WeaponMesh;
+	//탄창을 재장전
+	virtual void Reload();
 
 protected:
 	
@@ -54,7 +57,7 @@ protected:
 	//탄창이 비었는지 확인
 	bool IsAmmoEmpty() ;
 
-	virtual void Reload();
+	
 	
 	FVector SpreadDirection(const FVector OriginDirection) const;
 

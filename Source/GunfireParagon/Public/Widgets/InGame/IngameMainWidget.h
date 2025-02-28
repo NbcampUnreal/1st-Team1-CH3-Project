@@ -31,7 +31,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UIngameCrossHairs* CrossHairWidget;
 
-
+	UPROPERTY(meta = (BindWidget))
+	class UDashEffectWidget* DashWidget;
 protected:
 	//Player Status
 	UFUNCTION()
@@ -40,8 +41,20 @@ protected:
 	UFUNCTION()
 	void OnPlayerShieldBinding(float CurrentShield, float MaxShield);
 
+	UFUNCTION()
+	void OnPlayerIsDashBinding(bool IsDash);
+
+	UFUNCTION()
+	void OnPlayerDashCooldownBinding(float DashCoolDown);
 	//Weapon Status
 	UFUNCTION()
 	void OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo);
 
+	//Minimap RenderIcon Update
+	UFUNCTION()
+	void OnMinimapUpdated(ACharacter* Target, float Distance);
+
+private:
+	// Minimap Rendering Character Distance
+	float MaxRenderDistance = 1600.f;
 };
