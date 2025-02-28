@@ -82,7 +82,9 @@ float UMonsterWidgetComponent::GetPlayerToDistance()
 void UMonsterWidgetComponent::ConvertVisibilityMode()
 {
 	ACharacter* Target = Cast<ACharacter>(GetOwner());
+	if (!Target) return;
+
 	bool Visibility = !(Target->IsHidden());
-	SetComponentTickEnabled(false);
+	SetComponentTickEnabled(Visibility);
 	SetVisibility(Visibility, true);
 }
