@@ -8,10 +8,10 @@ ANormalRangeEnemy::ANormalRangeEnemy()
     AIControllerClass = ABaseEnemyAIController::StaticClass();
 
     Damage = 20.0f;
-    AttackRange = 1000.0f;
+    AttackRange = 900.0f;
     AttackDelay = 3.0f;
     MaxHealth = 150.0f;
-    BaseWalkSpeed = 600.0f;
+    BaseWalkSpeed = 700.0f;
     CurrentHealth = MaxHealth;
 
 }

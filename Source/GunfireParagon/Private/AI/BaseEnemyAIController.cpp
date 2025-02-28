@@ -61,10 +61,18 @@ void ABaseEnemyAIController::OnPossess(APawn* InPawn)
 			BBComp->SetValueAsVector("SpawnLocation", InPawn->GetActorLocation());
 			BBComp->SetValueAsFloat("AttackRange", ControlledEnemy->AttackRange - 100.0f);
 			BBComp->SetValueAsFloat("AttackDelay", ControlledEnemy->AttackDelay);
+
+			APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+			if (PlayerPawn)
+			{
+				if (BBComp)
+				{
+					BBComp->SetValueAsObject("TargetPlayer", PlayerPawn);
+				}
+			}
 		}
 	}
 }
-
 
 void ABaseEnemyAIController::BeginPlay()
 {
