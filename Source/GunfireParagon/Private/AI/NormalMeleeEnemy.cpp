@@ -15,6 +15,8 @@ ANormalMeleeEnemy::ANormalMeleeEnemy()
     CurrentHealth = MaxHealth;
 
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+
+    EnemyName = "MinionMelee";
 }
 
 void ANormalMeleeEnemy::Attack(const FVector& TargetLocation)

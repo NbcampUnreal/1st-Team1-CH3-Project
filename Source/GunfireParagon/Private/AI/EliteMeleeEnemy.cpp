@@ -14,4 +14,6 @@ AEliteMeleeEnemy::AEliteMeleeEnemy()
     CurrentHealth = MaxHealth;
 
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+
+    EnemyName = "EliteMelee";
 }

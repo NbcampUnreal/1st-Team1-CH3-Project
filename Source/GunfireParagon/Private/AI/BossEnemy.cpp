@@ -21,8 +21,10 @@ ABossEnemy::ABossEnemy()
     LastKnownPlayerLocation = FVector::ZeroVector;
     TeleportLocation = FVector::ZeroVector;
     bUsedHealSkill = false;
-
+    
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+
+    EnemyName = "Boss";
 }
 
 void ABossEnemy::Attack(const FVector& TargetLocation)

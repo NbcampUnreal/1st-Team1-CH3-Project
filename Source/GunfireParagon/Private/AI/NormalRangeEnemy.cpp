@@ -14,6 +14,7 @@ ANormalRangeEnemy::ANormalRangeEnemy()
     BaseWalkSpeed = 700.0f;
     CurrentHealth = MaxHealth;
 
+    EnemyName = "MinionRange";
 }
 
 void ANormalRangeEnemy::Attack(const FVector& TargetLocation)

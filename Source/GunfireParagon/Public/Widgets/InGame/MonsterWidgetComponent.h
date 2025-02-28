@@ -32,6 +32,9 @@ protected:
 	void UpdateHP(float CurrentHP, float MaxHP);
 
 	UFUNCTION()
+	void UpdateName(FString TargetName);
+
+	UFUNCTION()
 	void UpdateForwardVector();
 
 	UFUNCTION()

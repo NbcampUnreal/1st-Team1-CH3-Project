@@ -14,6 +14,8 @@ AEliteRangeEnemy::AEliteRangeEnemy()
     MaxHealth = 300.0f;
     BaseWalkSpeed = 600.0f;
     CurrentHealth = MaxHealth;
+
+    EnemyName = "EliteRange";
 }
 
 void AEliteRangeEnemy::Attack(const FVector& TargetLocation)

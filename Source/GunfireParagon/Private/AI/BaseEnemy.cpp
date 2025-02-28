@@ -41,6 +41,17 @@ ABaseEnemy::ABaseEnemy()
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	EnemyName = "BaseMonster";
+}
+
+void ABaseEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//OnTargetName.Broadcast(GetClass()->GetName());
+	OnTargetName.Broadcast(EnemyName);
+	OnTargetHPChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
 void ABaseEnemy::Attack(const FVector& TargetLocation)
@@ -157,6 +168,8 @@ float ABaseEnemy::TakeDamage
 	{
 		OnDeath();
 	}
+
+	OnTargetHPChanged.Broadcast(CurrentHealth, MaxHealth);
 
 	return ActualDamage;
 }

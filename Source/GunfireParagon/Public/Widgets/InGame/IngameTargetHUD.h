@@ -20,8 +20,15 @@ class GUNFIREPARAGON_API UIngameTargetHUD : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
+
+	
 	UFUNCTION()
 	void UpdateHP(float Current, float Max);
+
+	UFUNCTION()
+	void UpdateTargetName(FString TargetName);
 
 private:
 	UPROPERTY(meta =(BindWidget))

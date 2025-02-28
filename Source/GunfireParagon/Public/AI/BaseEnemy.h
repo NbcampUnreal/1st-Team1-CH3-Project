@@ -5,6 +5,8 @@
 #include "BaseEnemy.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnSkillMontageEnded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangedEnemyValue, float, CurrentValue, float, MaxValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSettingEnemyName, FString, TargetName);
 
 UCLASS()
 class GUNFIREPARAGON_API ABaseEnemy : public ACharacter
@@ -13,6 +15,8 @@ class GUNFIREPARAGON_API ABaseEnemy : public ACharacter
 
 public:
 	ABaseEnemy();
+	
+	virtual void BeginPlay() override;
 
 	virtual void Attack(const FVector& TargetLocation);
 
@@ -68,4 +72,13 @@ protected:
 
 	TArray<AActor*> AlreadyHitActors;
 
+public:
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangedEnemyValue OnTargetHPChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnSettingEnemyName OnTargetName;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy Name")
+	FString EnemyName;
 };

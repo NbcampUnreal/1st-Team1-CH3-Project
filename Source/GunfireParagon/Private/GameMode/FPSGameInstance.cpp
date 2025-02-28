@@ -36,7 +36,7 @@ void UFPSGameInstance::StartGame()
 		}
 	}
 
-	// Test¿ëÀ¸·Î ÀÏ´Ü ¸¸µê. 5ÃÊµÚ 1½ºÅ×ÀÌÁö·Î ÀÌµ¿
+	// Testï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½. 5ï¿½Êµï¿½ 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
 	FTimerHandle TestTimer;
 	GetTimerManager().SetTimer(
 		TestTimer,

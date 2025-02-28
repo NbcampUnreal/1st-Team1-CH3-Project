@@ -6,6 +6,7 @@
 #include "Kismet\GameplayStatics.h"
 #include "GameFramework\Actor.h"
 #include "GameFramework\Character.h"
+#include "AI\BaseEnemy.h"
 
 UMonsterWidgetComponent::UMonsterWidgetComponent()
 {
@@ -14,6 +15,7 @@ UMonsterWidgetComponent::UMonsterWidgetComponent()
 	SetWidgetSpace(EWidgetSpace::World);
 	SetDrawSize(FVector2D(200.f, 50.f));
 	SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetRelativeLocation(FVector(0.f, 0.f, 120.f));
 	bDrawAtDesiredSize = false;
 }
 
@@ -21,9 +23,33 @@ void UMonsterWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (TargetHUDClass)
+	{
+		SetWidgetClass(TargetHUDClass);
+		InitWidget();
+	}
+
 	if (GetWidget() && GetWidget()->IsA(TargetHUDClass))
 	{
 		TargetHUD = Cast<UIngameTargetHUD>(GetWidget());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Error : Target HUD Not Binding."));
+	}
+
+	if (ABaseEnemy* Target = Cast<ABaseEnemy>(GetOwner()))
+	{
+		ConvertVisibilityMode();
+		if (!(Target->OnTargetHPChanged.IsBound()))
+		{
+			Target->OnTargetHPChanged.AddDynamic(this, &UMonsterWidgetComponent::UpdateHP);
+		}
+		
+		if (!Target->OnTargetName.IsBound())
+		{
+			Target->OnTargetName.AddDynamic(this, &UMonsterWidgetComponent::UpdateName);
+		}
 	}
 }
 
@@ -31,9 +57,9 @@ void UMonsterWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	float PlayerToDistance = GetPlayerToDistance();
-	UpdateScale(PlayerToDistance);
+	UpdateScale(GetPlayerToDistance());
 	UpdateForwardVector();
+	ConvertVisibilityMode();
 }
 
 void UMonsterWidgetComponent::UpdateScale(float Distance)
@@ -48,6 +74,14 @@ void UMonsterWidgetComponent::UpdateHP(float CurrentHP, float MaxHP)
 	if (TargetHUD)
 	{
 		TargetHUD->UpdateHP(CurrentHP, MaxHP);
+	}
+}
+
+void UMonsterWidgetComponent::UpdateName(FString TargetName)
+{
+	if (TargetHUD)
+	{
+		TargetHUD->UpdateTargetName(TargetName);
 	}
 }
 
@@ -78,10 +112,10 @@ float UMonsterWidgetComponent::GetPlayerToDistance()
 
 void UMonsterWidgetComponent::ConvertVisibilityMode()
 {
-	ACharacter* Target = Cast<ACharacter>(GetOwner());
+	ABaseEnemy* Target = Cast<ABaseEnemy>(GetOwner());
 	if (!Target) return;
 
-	bool Visibility = !(Target->IsHidden());
+	bool Visibility = !(Target->bIsDead);
 	SetComponentTickEnabled(Visibility);
 	SetVisibility(Visibility, true);
 }
