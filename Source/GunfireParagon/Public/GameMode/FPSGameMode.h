@@ -19,7 +19,6 @@ public:
 	
 	AFPSGameMode();
 	virtual void BeginPlay() override;
-	// void ClearAllEnemies();
 	void InitializeObjectPool();
 	void InitializeBulletPool();
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetPoolInitializationData();
@@ -38,6 +37,8 @@ public:
 	void SpawnEnemiesForStage(int32 StageNumber);
 	UFUNCTION()
 	void ClearAllEnemies();
+	UFUNCTION()
+	void ClearAllBullets();
 	UFUNCTION()
 	void EndGame(bool bPlayWin);
 	UFUNCTION()

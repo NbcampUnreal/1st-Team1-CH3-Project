@@ -54,6 +54,13 @@ void UFPSGameInstance::LoadNextStage()
 
 	if (StageMapNames.IsValidIndex(CurrentStageIndex))
 	{
+		AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+		if (FPSGameMode)
+		{
+			FPSGameMode->ClearAllBullets();
+			FPSGameMode->ClearAllEnemies();
+		}
+
 		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
 		UE_LOG(LogTemp, Warning, TEXT("OpenStage : %s"), *StageMapNames[CurrentStageIndex].ToString());
 	}

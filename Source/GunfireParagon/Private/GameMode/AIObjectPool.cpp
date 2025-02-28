@@ -6,6 +6,7 @@
 #include "GameMode/SpawnVolume.h"
 #include "Engine/World.h"
 #include "AI/NormalMeleeEnemy.h"
+#include "AI/BaseEnemy.h"
 
 
 AAIObjectPool::AAIObjectPool()
@@ -84,11 +85,10 @@ ABaseEnemy* AAIObjectPool::GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<AB
 				{
 					FVector SpawnLocation = SpawnVolume->GetSafeSpawnPoint();
 					Enemy->SetActorLocation(SpawnLocation);
-					Enemy->SetActorHiddenInGame(false);
-					UE_LOG(LogTemp, Log, TEXT("%d"), Enemy->IsHidden());
-					Enemy->SetActorEnableCollision(true);
-					Enemy->SetActorTickEnabled(true);
-
+					// Enemy->SetActorHiddenInGame(false);
+					// Enemy->SetActorEnableCollision(true);
+					// Enemy->SetActorTickEnabled(true);
+					Enemy->ResetEnemy();
 					UE_LOG(LogTemp, Log, TEXT("%s spawned from pool"), *EnemyClass->GetName());
 					return Enemy;
 				}

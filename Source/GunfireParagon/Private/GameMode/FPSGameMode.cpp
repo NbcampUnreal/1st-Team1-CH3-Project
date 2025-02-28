@@ -12,6 +12,7 @@
 #include "Player/MyPlayerController.h"
 #include "Player/PlayerCharacter.h"
 #include "AI/BaseEnemy.h"
+#include "Actor/Bullet/BulletBase.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -20,18 +21,14 @@ AFPSGameMode::AFPSGameMode()
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = APlayerCharacter::StaticClass();
 	GameStateClass = AFPSGameState::StaticClass();
-
-	
 }
 
 void AFPSGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	
-
 	InitializeObjectPool();
 	InitializeBulletPool();
-
 
 	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GetGameInstance());
 	if (FPSGameInstance)
@@ -152,7 +149,7 @@ void AFPSGameMode::SpawnEnemiesForStage(int32 StageNumber)
 					
 					if (SpawnedEnemy)
 					{
-						UE_LOG(LogTemp, Log, TEXT("Get Enemy from Pool Success"), EnemyCount);
+						UE_LOG(LogTemp, Warning, TEXT("Get Enemy from Pool Success"), EnemyCount);
 						FPSGameState->RemainingEnemies++;
 					}
 				}
@@ -214,11 +211,13 @@ void AFPSGameMode::SpawnPortal()
 	AActor* PortalSpawnPoint = nullptr;
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATargetPoint::StaticClass(), FoundActors);
+	UE_LOG(LogTemp, Warning, TEXT("Found %d PortalSpawnPoints"), FoundActors.Num());
 
 	for (AActor* Actor : FoundActors)
 	{
-		if (Actor->GetName() == TEXT("PortalSpawnPoint"))
+		if (Actor->ActorHasTag(FName("ClearPortalPoint")))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Found Actor: %s"), *Actor->GetFName().ToString());
 			PortalSpawnPoint = Actor;
 			break;
 		}
@@ -228,14 +227,20 @@ void AFPSGameMode::SpawnPortal()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Portal Spawn!"));
 
-		GetWorld()->SpawnActor<AClearPortal>(
+		AActor* SpawnedPortal = GetWorld()->SpawnActor<AClearPortal>(
 			PortalClass,
 			PortalSpawnPoint->GetActorLocation(),
-			FRotator::ZeroRotator);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Portal Spawn Failed"));
+			FRotator::ZeroRotator
+		);
+
+		if (SpawnedPortal)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Portal Spawned Successfully at Location: %s"), *PortalSpawnPoint->GetActorLocation().ToString());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Portal Spawn Failed!"));
+		}
 	}
 }
 
@@ -255,6 +260,24 @@ void AFPSGameMode::ClearAllEnemies()
 			Enemy->Destroy();
 		}
 	}
+}
+
+void AFPSGameMode::ClearAllBullets()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	TArray<AActor*> Bullets;
+	UGameplayStatics::GetAllActorsOfClass(World, ABulletBase::StaticClass(), Bullets);
+
+	for (AActor* Bullet : Bullets)
+	{
+		if (Bullet)
+		{
+			Bullet->Destroy();
+		}
+	}
+
 }
 
 void AFPSGameMode::EndGame(bool bPlayWin)
