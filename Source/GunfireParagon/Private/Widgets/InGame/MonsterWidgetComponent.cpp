@@ -25,9 +25,6 @@ void UMonsterWidgetComponent::BeginPlay()
 	{
 		TargetHUD = Cast<UIngameTargetHUD>(GetWidget());
 	}
-
-
-	GetWorld()->GetTimerManager().SetTimer(TestTimer, this, &UMonsterWidgetComponent::ConvertVisibilityMode, 10.f, false);
 }
 
 void UMonsterWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
