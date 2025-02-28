@@ -525,36 +525,35 @@ void APlayerCharacter::PickupWeapon()
 {
 	UE_LOG(LogTemp, Warning, TEXT("G 키 입력 감지됨: 무기 줍기 시도"));
 
-	//무기 줍기 쿨타임 체크
+	// 무기 줍기 쿨타임 체크
 	if (!bCanPickupWeapon)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("G 키 연속 입력 방지: 무기 줍기 동작이 쿨다운 중입니다!"));
 		return;
 	}
 
-	//쿨타임 활성화
+	// 쿨타임 활성화
 	bCanPickupWeapon = false;
 	GetWorldTimerManager().SetTimer(PickupCooldownTimer, this, &APlayerCharacter::ResetPickupWeapon, 1.0f, false);
 
-	//주변에 무기가 있는지 확인
+	// 주변에 무기가 있는지 확인
 	ACGunBase* NearbyWeapon = FindNearbyDroppedWeapon();
 
-	//무기가 없을 경우 예외 방지
+	// 무기가 없을 경우 예외 방지
 	if (!NearbyWeapon)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없음 → 무기 교체 불가"));
 		return;
 	}
 
-	//이미 가지고 있는 무기인지 확인
-	if ((Inventory[0] && Inventory[0]->GetClass() == NearbyWeapon->GetClass()) ||
-		(Inventory[1] && Inventory[1]->GetClass() == NearbyWeapon->GetClass()))
+	//이미 같은 무기 카테고리를 가지고 있는지 확인
+	if ((Inventory[0] && Inventory[0]->WeaponType == NearbyWeapon->WeaponType) ||
+		(Inventory[1] && Inventory[1]->WeaponType == NearbyWeapon->WeaponType))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("이미 가지고 있는 무기입니다! 줍기 불가"));
+		UE_LOG(LogTemp, Warning, TEXT("이미 같은 타입의 무기를 소지하고 있음: %d → 줍기 불가"), (int32)NearbyWeapon->WeaponType);
 		return;
 	}
 
-	//여기서부터는 NearbyWeapon이 NULL이 아님이 보장됨
 	UE_LOG(LogTemp, Warning, TEXT("무기 획득 성공: %s"), *NearbyWeapon->GetName());
 
 	ACGunBase* OldWeapon = Inventory[1];
@@ -568,6 +567,7 @@ void APlayerCharacter::PickupWeapon()
 		UE_LOG(LogTemp, Warning, TEXT("무기 줍기 완료 → 새로운 무기 장착됨"));
 	}
 }
+
 
 ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 {
@@ -584,12 +584,12 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 	{
 		ACGunBase* FoundWeapon = Cast<ACGunBase>(Actor);
 
-		//이미 가지고 있는 무기는 무시
-		if (FoundWeapon && FoundWeapon != CurrentWeapon &&
-			((Inventory[0] && Inventory[0]->GetClass() == FoundWeapon->GetClass()) ||
-				(Inventory[1] && Inventory[1]->GetClass() == FoundWeapon->GetClass())))
+		//이미 같은 무기 카테고리가 있다면 무시
+		if (FoundWeapon &&
+			((Inventory[0] && Inventory[0]->WeaponType == FoundWeapon->WeaponType) ||
+				(Inventory[1] && Inventory[1]->WeaponType == FoundWeapon->WeaponType)))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("이미 가지고 있는 무기: %s → 줍기 불가"), *FoundWeapon->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("이미 소지한 무기 카테고리와 동일: %d → 줍기 불가"), (int32)FoundWeapon->WeaponType);
 			continue;
 		}
 
@@ -598,6 +598,7 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 
 	return nullptr;
 }
+
 
 
 void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
