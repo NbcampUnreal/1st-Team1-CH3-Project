@@ -23,24 +23,32 @@ public:
 	void SavePlayerLocation(const FVector& Location);
 	FVector GetPlayerLocation() const;
 	
+
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	float ExperiencePoints;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
-	float PlayerHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
 	int32 CurrentStageIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
 	TArray<FName> StageMapNames;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TrapLevel")
 	FString PreviousLevelName;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TrapLevel")
-	bool bTrapPortalUsed = false;
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "TrapLevel")
 	FVector StoredPlayerLocation;
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "Mouse")
+	float MouseSensitivity;
 
-
+	
+	UFUNCTION(BlueprintCallable, Category = "Mouse")
+	void SaveMouseSensitivity();
+	UFUNCTION(BlueprintCallable, Category = "Mouse")
+	void LoadMouseSensitivity();
+	UFUNCTION(BlueprintCallable, Category = "Level System")
+	void AddExperiencePoint(float ExpAmount);
+	UFUNCTION(BlueprintCallable, Category = "Level System")
+	void LevelUp();
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
 	UFUNCTION(BlueprintCallable)

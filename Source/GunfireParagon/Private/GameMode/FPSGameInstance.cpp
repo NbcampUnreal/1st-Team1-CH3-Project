@@ -8,13 +8,14 @@
 #include "AI/NormalMeleeEnemy.h"
 #include "AI/NormalRangeEnemy.h"
 #include "Player/PlayerCharacter.h"
+#include "Player/MyPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 UFPSGameInstance::UFPSGameInstance()
 {
+	MouseSensitivity = 
 	PlayerLevel = 1;
 	ExperiencePoints = 0.f;
-	PlayerHealth = 1000.0f;
 	CurrentStageIndex = 0; 
 	PreviousLevelName = TEXT("");
 }
@@ -61,12 +62,11 @@ void UFPSGameInstance::LoadNextStage()
 		{
 			FPSGameMode->ClearAllBullets();
 			FPSGameMode->ClearAllEnemies();
+			SaveMouseSensitivity();
 		}
 
 		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
 		UE_LOG(LogTemp, Warning, TEXT("OpenStage : %s"), *StageMapNames[CurrentStageIndex].ToString());
-
-		bTrapPortalUsed = false;
 	}
 }
 
@@ -126,6 +126,59 @@ void UFPSGameInstance::SavePlayerLocation(const FVector& Location)
 FVector UFPSGameInstance::GetPlayerLocation() const
 {
 	return StoredPlayerLocation;
+}
+
+
+
+void UFPSGameInstance::SaveMouseSensitivity()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		AMyPlayerController* FPSPlayerController = Cast<AMyPlayerController>(PlayerController);
+		if (FPSPlayerController)
+		{
+			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FPSPlayerController->GetPawn());
+			if (PlayerCharacter)
+			{
+				// MouseSensitivity = PlayerCharacter->MouseSensitivity or GetMouseSensitivity();
+			}
+		}
+	}
+}
+
+void UFPSGameInstance::LoadMouseSensitivity()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		AMyPlayerController* FPSPlayerController = Cast<AMyPlayerController>(PlayerController);
+		if (FPSPlayerController)
+		{
+			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FPSPlayerController->GetPawn());
+			if (PlayerCharacter)
+			{
+				// PlayerCharacter->MouseSensitivity = MouseSensitivity; || SetMouseSensitivity(MouseSensitivity);
+			}
+		}
+	}
+}
+
+void UFPSGameInstance::AddExperiencePoint(float ExpAmount)
+{
+	ExperiencePoints += ExpAmount;
+
+	//hile (PlayerLevel < ExpRequired.Num() - 1 && ExpRequired
+}
+
+void UFPSGameInstance::LevelUp()
+{
 }
 
 

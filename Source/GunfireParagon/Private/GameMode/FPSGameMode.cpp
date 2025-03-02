@@ -99,7 +99,6 @@ void AFPSGameMode::InitializeBulletPool()
 }
 
 
-
 TMap<TSubclassOf<ABaseEnemy>, int32> AFPSGameMode::GetPoolInitializationData()
 {
 	TMap<TSubclassOf<ABaseEnemy>, int32> PoolData;
@@ -261,6 +260,7 @@ void AFPSGameMode::TravelToLevel(FName LevelName)
 		FString CurrentLevel = World->GetMapName();
 		CurrentLevel.RemoveFromStart(World->StreamingLevelsPrefix);
 		FPSGameInstance->SetPreviousLevel(CurrentLevel);
+		SavePlayerLocation();
 
 		UE_LOG(LogTemp, Warning, TEXT("Saved Previous Level: %s"), *CurrentLevel);
 	}
@@ -291,8 +291,6 @@ void AFPSGameMode::SpawnTrapPortals()
 {
 	UFPSGameInstance* FPSGameInstnace = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
 	if (!FPSGameInstnace) return;
-
-	if (FPSGameInstnace->bTrapPortalUsed) return;
 
 	AActor* TrapPortalSpawnPoint = nullptr;
 	TArray<AActor*> FoundActors;

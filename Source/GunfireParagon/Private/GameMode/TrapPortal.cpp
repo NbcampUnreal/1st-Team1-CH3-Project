@@ -51,10 +51,7 @@ void ATrapPortal::OnPortalOverlap(
 		{
 			if (PortalType == ETrapPortalTypes::TravelToTrap)
 			{
-				FPSGameInstance->bTrapPortalUsed = true;
 				FPSGameMode->TravelToLevel("Stage_Trap_01");
-
-				Destroy();
 			}
 			else if (PortalType == ETrapPortalTypes::ReturnToStage)
 			{
