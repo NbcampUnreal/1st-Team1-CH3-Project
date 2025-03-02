@@ -66,4 +66,5 @@ public:
 	TSubclassOf<ATrapPortal> TrapPortalClass;
 
 	bool bIsObjectPoolReady;
+	bool bIsInTrapLevel;
 };

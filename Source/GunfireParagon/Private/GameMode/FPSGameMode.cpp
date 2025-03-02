@@ -29,12 +29,33 @@ AFPSGameMode::AFPSGameMode()
 void AFPSGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("GameMode BeginPlay() Called"));
+
+	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
+	if (FPSGameInstance)
+	{
+		FString PreviousLevel = FPSGameInstance->GetPreviousLevel();
+		bIsInTrapLevel = FPSGameInstance->bIsInTrapLevel;
+		if (bIsInTrapLevel)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("BeginPlay() - Returning from TrapLevel, Restoring Player Location."));
+			RestorePlayerLocation();
+			FPSGameInstance->bIsInTrapLevel = false;
+		}
+		else
+		{
+			FPSGameInstance->bIsInTrapLevel = false;
+			UE_LOG(LogTemp, Warning, TEXT("BeginPlay() - Normal level transition, skipping RestorePlayerLocation()."));
+			SpawnTrapPortals();
+		}
+
+	}
 	
-	SpawnTrapPortals();
 	InitializeObjectPool();
 	InitializeBulletPool();
 
-	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	// UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GetGameInstance());
 	if (FPSGameInstance)
 	{
 		int32 CurrentStageIndex = FPSGameInstance->CurrentStageIndex;
@@ -57,6 +78,7 @@ void AFPSGameMode::BeginPlay()
 	}
 	*/
 }
+
 
 void AFPSGameMode::InitializeObjectPool()
 {
@@ -138,23 +160,29 @@ void AFPSGameMode::SpawnEnemiesForStage(int32 StageNumber)
 
 	if (FoundVolumes.Num() > 0)
 	{
-		ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
-		if (SpawnVolume)
+		UE_LOG(LogTemp, Warning, TEXT("Found %d SpawnVolumes"), FoundVolumes.Num());
+
+		for (const TPair<TSubclassOf<ABaseEnemy>, int32>& Pair : EnemyData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Found SpawnVolume"));
-			for (const TPair<TSubclassOf<ABaseEnemy>, int32>& Pair : EnemyData)
+			TSubclassOf<ABaseEnemy> EnemyClass = Pair.Key;
+			int32 EnemyCount = Pair.Value;
+			UE_LOG(LogTemp, Warning, TEXT("Get Pair Value: %d"), EnemyCount);
+
+			for (int32 i = 0; i < EnemyCount; i++)
 			{
-				TSubclassOf<ABaseEnemy> EnemyClass = Pair.Key;
-				int32 EnemyCount = Pair.Value;
-				UE_LOG(LogTemp, Warning, TEXT("Get Pair Value: %d"), EnemyCount);
-				for (int32 i = 0; i < EnemyCount; i++)
+				int32 RandomIndex = FMath::RandRange(0, FoundVolumes.Num() - 1);
+				ASpawnVolume* SelectedSpawnVolume = Cast<ASpawnVolume>(FoundVolumes[RandomIndex]);
+
+				if (SelectedSpawnVolume)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("Using SpawnVolume at index: %d"), RandomIndex);
 					UE_LOG(LogTemp, Warning, TEXT("Try Get Enemy :%s from Pool"), *EnemyClass->GetName());
-					ABaseEnemy* SpawnedEnemy = ObjectPoolInstance->GetPooledAI(SpawnVolume, EnemyClass);
-					
+
+					ABaseEnemy* SpawnedEnemy = ObjectPoolInstance->GetPooledAI(SelectedSpawnVolume, EnemyClass);
+
 					if (SpawnedEnemy)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("Get Enemy from Pool Success"), EnemyCount);
+						UE_LOG(LogTemp, Warning, TEXT("Get Enemy from Pool Success"));
 						FPSGameState->RemainingEnemies++;
 					}
 				}
@@ -260,11 +288,10 @@ void AFPSGameMode::TravelToLevel(FName LevelName)
 		FString CurrentLevel = World->GetMapName();
 		CurrentLevel.RemoveFromStart(World->StreamingLevelsPrefix);
 		FPSGameInstance->SetPreviousLevel(CurrentLevel);
-		SavePlayerLocation();
 
 		UE_LOG(LogTemp, Warning, TEXT("Saved Previous Level: %s"), *CurrentLevel);
 	}
-	
+	SavePlayerLocation();
 	World->ServerTravel(LevelName.ToString(), true);
 }
 
@@ -278,13 +305,15 @@ void AFPSGameMode::ReturnToPreviousLevel()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Returning to Level: %s"), *PreviousLevel);
 			GetWorld()->ServerTravel(PreviousLevel, true);
-			GetWorld()->GetTimerManager().SetTimerForNextTick(this, &AFPSGameMode::RestorePlayerLocation);
+			// GetWorld()->GetTimerManager().SetTimerForNextTick(this, &AFPSGameMode::RestorePlayerLocation);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("PreviousLevel is Empthy"));
 		}
 	}
+	bIsInTrapLevel = true;
+	FPSGameInstance->bIsInTrapLevel = bIsInTrapLevel;
 }
 
 void AFPSGameMode::SpawnTrapPortals()
@@ -346,8 +375,7 @@ void AFPSGameMode::SavePlayerLocation()
 		{
 			FPSGameInstance->StoredPlayerLocation = FPSPlayerController->GetPawn()->GetActorLocation();
 			UE_LOG(LogTemp, Warning, TEXT("Saved Player Location: %s"), *FPSGameInstance->StoredPlayerLocation.ToString());
-		}
-		
+		}	
 	}	
 }
 
@@ -364,7 +392,7 @@ void AFPSGameMode::RestorePlayerLocation()
 		if (FPSGameInstance)
 		{
 			FVector SavedLocation = FPSGameInstance->StoredPlayerLocation;
-			FPSPlayerController->GetPawn()->SetActorLocation(SavedLocation);
+			FPSPlayerController->GetPawn()->SetActorLocation(SavedLocation, false, nullptr, ETeleportType::TeleportPhysics);
 			UE_LOG(LogTemp, Warning, TEXT("Restored Player Location: %s"), *SavedLocation.ToString());
 		}	
 	}

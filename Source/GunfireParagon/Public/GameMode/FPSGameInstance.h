@@ -23,7 +23,7 @@ public:
 	void SavePlayerLocation(const FVector& Location);
 	FVector GetPlayerLocation() const;
 	
-
+	bool bIsInTrapLevel = false;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;

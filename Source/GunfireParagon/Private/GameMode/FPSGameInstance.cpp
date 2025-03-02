@@ -57,6 +57,15 @@ void UFPSGameInstance::LoadNextStage()
 
 	if (StageMapNames.IsValidIndex(CurrentStageIndex))
 	{
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			AMyPlayerController* FPSPlayerController = Cast<AMyPlayerController>(PlayerController);
+			if (!FPSPlayerController || !FPSPlayerController->GetPawn()) return;
+
+			StoredPlayerLocation = FPSPlayerController->GetPawn()->GetActorLocation();
+			UE_LOG(LogTemp, Warning, TEXT("Saved Player Location: %s"), *StoredPlayerLocation.ToString())
+		}
 		AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
 		if (FPSGameMode)
 		{

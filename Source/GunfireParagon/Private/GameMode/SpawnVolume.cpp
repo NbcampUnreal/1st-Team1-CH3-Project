@@ -50,7 +50,7 @@ FVector ASpawnVolume::GetSafeSpawnPoint() const
         bool bBlocked = GetWorld()->SweepSingleByObjectType(
             HitResult,
             SpawnPoint,
-            SpawnPoint + FVector(0, 0, 10),
+            SpawnPoint,
             FQuat::Identity,
             ObjectQueryParams,  
             FCollisionShape::MakeSphere(50.0f),
@@ -58,6 +58,12 @@ FVector ASpawnVolume::GetSafeSpawnPoint() const
         );
 
         
+        if (!bBlocked)
+        {
+            return SpawnPoint;
+        }
+
+        /*
         if (!bBlocked && NavSystem)
         {
             FNavLocation NavLocation;
@@ -67,6 +73,7 @@ FVector ASpawnVolume::GetSafeSpawnPoint() const
                 return NavLocation.Location;
             }
         }
+        */
     }
 
     return SpawnPoint;
