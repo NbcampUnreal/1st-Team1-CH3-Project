@@ -71,6 +71,9 @@ public:
 
 	UFUNCTION()
 	float GetMaxAmmo() { return MaxAmmo; }
+
+	UFUNCTION(BlueprintCallable)
+	void DisableWeaponShadows();
 	
 //총기의 스텟관련 변수들,assetraw에서 데이터 받아와서저장시킬예정
 protected:

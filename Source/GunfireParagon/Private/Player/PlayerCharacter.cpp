@@ -29,12 +29,44 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentHealth = MaxHealth;
-	CurrentShield = MaxShield;
+	if (GetMesh())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("1인칭 메시 확인됨"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("1인칭 메시가 nullptr입니다!"));
+	}
+
+	if (ThirdPersonMesh)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("3인칭 메시 확인됨"));
+		ThirdPersonMesh->SetOwnerNoSee(false);
+		ThirdPersonMesh->bCastDynamicShadow = true;
+		ThirdPersonMesh->bCastHiddenShadow = true;
+		ThirdPersonMesh->CastShadow = true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("3인칭 메시가 nullptr입니다!"));
+	}
+
+	GetMesh()->SetSimulatePhysics(false); // 1인칭 메시 기본 설정
+	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
+
+	SetPlayerStatus(MaxHealth, MaxShield);
 
 	NormalSpeed = 1000.0f;
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 
+	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	if (GameInstance)
+	{
+		GameInstance->LoadPlayerStats(this);
+		ApplyLevelStats();
+		GameInstance->LoadMouseSensitivity();
+		SetMouseSensitivity(GameInstance->MouseSensitivity);
+	}
 
 	if (DefaultWeaponClass)
 	{
@@ -84,6 +116,13 @@ void APlayerCharacter::InitializeCharacter()
 
 	DefaultCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 	MeshOffset = GetMesh()->GetRelativeLocation();
+
+	ThirdPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ThirdPersonMesh"));
+	ThirdPersonMesh->SetupAttachment(RootComponent);
+	ThirdPersonMesh->SetOwnerNoSee(true);
+	ThirdPersonMesh->bCastDynamicShadow = true;
+	ThirdPersonMesh->bCastHiddenShadow = true;
+	ThirdPersonMesh->CastShadow = true;
 }
 
 #define BIND_INPUT_ACTION(Action, Event, Function) \
@@ -128,14 +167,22 @@ void APlayerCharacter::Move(const FInputActionValue& value)
 
 	if (!FMath::IsNearlyZero(MoveInput.X))
 	{
-		AddMovementInput(GetActorForwardVector(), MoveInput.X);
+		//Pitch(상하 회전) 제거 후 이동 방향 계산
+		FRotator ControlRotation = Controller->GetControlRotation();
+		ControlRotation.Pitch = 0.0f; //상하 회전 영향 제거
+		FVector ForwardDirection = FRotationMatrix(ControlRotation).GetUnitAxis(EAxis::X);
+
+		AddMovementInput(ForwardDirection, MoveInput.X);
 	}
 
 	if (!FMath::IsNearlyZero(MoveInput.Y))
 	{
-		AddMovementInput(GetActorRightVector(), MoveInput.Y);
+		FVector RightDirection = GetActorRightVector();
+		AddMovementInput(RightDirection, MoveInput.Y);
 	}
 }
+
+
 void APlayerCharacter::StartJump(const FInputActionValue& value)
 {
 	if (JumpCount < MaxJumpCount)
@@ -144,6 +191,7 @@ void APlayerCharacter::StartJump(const FInputActionValue& value)
 		JumpCount++;
 	}
 }
+
 void APlayerCharacter::StopJump(const FInputActionValue& value)
 {
 	if (!value.Get<bool>())
@@ -151,6 +199,7 @@ void APlayerCharacter::StopJump(const FInputActionValue& value)
 		StopJumping();
 	}
 }
+
 void APlayerCharacter::Look(const FInputActionValue& value)
 {
 	FVector2D LookInput = value.Get<FVector2D>();
@@ -239,24 +288,44 @@ void APlayerCharacter::DecreaseMouseSensitivity()
 	SetMouseSensitivity(MouseSensitivity - 0.005f);
 }
 
+void APlayerCharacter::ApplyLevelStats()
+{
+	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	if (!GameInstance) return;
+
+	int32 PlayerLevel = GameInstance->PlayerLevel;
+
+	MaxHealth = 100 + (PlayerLevel * 10);
+	MaxShield = 50 + (PlayerLevel * 5);
+
+	CurrentHealth = MaxHealth;
+	CurrentShield = MaxShield;
+
+	UE_LOG(LogTemp, Warning, TEXT("레벨 %d 적용됨 - 체력: %f, 실드: %f"), PlayerLevel, MaxHealth, MaxShield);
+
+	GameInstance->SavePlayerStats(this);
+}
 
 
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bIsDead)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TakeDamage 호출됨 - 하지만 이미 사망한 상태임 (bIsDead = true)"));
+		return 0.0f;
+	}
+
+	float RemainingDamage = DamageAmount;
 	if (CurrentShield > 0)
 	{
-		float RemainingDamage = FMath::Clamp(DamageAmount - CurrentShield, 0.0f, DamageAmount);
+		RemainingDamage = FMath::Clamp(DamageAmount - CurrentShield, 0.0f, DamageAmount);
 		CurrentShield = FMath::Clamp(CurrentShield - DamageAmount, 0.0f, MaxShield);
-
-		if (RemainingDamage > 0)
-		{
-			CurrentHealth = FMath::Clamp(CurrentHealth - RemainingDamage, 0.0f, MaxHealth);
-		}
 	}
-	else
+
+	if (RemainingDamage > 0)
 	{
-		CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.0f, MaxHealth);
+		CurrentHealth = FMath::Clamp(CurrentHealth - RemainingDamage, 0.0f, MaxHealth);
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("플레이어가 공격받음 피해량: %f | 현재 체력: %f | 실드: %f"),
@@ -265,19 +334,47 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	GetWorldTimerManager().ClearTimer(ShieldRegenTimer);
 	GetWorldTimerManager().SetTimer(ShieldRegenTimer, this, &APlayerCharacter::StartShieldRegen, ShieldRegenDelay, false);
 
+	SetPlayerStatus(CurrentHealth, CurrentShield);
+
 	if (CurrentHealth <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("플레이어 사망"));
+		UE_LOG(LogTemp, Warning, TEXT("체력이 0 이하가 됨 - 사망 처리 시작"));
+
+		/*if (!bIsDead)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("bIsDead가 false이므로 HandlePlayerDeath() 실행"));
+			bIsDead = true;
+
+			UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+			if (GameInstance)
+			{
+				GameInstance->SavePlayerStats(this);
+			}
+
+			HandlePlayerDeath();
+		}*/
 	}
 
 	return DamageAmount;
 }
 
+
+
 void APlayerCharacter::Heal(float HealAmount)
 {
-	CurrentHealth = FMath::Clamp(CurrentHealth + HealAmount, 0.0f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("체력 회복... 현재 체력: %f"), CurrentHealth);
+	SetPlayerStatus(CurrentHealth + HealAmount, CurrentShield);
 }
+
+
+void APlayerCharacter::GainExperience(float ExpAmount)
+{
+	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	if (GameInstance)
+	{
+		GameInstance->AddExperiencePoint(ExpAmount);
+	}
+}
+
 
 void APlayerCharacter::StartShieldRegen()
 {
@@ -364,8 +461,7 @@ bool APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
 	//새로운 무기 부착
 	AttachWeaponToHand(CurrentWeapon, 1);
 
-	//무기 장착 후 상태 확인
-	UE_LOG(LogTemp, Warning, TEXT("🚨 EquipWeapon 실행 후 CurrentWeapon: %s"), *CurrentWeapon->GetName());
+	CurrentWeapon->DisableWeaponShadows();
 
 	return true;
 }
@@ -601,7 +697,6 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 }
 
 
-
 void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 {
 	if (Slot == 0) //1번 무기로 변경
@@ -660,6 +755,111 @@ void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 	}
 }
 
+void APlayerCharacter::SetPlayerStatus(float NewHealth, float NewShield)
+{
+	CurrentHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+	CurrentShield = FMath::Clamp(NewShield, 0.0f, MaxShield);
+
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	OnShieldChanged.Broadcast(CurrentShield, MaxShield);
+}
+
+void APlayerCharacter::DisableFirstPersonShadows()
+{
+	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh()) // 1인칭 무기 그림자 제거
+	{
+		CurrentWeapon->GetWeaponMesh()->bCastDynamicShadow = false;
+		CurrentWeapon->GetWeaponMesh()->CastShadow = false;
+	}
+}
+
+//void APlayerCharacter::HandlePlayerDeath()
+//{
+//	if (bIsDead) return;
+//
+//	UE_LOG(LogTemp, Warning, TEXT(" HandlePlayerDeath() 실행됨 - Ragdoll 및 숨김 처리 시작"));
+//
+//	bIsDead = true;
+//
+//	//  1인칭 메시 숨기기
+//	if (GetMesh())
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("1인칭 메시 숨기기 시도"));
+//		GetMesh()->SetVisibility(false, true);  //  1인칭 메시 숨김
+//		GetMesh()->SetOwnerNoSee(true);
+//		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//		UE_LOG(LogTemp, Warning, TEXT(" 1인칭 메시 숨김 완료"));
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Error, TEXT(" GetMesh()가 nullptr입니다."));
+//	}
+//
+//	//  현재 들고 있는 무기 숨기기
+//	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("현재 들고 있는 무기 숨기기 시도: %s"), *CurrentWeapon->GetName());
+//		CurrentWeapon->GetWeaponMesh()->SetVisibility(false, true);  //  무기 숨김
+//		CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//		UE_LOG(LogTemp, Warning, TEXT(" 현재 들고 있는 무기 숨김 완료"));
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("현재 들고 있는 무기가 nullptr입니다."));
+//	}
+//
+//	//  3인칭 메시 Ragdoll 적용
+//	if (ThirdPersonMesh)
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("3인칭 메시 Ragdoll 적용 시도"));
+//
+//		ThirdPersonMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+//		ThirdPersonMesh->SetSimulatePhysics(true);
+//		ThirdPersonMesh->SetAllBodiesSimulatePhysics(true);
+//		ThirdPersonMesh->SetAllBodiesPhysicsBlendWeight(1.0f);
+//		ThirdPersonMesh->SetEnableGravity(true);
+//
+//		UE_LOG(LogTemp, Warning, TEXT(" 3인칭 메시 Ragdoll 적용 완료"));
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Error, TEXT(" ThirdPersonMesh가 nullptr입니다."));
+//	}
+//
+//	UE_LOG(LogTemp, Warning, TEXT(" HandlePlayerDeath() 완료 - Ragdoll 및 숨김 처리 완료"));
+//}
+
+//void APlayerCharacter::StartDeathCameraEffect()
+//{
+//	APlayerController* PC = Cast<APlayerController>(GetController());
+//	if (!PC)
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("StartDeathCameraEffect() 실패: PlayerController가 없음"));
+//		return;
+//	}
+//
+//	UE_LOG(LogTemp, Warning, TEXT("카메라 줌아웃 시작"));
+//
+//	FVector CameraLocation = CameraComp->GetComponentLocation();
+//	FVector ZoomOutLocation = CameraLocation - GetActorForwardVector() * 200.0f + FVector(0, 0, 50);
+//
+//	//  즉시 위치 변경 (테스트)
+//	CameraComp->SetWorldLocation(ZoomOutLocation);
+//	UE_LOG(LogTemp, Warning, TEXT("카메라 위치 변경됨: %s"), *ZoomOutLocation.ToString());
+//
+//	//  SetTimer를 사용한 부드러운 줌아웃 유지
+//	FTimerHandle TimerHandle;
+//	GetWorldTimerManager().SetTimer(TimerHandle, [this, ZoomOutLocation]()
+//		{
+//			FVector NewLocation = FMath::VInterpTo(CameraComp->GetComponentLocation(), ZoomOutLocation, GetWorld()->GetDeltaSeconds(), 2.0f);
+//			CameraComp->SetWorldLocation(NewLocation);
+//			UE_LOG(LogTemp, Warning, TEXT("카메라 이동 중... 현재 위치: %s"), *NewLocation.ToString());
+//		}, 0.01f, true, 0.1f);
+//}
+
+
+
+
 
 void APlayerCharacter::HideCurrentWeapon()
 {
@@ -668,7 +868,6 @@ void APlayerCharacter::HideCurrentWeapon()
 		CurrentWeapon->SetActorHiddenInGame(true);
 	}
 
-	//무기 Mesh도 숨김 처리
 	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
 	{
 		CurrentWeapon->GetWeaponMesh()->SetVisibility(false);
@@ -693,6 +892,12 @@ void APlayerCharacter::SetMouseSensitivity(float NewSensitivity)
 	UE_LOG(LogTemp, Warning, TEXT("마우스 감도 변경: %f"), MouseSensitivity);
 }
 
+float APlayerCharacter::GetMouseSensitivity() const
+{
+	return MouseSensitivity;
+}
+
+
 void APlayerCharacter::ReloadWeapon()
 {
 	if (CurrentWeapon)
@@ -700,7 +905,6 @@ void APlayerCharacter::ReloadWeapon()
 		CurrentWeapon->Reload();
 	}
 }
-
 
 void APlayerCharacter::Landed(const FHitResult& Hit)
 {
@@ -717,3 +921,5 @@ void APlayerCharacter::SwitchToSecondaryWeapon()
 {
 	SwitchWeaponSlot(1);
 }
+
+

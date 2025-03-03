@@ -1,4 +1,5 @@
 #include "Player/MyPlayerController.h"
+#include "GameMode/FPSGameInstance.h"
 #include "EnhancedInputSubsystems.h"
 
 AMyPlayerController::AMyPlayerController()
@@ -6,7 +7,6 @@ AMyPlayerController::AMyPlayerController()
 	MoveAction(nullptr),
 	LookAction(nullptr),
 	JumpAction(nullptr),
-	//SprintAction(nullptr),
 	DashAction(nullptr),
 	FireAction(nullptr),
 	SwitchToPrimaryWeaponAction(nullptr),
@@ -15,6 +15,7 @@ AMyPlayerController::AMyPlayerController()
 	IncreaseSensitivityAction(nullptr),
 	DecreaseSensitivityAction(nullptr),
 	ReloadAction(nullptr)
+	//SprintAction(nullptr)
 	//DebugDamageAction(nullptr)
 {
 }
@@ -33,5 +34,11 @@ void AMyPlayerController::BeginPlay()
 				Subsystem->AddMappingContext(InputMappingContext, 0);
 			}
 		}
+	}
+
+	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	if (GameInstance)
+	{
+		GameInstance->LoadMouseSensitivity();
 	}
 }

@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "InputAction.h"
+#include "GameMode/FPSGameInstance.h"
 #include "TimerManager.h"
 #include "Actor/Weapon/CGunBase.h"
 #include "Components/CapsuleComponent.h"
@@ -26,11 +27,22 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Animation")
 	bool bIsHoldingRifle = false;
+	UFUNCTION()
+	void SetPlayerStatus(float NewHealth, float NewShield);
+	UFUNCTION()
+	void GainExperience(float ExpAmount);
+	UFUNCTION()
+	void ApplyLevelStats();
+	UFUNCTION(BlueprintCallable)
+	float GetMouseSensitivity() const;
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void SetMouseSensitivity(float NewSensitivity);
+
 
 	void SwitchWeaponSlot(int32 Slot);
 	void SwitchToPrimaryWeapon();
 	void SwitchToSecondaryWeapon();
-	
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -60,6 +72,11 @@ protected:
 	float MouseSensitivity = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* MoveAction;
+	UPROPERTY(VisibleDefaultsOnly, Category = "Mesh")
+	USkeletalMeshComponent* ThirdPersonMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
+	bool bIsDead = false;
+
 
 	
 	UFUNCTION()
@@ -84,14 +101,18 @@ protected:
 	void PickupWeaponInput(const FInputActionValue& Value);
 	UFUNCTION()
 	bool EquipWeapon(ACGunBase* NewWeapon, int32 Slot);
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void SetMouseSensitivity(float NewSensitivity);
 	UFUNCTION()
 	void IncreaseMouseSensitivity();
 	UFUNCTION()
 	void DecreaseMouseSensitivity();
 	UFUNCTION()
 	void ReloadWeapon();
+	/*UFUNCTION(BlueprintCallable, Category = "Player")
+	void HandlePlayerDeath();
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void StartDeathCameraEffect();*/
+
+
 
 
 
@@ -103,6 +124,7 @@ protected:
 	void RegenerateShield();
 	void SwapWeaponWithDropped(ACGunBase* NewWeapon);
 	virtual void Landed(const FHitResult& Hit) override;
+	void DisableFirstPersonShadows();
 
 private:
 	void InitializeCharacter();
@@ -159,6 +181,7 @@ private:
 	void StopDash();
 	ACGunBase* FindNearbyDroppedWeapon();
 
+
 // Event Binding To WBP - KGW
 // 병합시 충돌 관련해서 문제 발생시 해당 과정 추가 바랍니다.
 // 해당 Value관련 델리게이트 Broad 전달 경우, 재사용성을 위해 델리게이트 선언 부 DYNAMIC_MULTICAST 형태로 선언하였으니 필요시 BroadCast하여 전달하셔도 괜찮습니다.
@@ -186,15 +209,15 @@ public:
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
 	void HideCurrentWeapon();
 
-	void ReturnHPValue()
-	{
-		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
-	}
+	//void ReturnHPValue()
+	//{
+	//	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	//}
 
-	void ReturnShieldValue()
-	{
-		OnShieldChanged.Broadcast(CurrentShield, MaxShield);
-	}
+	//void ReturnShieldValue()
+	//{
+	//	OnShieldChanged.Broadcast(CurrentShield, MaxShield);
+	//}
 };
 
 /*  UI-> Player Comment

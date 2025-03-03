@@ -20,6 +20,8 @@ ACGunBase::ACGunBase()
     WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
     WeaponMesh->SetupAttachment(RootComponent);
 
+	DisableWeaponShadows();
+
 	if (!MuzzleFlashEffect)
 	{
 		static ConstructorHelpers::FObjectFinder<UNiagaraSystem> MuzzleEffectFinder(TEXT("/Game/VFX/TakeGame/NS_MuzzleFlash.NS_MuzzleFlash"));
@@ -312,3 +314,15 @@ FVector ACGunBase::SpreadDirection(const FVector OriginDirection) const
 	FRotator SpreadRotation = FRotator(RandomPitch, RandomYaw, 0.0f);
 	return SpreadRotation.RotateVector(OriginDirection);
 }
+
+
+void ACGunBase::DisableWeaponShadows()
+{
+	if (WeaponMesh)
+	{
+		WeaponMesh->SetCastShadow(false);
+		WeaponMesh->bCastDynamicShadow = false;
+		WeaponMesh->bAffectDistanceFieldLighting = false;
+	}
+}
+
