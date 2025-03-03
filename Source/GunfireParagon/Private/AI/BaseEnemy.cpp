@@ -81,15 +81,12 @@ void ABaseEnemy::ResetEnemy()
 	if (MeshComp)
 	{
 		MeshComp->SetSimulatePhysics(false);
-		MeshComp->SetCollisionProfileName(TEXT("Pawn"));  
 		MeshComp->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	/*GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
-	GetCapsuleComponent()->SetCollisionObjectType(ECC_EngineTraceChannel2);
-	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-
+	GetCapsuleComponent()->SetCollisionProfileName("EnemyPawn");*/
 
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (AIController)
