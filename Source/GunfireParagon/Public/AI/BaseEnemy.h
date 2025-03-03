@@ -69,6 +69,12 @@ protected:
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	UAnimMontage* HitReactionMontage;
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	USoundBase* DeathSound;
+
+	void PlayHitReaction();
 	void OnDeath();
 	void ReturnToPool();
 

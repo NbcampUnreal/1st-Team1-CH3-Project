@@ -23,8 +23,8 @@ ABaseEnemy::ABaseEnemy()
 	{
 		SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		SkeletalMesh->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel2);
-		SkeletalMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-		SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
+		//SkeletalMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		//SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 	}
 
 	Damage = 20.0f;
@@ -84,10 +84,6 @@ void ABaseEnemy::ResetEnemy()
 		MeshComp->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
 
-	/*GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
-	GetCapsuleComponent()->SetCollisionProfileName("EnemyPawn");*/
-
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (AIController)
 	{
@@ -126,7 +122,6 @@ void ABaseEnemy::UpdateAimPitch()
 	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Start, Target);
 
 	AimPitch = FMath::Clamp(LookAtRotation.Pitch, -60.0f, 60.0f);
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("AimPitch: %f"), AimPitch));
 }
 
 float ABaseEnemy::TakeDamage
@@ -163,6 +158,12 @@ float ABaseEnemy::TakeDamage
 	}
 
 	CurrentHealth = FMath::Clamp(CurrentHealth - ActualDamage, 0.0f, MaxHealth);
+
+	if (ActualDamage > 0.0f && !bIsDead && HitReactionMontage)
+	{
+		PlayHitReaction();
+	}
+
 	if (CurrentHealth <= 0.0f)
 	{
 		OnDeath();
@@ -171,6 +172,20 @@ float ABaseEnemy::TakeDamage
 	OnTargetHPChanged.Broadcast(CurrentHealth, MaxHealth);
 
 	return ActualDamage;
+}
+
+void ABaseEnemy::PlayHitReaction()
+{
+	if (!GetMesh() || !HitReactionMontage) return;
+	if (bIsAttacking) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance) return;
+
+	if (AnimInstance->Montage_IsPlaying(HitReactionMontage)) return;
+
+	AnimInstance->Montage_Play(HitReactionMontage, 2.0f);
+
 }
 
 void ABaseEnemy::OnDeath()
@@ -182,6 +197,11 @@ void ABaseEnemy::OnDeath()
 
 	SetActorTickEnabled(false);
 	SetDeathState();
+
+	if (DeathSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+	}
 	
 	AFPSGameState* FPSGameState = Cast<AFPSGameState>(GetWorld()->GetGameState());
 	if (FPSGameState)
@@ -237,19 +257,20 @@ void ABaseEnemy::SetDeathState()
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);
 	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	MeshComp->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+	MeshComp->SetCollisionResponseToChannel(ECC_EngineTraceChannel2, ECR_Ignore);
 
 	// 물리 속도 초기화 
 	MeshComp->SetPhysicsLinearVelocity(FVector::ZeroVector);
 	MeshComp->SetSimulatePhysics(true);
 
-	// 충격 적용 
-	FVector ImpulseDirection = GetActorRotation().Vector() * -1.0f;
-	ImpulseDirection.Normalize();
+	//// 충격 적용 
+	//FVector ImpulseDirection = GetActorRotation().Vector() * -1.0f;
+	//ImpulseDirection.Normalize();
 
-	float ImpulseStrength = 20.0f;  
-	FVector FinalImpulse = ImpulseDirection * ImpulseStrength;
+	//float ImpulseStrength = 20.0f;  
+	//FVector FinalImpulse = ImpulseDirection * ImpulseStrength;
 
-	MeshComp->AddImpulseToAllBodiesBelow(FinalImpulse);
+	//MeshComp->AddImpulseToAllBodiesBelow(FinalImpulse);
 }
 
 void ABaseEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)

@@ -84,8 +84,6 @@ void ANormalMeleeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
             
         }
     }
-
-    DrawDebugCapsule(GetWorld(), MidPoint, CapsuleHalfHeight, CapsuleRadius, SwordRotation, FColor::Red, false, 0.5f, 0, 2.0f);
 }
 
 void ANormalMeleeEnemy::PerformRangeAttack(const FVector& TargetLocation)

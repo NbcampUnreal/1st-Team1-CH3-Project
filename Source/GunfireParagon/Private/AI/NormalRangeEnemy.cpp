@@ -84,17 +84,6 @@ void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
             UGameplayStatics::ApplyDamage(HitActor, Damage, GetController(), this, UDamageType::StaticClass());
         }
     }
-    DrawDebugCapsule(GetWorld(),
-        CapsuleCenter,
-        CapsuleHalfHeight,
-        CapsuleRadius,
-        CapsuleRotation,
-        bHit ? FColor::Red : FColor::Green, // 히트 여부에 따라 색상 변경
-        false,
-        2.0f,  // 지속 시간
-        0,
-        2.0f  // 두께
-    );
 
     PlayAttackEffect(Start, AdjustedDirection);
 }

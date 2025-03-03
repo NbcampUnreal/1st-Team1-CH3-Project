@@ -36,7 +36,7 @@ void ABossAIController::OnPossess(APawn* InPawn)
 
 		float AttackRange = Enemy->AttackRange;
 		BBComp->SetValueAsFloat("AttackRange", AttackRange);
-		BBComp->SetValueAsFloat("AcceptableRadius", AttackRange - 50.0f);
+		BBComp->SetValueAsFloat("AcceptableRadius", AttackRange - 100.0f);
 
 		APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 		if (PlayerPawn)
