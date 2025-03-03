@@ -23,4 +23,9 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void BeginPlay() override;
 	virtual void OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus) override;
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void DisableAI();
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void EnableAI();
 };

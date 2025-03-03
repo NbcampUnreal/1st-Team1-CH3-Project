@@ -25,7 +25,7 @@ void ABossAIController::OnPossess(APawn* InPawn)
 		BBComp->RemoveFromRoot();
 		BBComp = nullptr;
 	}
-
+	
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(GetPawn());
 	if (!Enemy) return;
 
@@ -61,6 +61,7 @@ void ABossAIController::BeginPlay()
 			BBComp->SetValueAsObject("TargetPlayer", PlayerPawn);
 		}
 	}
+	DisableAI();
 }
 
 void ABossAIController::Tick(float DeltaTime)
@@ -96,6 +97,53 @@ void ABossAIController::OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus)
 		BBComp->SetValueAsVector("LastKnownPlayerLocation", PlayerLocation);
 		BBComp->ClearValue("PlayerLocation");
 		BBComp->SetValueAsBool("HasSpottedPlayer", false);
+	}
+}
+
+void ABossAIController::DisableAI()
+{
+	if (PerceptionComponent)
+	{
+		PerceptionComponent->Deactivate();  // AI 감지 비활성화
+	}
+
+	StopMovement();  // AI 이동 멈춤
+
+	if (BBComp)
+	{
+		BBComp->ClearValue("TargetPlayer");  // 블랙보드 값 제거
+		BBComp->ClearValue("HasSpottedPlayer");
+	}
+
+	ABossEnemy* Boss = Cast<ABossEnemy>(GetPawn());
+	if (Boss)
+	{
+		Boss->SetActorHiddenInGame(true); // 보스 숨김
+		Boss->SetActorEnableCollision(false); // 충돌 제거
+	}
+}
+
+void ABossAIController::EnableAI()
+{
+	if (PerceptionComponent)
+	{
+		PerceptionComponent->Activate();  // AI 감지 다시 활성화
+	}
+
+	ABossEnemy* Boss = Cast<ABossEnemy>(GetPawn());
+	if (Boss)
+	{
+		Boss->SetActorHiddenInGame(false); // 보스 다시 보이기
+		Boss->SetActorEnableCollision(true); // 충돌 다시 활성화
+	}
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	if (PlayerPawn)
+	{
+		if (BBComp)
+		{
+			BBComp->SetValueAsObject("TargetPlayer", PlayerPawn);
+		}
 	}
 }
 

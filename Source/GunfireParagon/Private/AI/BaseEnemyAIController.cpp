@@ -113,15 +113,24 @@ void ABaseEnemyAIController::OnTargetPerceived(AActor* Actor, FAIStimulus Stimul
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(GetPawn());
 	if (!Enemy) return;
 
-	if (Stimulus.WasSuccessfullySensed())
+	// 플레이어가 시야에 들어온 경우
+	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
 	{
-		BBComp->SetValueAsBool("HasSpottedPlayer", true);
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			BBComp->SetValueAsBool("HasSpottedPlayer", true);
+		}
+		else
+		{
+			FVector PlayerLocation = BBComp->GetValueAsVector("PlayerLocation");
+			BBComp->SetValueAsVector("LastKnownPlayerLocation", PlayerLocation);
+			BBComp->ClearValue("PlayerLocation");
+			BBComp->SetValueAsBool("HasSpottedPlayer", false);
+		}
 	}
-	else
+	// 플레이어가 데미지를 준 경우
+	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Damage>())
 	{
-		FVector PlayerLocation = BBComp->GetValueAsVector("PlayerLocation");
-		BBComp->SetValueAsVector("LastKnownPlayerLocation", PlayerLocation);
-		BBComp->ClearValue("PlayerLocation");
-		BBComp->SetValueAsBool("HasSpottedPlayer", false);
+		BBComp->SetValueAsBool("HasSpottedPlayer", true); 
 	}
 }
