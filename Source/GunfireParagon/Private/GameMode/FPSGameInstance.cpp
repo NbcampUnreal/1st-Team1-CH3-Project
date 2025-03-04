@@ -7,16 +7,16 @@
 #include "GameMode/FPSGameMode.h"
 #include "AI/NormalMeleeEnemy.h"
 #include "AI/NormalRangeEnemy.h"
-#include "Player/PlayerCharacter.h"
 #include "Player/MyPlayerController.h"
+#include "Player/PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 UFPSGameInstance::UFPSGameInstance()
 {
-	MouseSensitivity = 
+	MouseSensitivity = 1000;
 	PlayerLevel = 1;
 	ExperiencePoints = 0.f;
-	MaxExp = ((PlayerLevel-1) + 10) * 10;
+	MaxExp = 100;
 	CurrentStageIndex = 0; 
 	PreviousLevelName = TEXT("");
 }
@@ -65,7 +65,15 @@ void UFPSGameInstance::LoadNextStage()
 			if (!FPSPlayerController || !FPSPlayerController->GetPawn()) return;
 
 			StoredPlayerLocation = FPSPlayerController->GetPawn()->GetActorLocation();
-			UE_LOG(LogTemp, Warning, TEXT("Saved Player Location: %s"), *StoredPlayerLocation.ToString())
+			UE_LOG(LogTemp, Warning, TEXT("Saved Player Location: %s"), *StoredPlayerLocation.ToString());
+
+			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FPSPlayerController->GetPawn());
+
+			if (PlayerCharacter)
+			{
+				SavePlayerStats(PlayerCharacter);
+				SaveWeaponStats(PlayerCharacter);
+			}
 		}
 		AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
 		if (FPSGameMode)
@@ -97,25 +105,33 @@ void UFPSGameInstance::SavePlayerStats(ACharacter* PlayerCharacter)
 		APlayerCharacter* Char = Cast<APlayerCharacter>(PlayerCharacter);
 		if (Char)
 		{
-			//변수명 모름
-			//PlayerLevel = Char->PlayerLevel;
-			//ExperiencePoints = Char->CurrentExperience;
+			MaxHP = Char->GetMaxHealth();
+			MaxShield = Char->GetMaxShield();
 		}
 	}
 }
 
-void UFPSGameInstance::LoadPlayerStats(ACharacter* PlayerCharacter)
+void UFPSGameInstance::LoadPlayerStats()
 {
-	if (PlayerCharacter)
+	UWorld* World = GetWorld();
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	if (PlayerController)
 	{
-		APlayerCharacter* Char = Cast<APlayerCharacter>(PlayerCharacter);
-		if (Char)
+		AMyPlayerController* FPSPlayerController = Cast<AMyPlayerController>(PlayerController);
+		if (FPSPlayerController)
 		{
-			//변수명 모름
-			//Char->PlayerLevel = PlayerLevel;
-			//Char->CurrentExperience = ExperiencePoints;
+			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FPSPlayerController->GetPawn());
+			if (PlayerCharacter)
+			{
+				APlayerCharacter* Char = Cast<APlayerCharacter>(PlayerCharacter);
+				if (Char)
+				{
+					Char->SetMaxHealth(MaxHP);
+					Char->SetMaxShield(MaxShield);
+				}
+			}
 		}
-	}
+	}	
 }
 
 void UFPSGameInstance::SetPreviousLevel(const FString& LevelName)
@@ -138,6 +154,52 @@ FVector UFPSGameInstance::GetPlayerLocation() const
 	return StoredPlayerLocation;
 }
 
+void UFPSGameInstance::SaveWeaponStats(APlayerCharacter* Player)
+{
+	{
+		if (!Player) return;
+
+		if (Player->Inventory[0])
+		{
+			PrimaryWeaponClass = Player->Inventory[0]->GetClass();
+		}
+
+		if (Player->Inventory[1])
+		{
+			SecondaryWeaponClass = Player->Inventory[1]->GetClass();
+		}
+	}
+}
+
+void UFPSGameInstance::LoadWeaponStats(APlayerCharacter* Player)
+{
+	if (!Player) return;
+
+	UWorld* World = Player->GetWorld();
+	if (!World) return;
+
+	if (PrimaryWeaponClass)
+	{
+		ACGunBase* NewPrimaryWeapon = World->SpawnActor<ACGunBase>(PrimaryWeaponClass);
+		if (NewPrimaryWeapon)
+		{
+			Player->Inventory[0] = NewPrimaryWeapon;
+			Player->GetCurrentWeaponClass() = NewPrimaryWeapon;
+			Player->GetCurrentWeaponSlot = 0;
+			Player->AttachWeaponToHand(NewPrimaryWeapon, 0);
+		}
+	}
+
+	if (SecondaryWeaponClass)
+	{
+		ACGunBase* NewSecondaryWeapon = World->SpawnActor<ACGunBase>(SecondaryWeaponClass);
+		if (NewSecondaryWeapon)
+		{
+			Player->Inventory[1] = NewSecondaryWeapon;
+		}
+	}
+}
+
 
 
 void UFPSGameInstance::SaveMouseSensitivity()
@@ -154,7 +216,7 @@ void UFPSGameInstance::SaveMouseSensitivity()
 			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FPSPlayerController->GetPawn());
 			if (PlayerCharacter)
 			{
-				// MouseSensitivity = PlayerCharacter->MouseSensitivity or GetMouseSensitivity();
+				MouseSensitivity = PlayerCharacter->GetMouseSensitivity();
 			}
 		}
 	}
@@ -174,7 +236,7 @@ void UFPSGameInstance::LoadMouseSensitivity()
 			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FPSPlayerController->GetPawn());
 			if (PlayerCharacter)
 			{
-				// PlayerCharacter->MouseSensitivity = MouseSensitivity; || SetMouseSensitivity(MouseSensitivity);
+				PlayerCharacter->SetMouseSensitivity(MouseSensitivity);
 			}
 		}
 	}
@@ -187,35 +249,11 @@ void UFPSGameInstance::AddExperiencePoint(float ExpAmount)
 	{
 		PlayerLevel +=	FMath::FloorToInt32(ExperiencePoints / MaxExp);
 		ExperiencePoints = FMath::Fmod(ExperiencePoints, MaxExp);
+
+		MaxHP = 100 + (PlayerLevel * 10);
+		MaxShield = 50 + (PlayerLevel * 5);
+		MaxExp = ((PlayerLevel - 1) + 10) * 10;
+		LoadPlayerStats();
 	}
 }
 
-
-/*
-void UFPSGameInstance::AddPassive(FPassiveInventory NewPassive)
-{
-	//
-	for (FPassiveInventory& Passive : PlayerPassiveInventory)
-	{
-		if (Passive.PassiveName == NewPassive.PassiveName)
-		{
-			Passive.Quentity++;
-			return;
-		}
-	}
-
-	PlayerPassiveInventory.Add(NewPassive);
-}
-
-void UFPSGameInstance::RemovePassive(FString PassiveName)
-{
-	for (int32 i = 0; i < PlayerPassiveInventory.Num(); i++)
-	{
-		if (PlayerPassiveInventory[i].PassiveName == PassiveName)
-		{
-			PlayerPassiveInventory.RemoveAt(i);
-			return;
-		}
-	}
-}
-*/

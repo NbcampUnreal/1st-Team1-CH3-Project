@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "AIObjectPool.h"
+#include "Actor/Weapon/CGunBase.h"
 #include "FPSGameInstance.generated.h"
 
+class APlayerCharacter;
 
 UCLASS()
 class GUNFIREPARAGON_API UFPSGameInstance : public UGameInstance
@@ -17,20 +19,28 @@ public:
 	UFPSGameInstance();
 	virtual void Init() override;
 	void SavePlayerStats(ACharacter* PlayerCharacter);
-	void LoadPlayerStats(ACharacter* PlayerCharacter);
+	void LoadPlayerStats();
 	void SetPreviousLevel(const FString& LevelName);
 	FString GetPreviousLevel() const;
 	void SavePlayerLocation(const FVector& Location);
 	FVector GetPlayerLocation() const;
-	
+	void SaveWeaponStats(APlayerCharacter* Player);
+	void LoadWeaponStats(APlayerCharacter* Player);
+
 	bool bIsInTrapLevel = false;
-	
+	TSubclassOf<ACGunBase> PrimaryWeaponClass;
+	TSubclassOf<ACGunBase> SecondaryWeaponClass;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	float ExperiencePoints;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	float MaxExp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float MaxShield = 50;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float MaxHP = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
 	int32 CurrentStageIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
@@ -56,11 +66,4 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GotoMainMenu();
 
-
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PassiveInventory")
-	// TArray<FPassiveInventory> PlayerPassiveInventory;
-
-
-	// void AddPassive(FPassiveInventory NewPassive);
-	// void RemovePassive(FString PassiveName)
 };
