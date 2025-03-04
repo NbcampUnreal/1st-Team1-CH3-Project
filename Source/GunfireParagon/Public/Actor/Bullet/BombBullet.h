@@ -32,5 +32,9 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Projectile")
 	int32 ExplosionRadius = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Sounds")
+	TSoftObjectPtr<USoundBase> ExplosionSound;
+
+	virtual void OnBulletHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	
 };

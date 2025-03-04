@@ -46,9 +46,6 @@ UE_DISABLE_OPTIMIZATION
 void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	
-	Super::OnBulletOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
 	if (!OtherActor || OtherActor == this) 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("자신충돌했으나 무시함"));
@@ -73,7 +70,12 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
 			FinalDamage *= 2.0f; // 헤드샷 데미지 2배
+
 			UE_LOG(LogTemp, Warning, TEXT("헤드샷! 데미지: %f"), FinalDamage);
+			if (HeadHitSound.IsValid())
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, HeadHitSound.Get(), GetActorLocation());
+			}
 		}
 		else
 		{

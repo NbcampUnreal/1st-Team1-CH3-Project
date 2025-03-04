@@ -502,6 +502,7 @@ void APlayerCharacter::DropCurrentWeapon(int32 Slot)
 	WeaponSlot->SetActorRotation(DropRotation);
 	WeaponSlot->SetActorHiddenInGame(false);
 	WeaponSlot->SetActorEnableCollision(true);
+	WeaponSlot->SetIsDrop(true);
 
 	FVector DropImpulse = GetActorForwardVector() * 300.0f + FVector(0, 0, 200.0f);
 	WeaponSlot->GetWeaponMesh()->AddImpulse(DropImpulse, NAME_None, true);
@@ -583,6 +584,7 @@ void APlayerCharacter::SwapWeaponWithDropped(ACGunBase* DroppedWeapon)
 
 		if (SecondaryWeapon)
 		{
+			SecondaryWeapon->SetIsDrop(true);
 			SecondaryWeapon->WeaponMesh->SetSimulatePhysics(true);
 			SecondaryWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			SecondaryWeapon->WeaponMesh->SetCollisionObjectType(ECC_PhysicsBody);
@@ -756,6 +758,7 @@ void APlayerCharacter::HideCurrentWeapon()
 	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
 	{
 		CurrentWeapon->GetWeaponMesh()->SetVisibility(false);
+		CurrentWeapon->SetIsDrop(false);
 	}
 }
 

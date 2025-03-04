@@ -3,7 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Actor/Bullet/BulletBase.h"
-#include "NiagaraComponent.h"  
+#include "NiagaraComponent.h"
+#include "Sound/SoundBase.h"
 #include "NiagaraFunctionLibrary.h"  
 #include "CGunBase.generated.h"
 
@@ -59,6 +60,7 @@ protected:
 	void SetIsFire(); 
 	//탄창이 비었는지 확인
 	bool IsAmmoEmpty() ;
+	void SwitchGunSound();
 
 	
 	
@@ -130,4 +132,8 @@ protected:
 	UNiagaraSystem* DropEffect;
 	
 	UNiagaraComponent* DropEffectComp;
+
+	//총기사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Sounds")
+	TSoftObjectPtr<USoundBase> FireSound;
 };

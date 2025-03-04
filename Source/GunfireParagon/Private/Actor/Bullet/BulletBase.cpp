@@ -2,6 +2,7 @@
 
 #include "Actor/Bullet/BulletBase.h"
 #include "Actor/BulletPool.h"
+#include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
 ABulletBase::ABulletBase()
@@ -41,7 +42,17 @@ ABulletBase::ABulletBase()
 	ProjectileMovement->bShouldBounce = false; // 튕김 여부
 	ProjectileMovement->ProjectileGravityScale = 0.0f; // 중력여부 
 	ProjectileMovement->bSweepCollision = true; //총알이 벽을 지나치는 문제 해결
-	
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sound/headshotSound.headshotSound"));
+
+	if (SoundAsset.Succeeded())
+	{
+		HeadHitSound = SoundAsset.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("FireSound 파일을 찾을 수 없습니다!"));
+	}
 }
 
 void ABulletBase::BeginPlay()
@@ -53,11 +64,6 @@ void ABulletBase::BeginPlay()
 		ProjectileMovement->Deactivate(); //총알이 풀에서 생성될 때 기본적으로 멈추도록 설정
 	}
 	
-	// CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	// CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
-	// CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	// CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // 벽과 충돌 O
-	// CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABulletBase::OnBulletOverlap);
 	CollisionComponent->OnComponentHit.AddDynamic(this, &ABulletBase::OnBulletHit);
@@ -102,6 +108,10 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		float FinalDamage = BulletDamage;
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
+			if (HeadHitSound.IsValid())
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, HeadHitSound.Get(), GetActorLocation());
+			}
 			FinalDamage *= 2.0f;
 			UE_LOG(LogTemp, Warning, TEXT("헤드샷! 데미지: %f"), FinalDamage);
 		}
@@ -126,7 +136,7 @@ FVector NormalImpulse, const FHitResult& Hit)
 	
 	if (BulletPool)
 	{
-		BulletPool->ReturnBullet(this, EAmmoType::Normal);
+		BulletPool->ReturnBullet(this, AmmoType);
 		SpawnBulletDecal(Hit);
 		UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌하여 풀로 반환됨"));
 	}
@@ -138,11 +148,8 @@ void ABulletBase::SpawnBulletDecal(const FHitResult& Hit)
 {
 	if (!BulletDecalMaterial)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("데칼머테리얼없음"));
 		return;
 	} 
-
-	// 탄흔을 남길 위치와 방향 설정
 	UDecalComponent* BulletDecal = UGameplayStatics::SpawnDecalAtLocation(
 		GetWorld(), 
 		BulletDecalMaterial, 

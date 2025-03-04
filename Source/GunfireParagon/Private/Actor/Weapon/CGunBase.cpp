@@ -32,6 +32,10 @@ ACGunBase::ACGunBase()
 			MuzzleFlashEffect = MuzzleEffectFinder.Object;
 		}
 	}
+
+	SwitchGunSound();
+	
+	
 }
 
 
@@ -117,13 +121,14 @@ void ACGunBase::SetIsDrop(bool isDrop)
 	{
 		if (DropEffect)
 		{
-			DropEffectComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-				GetWorld(),
+			DropEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 				DropEffect,
-				GetActorLocation(),  
+				WeaponMesh,
+				NAME_None,
+				FVector::ZeroVector,
 				FRotator::ZeroRotator,  
-				FVector(1, 1, 1),  
-				true
+				EAttachLocation::SnapToTarget,  
+				true	
 			);
 		}
 	}
@@ -143,7 +148,15 @@ void ACGunBase::Fire()
 
 	
 	bCanFire = false; //발사 후 즉시 다음 발사 방지
+	
 	GetWorldTimerManager().SetTimer(FireTimer, this, &ACGunBase::SetIsFire, GunDelay, false); //딜레이 적용
+
+	if (FireSound.IsValid())
+	{
+		
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound.Get(), GetActorLocation());
+	}
+	
 	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
 	{
 		MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
@@ -186,6 +199,9 @@ void ACGunBase::Fire()
 				}
 			}, 0.2f, false);
 		}
+
+
+		
 	}
 
 	
@@ -242,6 +258,51 @@ bool ACGunBase::IsAmmoEmpty()
 	Reload();
 	UE_LOG(LogTemp, Warning, TEXT("탄약 부족! 자동 재장전 실행"));
 	return CurrentAmmo <= 0;
+}
+
+void ACGunBase::SwitchGunSound()
+{
+	switch (WeaponType)
+	{
+	case EWeaponType::Rifle:
+		{
+			static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sound/bulldogTap.bulldogTap"));
+			if (SoundAsset.Succeeded())
+			{
+				FireSound = SoundAsset.Object;
+			}
+		}
+		break;
+
+	case EWeaponType::Shotgun:
+		{
+			static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sound/buckyTap.buckyTap"));
+			if (SoundAsset.Succeeded())
+			{
+				FireSound = SoundAsset.Object;
+			}
+		}
+		break;
+	case EWeaponType::Sniper:
+		{
+			static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sound/operatorTap.operatorTap"));
+			if (SoundAsset.Succeeded())
+			{
+				FireSound = SoundAsset.Object;
+			}
+		}
+		break;
+	case EWeaponType::Rocket:
+		{
+			static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sound/RocketFire.RocketFire"));
+			if (SoundAsset.Succeeded())
+			{
+				FireSound = SoundAsset.Object;
+			}
+		}
+		break;
+	}
+	
 }
 
 void ACGunBase::Reload()

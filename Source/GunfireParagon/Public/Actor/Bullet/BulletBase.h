@@ -78,6 +78,11 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Projectile")
 	USphereComponent* CollisionComponent;
 	
-	float SpawnTime; 
+	float SpawnTime;
+
+	
+	//총기사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Sounds")
+	TSoftObjectPtr<USoundBase> HeadHitSound;
 	
 };
