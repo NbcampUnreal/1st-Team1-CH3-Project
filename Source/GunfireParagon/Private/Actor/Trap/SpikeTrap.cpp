@@ -113,7 +113,6 @@ void ASpikeTrap::OnSpikeHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
     if (OtherActor && OtherActor->ActorHasTag("Player") && bIsSpikesUp && !bHasDealtDamage)  
     {
         bHasDealtDamage = true; 
-        UE_LOG(LogTemp, Warning, TEXT("스파이크가 플레이어에게 데미지!"));
         UGameplayStatics::ApplyDamage(OtherActor, DamageAmount, nullptr, this, nullptr);
     }
 }

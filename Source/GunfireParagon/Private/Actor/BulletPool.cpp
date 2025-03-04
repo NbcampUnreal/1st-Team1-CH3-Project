@@ -90,11 +90,6 @@ ABulletBase* ABulletPool::GetPooledBullet(EAmmoType AmmoType)
 			{
 				Bullet->ProjectileMovement->bSimulationEnabled = true;
 				Bullet->ProjectileMovement->SetUpdatedComponent(Bullet->CollisionComponent);
-				UE_LOG(LogTemp, Warning, TEXT("ProjectileMovement 활성화됨!"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("ProjectileMovement가 nullptr 상태!"));
 			}
 			
 			return Bullet;
@@ -118,7 +113,6 @@ ABulletBase* ABulletPool::GetPooledBullet(EAmmoType AmmoType)
 	if (NewBullet)
 	{
 		BulletPools[AmmoType].Add(NewBullet);
-		UE_LOG(LogTemp, Warning, TEXT("새로운 탄환 생성 완료: %s"), *NewBullet->GetName());
 	}
 
 	return NewBullet;
@@ -149,7 +143,6 @@ void ABulletPool::ReturnBullet(ABulletBase* Bullet, EAmmoType AmmoType)
 		{
 			ActiveBullets.Remove(Bullet);
 		}
-        UE_LOG(LogTemp, Warning, TEXT("총알이 풀로 반환됨: %s"), *Bullet->GetName());
 		
 	}
 }

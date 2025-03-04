@@ -18,3 +18,21 @@ AGun_Rocket::AGun_Rocket()
 }
 
 
+
+void AGun_Rocket::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (!WeaponMesh)
+    {
+        return;
+    }
+
+}
+
+
+
+void AGun_Rocket::Fire()
+{
+    Super::Fire();
+}

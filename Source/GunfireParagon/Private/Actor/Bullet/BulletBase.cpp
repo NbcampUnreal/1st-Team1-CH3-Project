@@ -15,12 +15,6 @@ ABulletBase::ABulletBase()
 	{
 		CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 		CollisionComponent->InitSphereRadius(15.0f);
-		// CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		// CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
-		// CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-		// CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-		// CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); 
-
 
 		// 연속 충돌 감지(CCD) 활성화 (고속 총알이 벽을 통과하는 문제 해결)
 		CollisionComponent->SetNotifyRigidBodyCollision(true);
@@ -53,7 +47,6 @@ ABulletBase::ABulletBase()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("FireSound 파일을 찾을 수 없습니다!"));
 	}
 }
 
@@ -85,7 +78,6 @@ void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage
 
 	if (!ProjectileMovement->UpdatedComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ProjectileMovement의 UpdatedComponent가 설정되지 않음! 강제로 설정함."));
 		ProjectileMovement->SetUpdatedComponent(CollisionComponent);
 	}
 	if (ProjectileMovement)
@@ -121,11 +113,9 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 			}
 			IsHead = true;
 			FinalDamage *= 2.0f;
-			UE_LOG(LogTemp, Warning, TEXT("헤드샷! 데미지: %f"), FinalDamage);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("일반 공격! 데미지: %f"), FinalDamage);
 		}
 		SpawnBulletDecal(SweepResult);
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
@@ -147,7 +137,6 @@ FVector NormalImpulse, const FHitResult& Hit)
 	{
 		BulletPool->ReturnBullet(this, AmmoType);
 		SpawnBulletDecal(Hit);
-		UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌하여 풀로 반환됨"));
 	}
 
 	
@@ -167,7 +156,6 @@ void ABulletBase::SpawnBulletDecal(const FHitResult& Hit)
 		Hit.ImpactNormal.Rotation(), 
 		DecalLifeTime
 	);
-		UE_LOG(LogTemp, Warning, TEXT("데칼생성"));
 
 	if (BulletDecal)
 	{
