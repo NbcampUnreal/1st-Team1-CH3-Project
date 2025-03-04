@@ -37,10 +37,12 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	
 	if (OtherActor->ActorHasTag("Enemy"))
 	{
+		bool IsHead = false;
 		PierceCount--;
 		// 맞은 부위가 "head"인지 확인 (Skeleton Bone Name 사용)
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
+			IsHead = true;
 			FinalDamage *= 2.0f; // 헤드샷 데미지 2배
 			UE_LOG(LogTemp, Warning, TEXT("헤드샷! 데미지: %f"), FinalDamage);
 		}
@@ -51,7 +53,7 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		//  ApplyPointDamage 사용 (맞은 위치 포함)
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
 		UE_LOG(LogTemp, Warning, TEXT("총알이 Enemy를 맞춤: %s"), *OtherActor->GetName());
-		
+		OnHitMarker.Broadcast(IsHead);
 		if (PierceCount<=0)
 		{
 			if (BulletPool)

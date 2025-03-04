@@ -44,6 +44,12 @@ void UInGameMinimap::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	UpdateAllIcons();
 }
 
+void UInGameMinimap::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+}
+
 void UInGameMinimap::UpdatePlayTime()
 {
 	if (TimeTextBlock)
@@ -99,7 +105,7 @@ void UInGameMinimap::RemoveMinimapIcon(ACharacter* Target)
 		if (UIngameMinimapIcon* Icon = *IconPtr)
 		{
 			Icon->SetVisibility(ESlateVisibility::Hidden);
-			Icon->RemoveFromParent();
+			//Icon->RemoveFromParent();
 		}
 		//ActiveIcons.Remove(Target);
 	}
@@ -115,6 +121,7 @@ void UInGameMinimap::UpdateActorIcon(ACharacter* RenderTarget, FVector WorldLoca
 	{
 		RemoveMinimapIcon(RenderTarget);
 
+		return;
 	}
 	if (ActiveIcons.Contains(RenderTarget))
 	{

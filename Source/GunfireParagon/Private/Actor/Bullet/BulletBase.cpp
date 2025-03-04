@@ -5,6 +5,8 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
+FOnHitMarkerDele ABulletBase::OnHitMarker;
+
 ABulletBase::ABulletBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -109,6 +111,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 
 	if (OtherActor->ActorHasTag("Enemy"))
 	{
+		bool IsHead = false;
 		float FinalDamage = BulletDamage;
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
@@ -116,6 +119,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 			{
 				UGameplayStatics::PlaySoundAtLocation(this, HeadHitSound.Get(), GetActorLocation());
 			}
+			IsHead = true;
 			FinalDamage *= 2.0f;
 			UE_LOG(LogTemp, Warning, TEXT("헤드샷! 데미지: %f"), FinalDamage);
 		}
@@ -125,6 +129,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		}
 		SpawnBulletDecal(SweepResult);
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
+		OnHitMarker.Broadcast(IsHead);
 	}
 }
 

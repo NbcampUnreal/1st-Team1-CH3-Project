@@ -67,6 +67,7 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	
 	if (OtherActor->ActorHasTag("Monster"))
 	{
+		bool IsHead = false;
 		// 맞은 부위가 "head"인지 확인 (Skeleton Bone Name 사용)
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
@@ -77,6 +78,7 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 			{
 				UGameplayStatics::PlaySoundAtLocation(this, HeadHitSound.Get(), GetActorLocation());
 			}
+			IsHead = true;
 		}
 		else
 		{
@@ -86,7 +88,7 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		SpawnBulletDecal(SweepResult);
 		//  ApplyPointDamage 사용 (맞은 위치 포함)
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
-
+		OnHitMarker.Broadcast(IsHead);
 		UE_LOG(LogTemp, Warning, TEXT("총알이 Enemy를 맞춤: %s"), *OtherActor->GetName());
 	}
 
