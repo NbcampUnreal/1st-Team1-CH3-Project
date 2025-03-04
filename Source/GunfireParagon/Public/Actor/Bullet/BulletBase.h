@@ -45,7 +45,7 @@ protected:
 	void SpawnBulletDecal(const FHitResult& Hit);
 
 public:
-	virtual void Fire(FVector StartLocation, FVector Direction, float GunDamage,float GunSpeed);
+	virtual void Fire(FVector StartLocation, FVector Direction, float GunDamage);
 
 	float GetSpawnTime() const { return SpawnTime; } 
 	void SetSpawnTime(float Time) { SpawnTime = Time; }

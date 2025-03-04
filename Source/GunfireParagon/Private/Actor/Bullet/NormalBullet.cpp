@@ -13,7 +13,7 @@ void ANormalBullet::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage,float GunSpeed)
+void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
 {
 	SetActorLocation(StartLocation);
 	SetActorRotation(Direction.Rotation());
@@ -33,12 +33,9 @@ void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDama
 		ProjectileMovement->bSimulationEnabled = true;
 		ProjectileMovement->SetUpdatedComponent(CollisionComponent);
 	}
-	ProjectileMovement->StopMovementImmediately();
-        
-	ProjectileMovement->InitialSpeed = GunSpeed;
-	ProjectileMovement->MaxSpeed = GunSpeed;
 
-	ProjectileMovement->Velocity = Direction * GunSpeed;
+	ProjectileMovement->StopMovementImmediately();
+	ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
 	ProjectileMovement->Activate();
 
 }

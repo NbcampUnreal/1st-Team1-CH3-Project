@@ -14,4 +14,7 @@ class GUNFIREPARAGON_API AGun_Rocket : public ACGunBase
 public:
 	AGun_Rocket();
 
+	virtual void BeginPlay() override;
+
+	virtual void Fire() override;
 };

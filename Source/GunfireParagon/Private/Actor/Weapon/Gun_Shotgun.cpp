@@ -60,7 +60,7 @@ void AGun_Shotgun::Fire()
 			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
 			if (Bullet)
 			{
-				Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
+				Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
 			}
 			else
 			{
@@ -80,7 +80,7 @@ void AGun_Shotgun::Fire()
 			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
 			if (Bullet)
 			{
-				Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
+				Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
 			}
 			else
 			{

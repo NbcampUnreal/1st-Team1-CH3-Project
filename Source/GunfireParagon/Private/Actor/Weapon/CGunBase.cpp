@@ -210,7 +210,7 @@ void ACGunBase::Fire()
 	ABulletBase* Bullet = BulletPool->GetPooledBullet(AmmoType);
 	if (Bullet)
 	{
-		Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
+		Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
 		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 속도: %f"), Bullet->ProjectileMovement->InitialSpeed);
 
 		CurrentAmmo--;
@@ -301,8 +301,6 @@ void ACGunBase::SwitchGunSound()
 			}
 		}
 		break;
-		
-		
 	}
 	
 }

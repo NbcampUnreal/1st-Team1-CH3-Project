@@ -25,3 +25,27 @@ AGun_Rocket::AGun_Rocket()
 }
 
 
+
+void AGun_Rocket::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (!WeaponMesh)
+    {
+        return;
+    }
+
+    if (!WeaponMesh->GetSkeletalMeshAsset())
+    {
+    }
+    else
+    {
+    }
+}
+
+
+
+void AGun_Rocket::Fire()
+{
+    Super::Fire();
+}
