@@ -42,11 +42,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* ReloadAction;
 	
-
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* DebugDamageAction;*/
 	
-
 protected:
 	virtual void BeginPlay() override;
 };

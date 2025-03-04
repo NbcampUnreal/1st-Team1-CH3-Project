@@ -105,8 +105,8 @@ protected:
 	/*UFUNCTION()
 	void StartSprint(const FInputActionValue& Value);
 	UFUNCTION()
-	void StopSprint(const FInputActionValue& Value);*/
-	/*UFUNCTION(BlueprintCallable, Category = "Player")
+	void StopSprint(const FInputActionValue& Value);
+	UFUNCTION(BlueprintCallable, Category = "Player")
 	void HandlePlayerDeath();
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void StartDeathCameraEffect();*/
