@@ -10,7 +10,7 @@ AEliteRangeEnemy::AEliteRangeEnemy()
 
     Damage = 30.0f;
     AttackRange = 1000.0f;
-    AttackDelay = 4.0f;
+    AttackDelay = 1.0f;
     MaxHealth = 300.0f;
     BaseWalkSpeed = 600.0f;
     CurrentHealth = MaxHealth;

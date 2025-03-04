@@ -16,9 +16,9 @@ ABaseEnemyAIController::ABaseEnemyAIController()
 
 	// 시각 감지 설정
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-	SightConfig->SightRadius = 6000.0f; // AI의 감지 범위
-	SightConfig->LoseSightRadius = 6500.0f; // AI가 플레이어를 잃어버리는 거리
-	SightConfig->PeripheralVisionAngleDegrees = 170.0f; // 시야각 설정
+	SightConfig->SightRadius = 8000.0f; // AI의 감지 범위
+	SightConfig->LoseSightRadius = 8500.0f; // AI가 플레이어를 잃어버리는 거리
+	SightConfig->PeripheralVisionAngleDegrees = 180.0f; // 시야각 설정
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
