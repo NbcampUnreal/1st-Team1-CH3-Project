@@ -13,6 +13,7 @@
 
 UFPSGameInstance::UFPSGameInstance()
 {
+	StoredPlayerLocation = FVector::ZeroVector;
 	MouseSensitivity = 1000;
 	PlayerLevel = 1;
 	ExperiencePoints = 0.f;
@@ -73,14 +74,14 @@ void UFPSGameInstance::LoadNextStage()
 			{
 				SavePlayerStats(PlayerCharacter);
 				SaveWeaponStats(PlayerCharacter);
+				SaveMouseSensitivity();
 			}
 		}
 		AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
 		if (FPSGameMode)
 		{
 			FPSGameMode->ClearAllBullets();
-			FPSGameMode->ClearAllEnemies();
-			SaveMouseSensitivity();
+			FPSGameMode->ClearAllEnemies();	
 		}
 
 		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
@@ -199,8 +200,6 @@ void UFPSGameInstance::LoadWeaponStats(APlayerCharacter* Player)
 		}
 	}
 }
-
-
 
 void UFPSGameInstance::SaveMouseSensitivity()
 {

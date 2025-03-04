@@ -37,5 +37,5 @@ public:
 		const FHitResult& SweepResult
 	);
 
-
+	bool bHasActivated = false;
 };

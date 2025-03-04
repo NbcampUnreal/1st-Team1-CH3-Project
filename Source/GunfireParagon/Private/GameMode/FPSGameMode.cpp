@@ -58,7 +58,6 @@ void AFPSGameMode::BeginPlay()
 	InitializeObjectPool();
 	InitializeBulletPool();
 
-	// UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(GetGameInstance());
 	if (FPSGameInstance)
 	{
 		int32 CurrentStageIndex = FPSGameInstance->CurrentStageIndex;
@@ -72,14 +71,6 @@ void AFPSGameMode::BeginPlay()
 			OnBossDefeated();
 		}
 	}
-	// HUD 
-	/*
-	AMyPlayerController* PlayerController = Cast<AmyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	if (PlayerController)
-	{
-		PlayerController->ShowHUD();
-	}
-	*/
 }
 
 
@@ -294,7 +285,7 @@ void AFPSGameMode::TravelToLevel(FName LevelName)
 		FString CurrentLevel = World->GetMapName();
 		CurrentLevel.RemoveFromStart(World->StreamingLevelsPrefix);
 		FPSGameInstance->SetPreviousLevel(CurrentLevel);
-
+		FPSGameInstance->SaveMouseSensitivity();
 		UE_LOG(LogTemp, Warning, TEXT("Saved Previous Level: %s"), *CurrentLevel);
 	}
 	SavePlayerLocation();
@@ -311,15 +302,14 @@ void AFPSGameMode::ReturnToPreviousLevel()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Returning to Level: %s"), *PreviousLevel);
 			GetWorld()->ServerTravel(PreviousLevel, true);
-			// GetWorld()->GetTimerManager().SetTimerForNextTick(this, &AFPSGameMode::RestorePlayerLocation);
+			bIsInTrapLevel = true;
+			FPSGameInstance->bIsInTrapLevel = bIsInTrapLevel;
 		}
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("PreviousLevel is Empthy"));
 		}
 	}
-	bIsInTrapLevel = true;
-	FPSGameInstance->bIsInTrapLevel = bIsInTrapLevel;
 }
 
 void AFPSGameMode::SpawnTrapPortals()

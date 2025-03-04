@@ -37,9 +37,16 @@ void AClearPortal::OnPortalOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	if (bHasActivated)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LoadNextStage() already triggered!"));
+		return;
+	}
+
 	APlayerCharacter* FPSCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (FPSCharacter && FPSCharacter->IsA(APlayerCharacter::StaticClass()))
 	{
+		bHasActivated = true;
 		LoadNextStage();
 	}
 }
