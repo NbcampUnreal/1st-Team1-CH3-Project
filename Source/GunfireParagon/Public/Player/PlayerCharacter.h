@@ -6,7 +6,7 @@
 #include "InputAction.h"
 #include "GameMode/FPSGameInstance.h"
 #include "TimerManager.h"
-
+#include "GameMode/CardData.h"
 #include "Actor/Weapon/CGunBase.h"
 #include "Components/CapsuleComponent.h"
 #include "PlayerCharacter.generated.h"
@@ -34,8 +34,6 @@ public:
 	void SetPlayerStatus(float NewHealth, float NewShield);
 	UFUNCTION()
 	void GainExperience(float ExpAmount);
-	UFUNCTION()
-	void ApplyLevelStats();
 	UFUNCTION(BlueprintCallable)
 	float GetMouseSensitivity() const;
 	UFUNCTION(BlueprintCallable, Category = "Input")
@@ -44,6 +42,13 @@ public:
 	void SwitchWeaponSlot(int32 Slot);
 	void SwitchToPrimaryWeapon();
 	void SwitchToSecondaryWeapon();
+	UPROPERTY()
+	TArray<FCardEffect> AppliedCardEffects;
+	void ApplyCardEffect(UCardData* SelectedCard);
+	void ApplyEffectToGun(FCardEffect Effect);
+	ACGunBase* GetEquippedGun();
+	ACGunBase* Inventory[2];
+	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
 
 protected:
 	virtual void BeginPlay() override;
@@ -124,7 +129,6 @@ protected:
 
 private:
 	void InitializeCharacter();
-	ACGunBase* Inventory[2];
 	float NormalSpeed;
 	float SprintSpeedMultiplier;
 	float SprintSpeed;
@@ -138,7 +142,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	float DashDistance = 600.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-	float DashCooldown = 1.5f;
+	float DashCoolDown = 1.5f;
 
 	bool bCanSwitchWeapon = true;
 	UPROPERTY()
@@ -151,7 +155,6 @@ private:
 	ACGunBase* CurrentWeapon = nullptr;
 	int32 CurrentWeaponSlot = 1;
 
-	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
 	void DropCurrentWeapon(int32 Slot);
 	bool bCanPickupWeapon = true;
 	FTimerHandle PickupCooldownTimer;
@@ -196,8 +199,8 @@ public:
 	float GetMaxShield() { return MaxShield; }
 	void SetMaxHealth(float amount) { MaxHealth = amount;}
 	void SetMaxShield(float amount) { MaxShield = amount;}
-	ACGunBase* GetCurrentWeaponClass() { return CurrentWeapon; }
-
+	ACGunBase* GetCurrentWeaponClass() { return CurrentWeapon;}
+	int32 GetCurrentWeaponSlot() { return CurrentWeaponSlot;}
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
 
 	void SetCurrentWeaponClass()

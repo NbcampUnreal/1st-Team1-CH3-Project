@@ -61,9 +61,8 @@ void APlayerCharacter::BeginPlay()
 	if (GameInstance)
 	{
 		GameInstance->LoadPlayerStats(this);
-		ApplyLevelStats();
+		//GameInstance->LoadWeaponStats(this);
 		GameInstance->LoadMouseSensitivity();
-		SetMouseSensitivity(GameInstance->MouseSensitivity);
 	}
 
 	if (DefaultWeaponClass)
@@ -230,7 +229,7 @@ void APlayerCharacter::Dash(const FInputActionValue& value)
 
 	bCanDash = false;
 	OnDashState.Broadcast(true);
-	OnDashCoolDown.Broadcast(DashCooldown);
+	OnDashCoolDown.Broadcast(DashCoolDown);
 	float DashTime = 0.1f;
 	float DashSpeed = DashDistance / DashTime;
 
@@ -248,7 +247,7 @@ void APlayerCharacter::Dash(const FInputActionValue& value)
 
 	GetWorldTimerManager().SetTimer(DashStopTimer, this, &APlayerCharacter::StopDash, DashTime, false);
 
-	GetWorldTimerManager().SetTimer(DashCooldownTimer, this, &APlayerCharacter::ResetDash, DashCooldown, false);
+	GetWorldTimerManager().SetTimer(DashCooldownTimer, this, &APlayerCharacter::ResetDash, DashCoolDown, false);
 
 	UE_LOG(LogTemp, Warning, TEXT("대시 실행: 방향 = %s, 속도 = %f"), *DashDirection.ToString(), DashSpeed);
 }
@@ -286,23 +285,6 @@ void APlayerCharacter::DecreaseMouseSensitivity()
 	SetMouseSensitivity(MouseSensitivity - 0.005f);
 }
 
-void APlayerCharacter::ApplyLevelStats()
-{
-	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
-	if (!GameInstance) return;
-
-	int32 PlayerLevel = GameInstance->PlayerLevel;
-
-	MaxHealth = 100 + (PlayerLevel * 10);
-	MaxShield = 50 + (PlayerLevel * 5);
-
-	CurrentHealth = MaxHealth;
-	CurrentShield = MaxShield;
-
-	UE_LOG(LogTemp, Warning, TEXT("레벨 %d 적용됨 - 체력: %f, 실드: %f"), PlayerLevel, MaxHealth, MaxShield);
-
-	GameInstance->SavePlayerStats(this);
-}
 
 
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -454,6 +436,11 @@ bool APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
 	CurrentWeaponSlot = 1;
 
 	AttachWeaponToHand(CurrentWeapon, 1);
+
+	for (const FCardEffect& Effect : AppliedCardEffects)
+	{
+		ApplyEffectToGun(Effect);
+	}
 
 	CurrentWeapon->DisableWeaponShadows();
 
@@ -812,6 +799,67 @@ void APlayerCharacter::SwitchToSecondaryWeapon()
 {
 	SwitchWeaponSlot(1);
 }
+
+void APlayerCharacter::ApplyCardEffect(UCardData* SelectedCard)
+{
+	if (!SelectedCard) return;
+
+	FCardEffect Effect = SelectedCard->CardEffect;
+	float AppliedValue = Effect.EffectValues;
+
+	switch (Effect.EffectType)
+	{
+	case ECardEffectType::DashCoolTimeDecrease:
+		DashCoolDown *= (1.0f - AppliedValue * 0.01f);
+		break;
+
+	case ECardEffectType::MoveSpeedIncrease:
+		NormalSpeed *= (1.0f + AppliedValue * 0.01f);
+		break;
+
+	case ECardEffectType::ShieldAmountIncrease:
+		MaxShield += AppliedValue;
+		break;
+
+	case ECardEffectType::ShieldRateIncrease:
+		ShieldRegenRate += AppliedValue;
+		break;
+
+	case ECardEffectType::MaxHealthIncrease:
+		MaxHealth += AppliedValue;
+		break;
+
+	case ECardEffectType::AttackPowerIncrease:
+	case ECardEffectType::AttackSpeedIncrease:
+		ApplyEffectToGun(Effect);
+		AppliedCardEffects.Add(Effect);
+		break;
+	}
+}
+
+void APlayerCharacter::ApplyEffectToGun(FCardEffect Effect)
+{
+	ACGunBase* EquippedGun = GetEquippedGun();
+
+	if (!EquippedGun) return;
+
+	float AppliedValue = Effect.EffectValues;
+
+	if (Effect.EffectType == ECardEffectType::AttackPowerIncrease)
+	{
+		//EquippedGun->GetDamage() += AppliedValue;
+	}
+	else if (Effect.EffectType == ECardEffectType::AttackSpeedIncrease)
+	{
+		//EquippedGun->GetGunDelay() *= (1.0f + AppliedValue * 0.01f);
+	}
+}
+
+ACGunBase* APlayerCharacter::GetEquippedGun()
+{
+	return CurrentWeapon;
+}
+
 
 
 //void APlayerCharacter::HandlePlayerDeath()
