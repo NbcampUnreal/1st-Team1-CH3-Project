@@ -5,6 +5,8 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
+FOnHitMarkerDele ABulletBase::OnHitMarker;
+
 ABulletBase::ABulletBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -74,7 +76,7 @@ void ABulletBase::BeginPlay()
 	
 }
 
-void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage)
+void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage,float GunSpeed)
 {
 	
 	SetActorLocation(StartLocation);
@@ -88,10 +90,14 @@ void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage
 	}
 	if (ProjectileMovement)
 	{
-		ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+
+		ProjectileMovement->StopMovementImmediately();
+        
+		ProjectileMovement->InitialSpeed = GunSpeed;
+		ProjectileMovement->MaxSpeed = GunSpeed;
+
+		ProjectileMovement->Velocity = Direction * GunSpeed;
 		ProjectileMovement->Activate();
-		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 위치: %s, 방향: %s, 속도: %f"),
-			*StartLocation.ToString(), *Direction.ToString(), ProjectileMovement->InitialSpeed);
 	}
 }
 
@@ -105,6 +111,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 
 	if (OtherActor->ActorHasTag("Enemy"))
 	{
+		bool IsHead = false;
 		float FinalDamage = BulletDamage;
 		if (SweepResult.BoneName == "head" || SweepResult.BoneName == "Head")
 		{
@@ -112,6 +119,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 			{
 				UGameplayStatics::PlaySoundAtLocation(this, HeadHitSound.Get(), GetActorLocation());
 			}
+			IsHead = true;
 			FinalDamage *= 2.0f;
 			UE_LOG(LogTemp, Warning, TEXT("헤드샷! 데미지: %f"), FinalDamage);
 		}
@@ -121,6 +129,7 @@ void ABulletBase::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		}
 		SpawnBulletDecal(SweepResult);
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
+		OnHitMarker.Broadcast(IsHead);
 	}
 }
 

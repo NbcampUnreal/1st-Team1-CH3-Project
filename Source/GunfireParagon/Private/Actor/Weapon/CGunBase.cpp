@@ -4,6 +4,7 @@
 #include "Player/MyPlayerController.h" 
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameMode/FPSGameMode.h"
 #include "FPSDataTables.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
@@ -45,7 +46,6 @@ void ACGunBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    CurrentAmmo = MaxAmmo;
 	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
 	{
 		MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
@@ -72,14 +72,25 @@ void ACGunBase::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("WeaponMesh가 초기화되지 않음!"));
     }
-    //  BulletPool을 찾기 (월드에서 검색)
-    BulletPool = Cast<ABulletPool>(UGameplayStatics::GetActorOfClass(GetWorld(), ABulletPool::StaticClass()));
+	AFPSGameMode* GameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-    if (!BulletPool)
-    {
-        BulletPool = GetWorld()->SpawnActor<ABulletPool>(ABulletPool::StaticClass());
-    }
-
+	if (GameMode)
+	{
+		BulletPool = GameMode->GetBulletPool();
+		if (BulletPool)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("게임모드에서 BulletPool을 성공적으로 가져옴!"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("게임모드에서 BulletPool을 찾지 못함!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드를 찾지 못함!"));
+	}
+	
 	AFPSDataTables* DataTables = Cast<AFPSDataTables>(UGameplayStatics::GetActorOfClass(GetWorld(), AFPSDataTables::StaticClass()));
 
 	if (!DataTables)
@@ -97,6 +108,7 @@ void ACGunBase::BeginPlay()
 			GunSpeed = WeaponData->AttackSpeed;
 			CurrentAmmo = MaxAmmo;
 			DropEffect = Cast<UNiagaraSystem>(WeaponData->DropEffectPath.TryLoad());
+			
 
 			if (WeaponData->DropEffectPath.IsValid())
 			{
@@ -262,6 +274,7 @@ bool ACGunBase::IsAmmoEmpty()
 
 void ACGunBase::SwitchGunSound()
 {
+	
 	switch (WeaponType)
 	{
 	case EWeaponType::Rifle:
@@ -367,11 +380,11 @@ FVector ACGunBase::GetAimDirection() const
 		UE_LOG(LogTemp, Warning, TEXT("MuzzleSpot: %s, ImpactPoint: %s"), *MuzzleSpot.ToString(), *HitResult.ImpactPoint.ToString());
 		if (FVector::DistSquared(HitResult.ImpactPoint, MuzzleSpot) < 100.0f) 
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AimDirection 너무 가까움! 기본 방향 사용"));
+			UE_LOG(LogTemp, Warning, TEXT("AimDirection 너무 가까움 기본 방향 사용"));
 			return CameraRotation.Vector();  
 		}
 		
-		UE_LOG(LogTemp, Warning, TEXT("총알방향: %s"), *AimDirection.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("총알방향 %s"), *AimDirection.ToString());
 		UE_LOG(LogTemp, Warning, TEXT("화면 정중앙으로 발사"));
 
 		return AimDirection;

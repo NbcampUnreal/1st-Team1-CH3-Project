@@ -39,7 +39,7 @@ private:
 	float MaxZ = 500.0f;  
 
 	UPROPERTY(EditAnywhere, Category="Movement")
-	float ChangeInterval = 5.0f; 
+	float ChangeInterval = 2.0f; 
 
 	FVector TargetLocation; 
 	FTimerHandle ChangeTargetTimer;  

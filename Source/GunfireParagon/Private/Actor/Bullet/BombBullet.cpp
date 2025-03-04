@@ -58,8 +58,9 @@ void ABombBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		UE_LOG(LogTemp, Error, TEXT("폭발사운드가 없습니다."));
 	}
+	bool IsHead = false;
 	ApplyExplosionDamage();
-
+	OnHitMarker.Broadcast(IsHead);
 	// 폭발 후 총알을 풀로 반환
 	if (BulletPool)
 	{

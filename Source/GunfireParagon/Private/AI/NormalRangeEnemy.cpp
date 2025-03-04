@@ -9,11 +9,13 @@ ANormalRangeEnemy::ANormalRangeEnemy()
 
     Damage = 20.0f;
     AttackRange = 900.0f;
-    AttackDelay = 3.0f;
+    AttackDelay = 1.0f;
     MaxHealth = 150.0f;
     BaseWalkSpeed = 700.0f;
     EXP = 10.0f;
     CurrentHealth = MaxHealth;
+
+    GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
     EnemyName = "MinionRange";
 }
@@ -51,11 +53,12 @@ void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
 
     FRotator AdjustedRotation = ForwardDirection.Rotation();
     AdjustedRotation.Pitch += AimPitch;
-   
+    AdjustedRotation.Yaw -= 2.0f;
+
     FVector AdjustedDirection = AdjustedRotation.Vector();
     AdjustedDirection.Normalize();
 
-    float CapsuleRadius = 5.0f;
+    float CapsuleRadius = 9.0f;
     float CapsuleHalfHeight = AttackRange * 0.5f;
 
     FVector CapsuleCenter = Start + (AdjustedDirection * CapsuleHalfHeight);

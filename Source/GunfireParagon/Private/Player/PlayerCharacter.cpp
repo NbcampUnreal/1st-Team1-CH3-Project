@@ -10,7 +10,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-
 APlayerCharacter::APlayerCharacter()
 {
 	InitializeCharacter();
@@ -21,9 +20,6 @@ APlayerCharacter::APlayerCharacter()
 
 	Tags.Add("Player");
 }
-
-//ReturnHPValue();
-//ReturnShieldValue();
 
 void APlayerCharacter::BeginPlay()
 {
@@ -80,7 +76,8 @@ void APlayerCharacter::BeginPlay()
 			CurrentWeaponSlot = 0;
 
 			AttachWeaponToHand(CurrentWeapon, 0);
-
+			CurrentAmmo = CurrentWeapon->GetCurrentAmmo();
+			MaxAmmo = CurrentWeapon->GetMaxAmmo();
 			UE_LOG(LogTemp, Warning, TEXT("기본 무기 장착 완료: %s"), *Inventory[0]->GetName());
 		}
 		else
@@ -395,6 +392,7 @@ void APlayerCharacter::RegenerateShield()
 	}
 
 	CurrentShield = FMath::Clamp(CurrentShield + ShieldRegenRate, 0.0f, MaxShield);
+	OnShieldChanged.Broadcast(CurrentShield, MaxShield);
 	UE_LOG(LogTemp, Warning, TEXT("실드 회복 중... 현재 실드: %f"), CurrentShield);
 }
 

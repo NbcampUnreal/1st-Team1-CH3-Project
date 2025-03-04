@@ -9,6 +9,7 @@
 #include "Blueprint\WidgetTree.h"
 #include "Widgets/DataAssets/InGameMinimapDataAsset.h"
 #include "Widgets\InGame\IngameMinimapIcon.h"
+#include "Components\CapsuleComponent.h"
 
 void UInGameMinimap::NativeOnInitialized()
 {
@@ -41,6 +42,12 @@ void UInGameMinimap::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
 	UpdateAllIcons();
+}
+
+void UInGameMinimap::NativeDestruct()
+{
+	Super::NativeDestruct();
+
 }
 
 void UInGameMinimap::UpdatePlayTime()
@@ -97,9 +104,10 @@ void UInGameMinimap::RemoveMinimapIcon(ACharacter* Target)
 	{
 		if (UIngameMinimapIcon* Icon = *IconPtr)
 		{
-			Icon->RemoveFromParent();
+			Icon->SetVisibility(ESlateVisibility::Hidden);
+			//Icon->RemoveFromParent();
 		}
-		ActiveIcons.Remove(Target);
+		//ActiveIcons.Remove(Target);
 	}
 }
 
@@ -109,6 +117,12 @@ void UInGameMinimap::UpdateActorIcon(ACharacter* RenderTarget, FVector WorldLoca
 
 	FVector2D MinimapPosition = IconRenderPosition(WorldLocation);
 
+	if (RenderTarget->GetCapsuleComponent()->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	{
+		RemoveMinimapIcon(RenderTarget);
+
+		return;
+	}
 	if (ActiveIcons.Contains(RenderTarget))
 	{
 		UIngameMinimapIcon* Icon = ActiveIcons[RenderTarget];

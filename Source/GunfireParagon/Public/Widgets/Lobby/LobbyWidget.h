@@ -19,25 +19,6 @@ class GUNFIREPARAGON_API ULobbyWidget : public UUserWidget
 public :
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
-
-protected:
-	UPROPERTY(meta = (BindWidget))
-	UButton* StartButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* InfoButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* EndButton;
-
-private:
-	UFUNCTION()
-	void OnStartButtonClicked();
-
-	UFUNCTION()
-	void OnInfoButtonClicked();
-
-	UFUNCTION()
-	void OnEndButtonClicked();
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 };

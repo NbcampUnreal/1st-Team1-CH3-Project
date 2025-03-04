@@ -9,9 +9,9 @@
 #include "Components/DecalComponent.h"
 #include "BulletBase.generated.h"
 
-
 class ABulletPool;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHitMarkerDele, bool, IsHead);
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8
@@ -85,4 +85,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Sounds")
 	TSoftObjectPtr<USoundBase> HeadHitSound;
 	
+public:
+	static FOnHitMarkerDele OnHitMarker;
 };

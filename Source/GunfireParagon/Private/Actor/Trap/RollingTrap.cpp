@@ -3,10 +3,8 @@
 #include "Components/SphereComponent.h"
 
 
-
 ARollingTrap::ARollingTrap()
 {
-
 	PrimaryActorTick.bCanEverTick = true;
 
 	DamageCollider = CreateDefaultSubobject<USphereComponent>(TEXT("DamageCollider"));
@@ -17,21 +15,16 @@ ARollingTrap::ARollingTrap()
 
 	BoulderMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BoulderMesh"));
 	BoulderMesh->SetupAttachment(DamageCollider);
-	BoulderMesh->SetSimulatePhysics(true); 
-	BoulderMesh->SetNotifyRigidBodyCollision(true);
-	BoulderMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);  
-	BoulderMesh->SetCollisionObjectType(ECC_PhysicsBody); 
-	BoulderMesh->OnComponentHit.AddDynamic(this, &ARollingTrap::OnHit);
-	
-	StartLocation = GetActorLocation();
-
-	
 }
 
 void ARollingTrap::BeginPlay()
 {
 	Super::BeginPlay();
-    
+	Velocity = FVector(0.0f, 0.0f, 0.0f);
+	StartLocation = GetActorLocation();
+	GetWorldTimerManager().SetTimer(DropTimerHandle, this, &ARollingTrap::StartFalling, DropInterval, true);
+
+
 }
 
 void ARollingTrap::ActivateTrap()
@@ -39,45 +32,83 @@ void ARollingTrap::ActivateTrap()
 	Super::ActivateTrap();
 }
 
-void ARollingTrap::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (OtherActor->ActorHasTag("Trap"))
-		return;
-	
-	if (!bHasHitGround && OtherActor->ActorHasTag("Ground"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("바닥과 부딪힘"));
-		bHasHitGround = true; 
-	}
-	if (OtherActor && OtherActor->ActorHasTag("Player"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("플레이어와 부딪힘"));
-		bHasHitGround = true; 
-	BoulderMesh->SetSimulatePhysics(false); 
-	}
-}
-
-void ARollingTrap::OnOverlapWithDestroyBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("OnOverlapWithDestroyBox 호출됨!"));
-	if (OtherActor && OtherActor->ActorHasTag("DestroyBox")) 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("RollingTrap collided with DestroyBox: %s"), *OtherActor->GetName());
-		SetActorLocation(StartLocation);
-	}
-}
-
 void ARollingTrap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!bCanFall) return;
+	
+	if (!bHasHitGround)
+	{
+		Velocity.Z -= GravityScale * DeltaTime;
+	}
 
-	FVector NewLocation = GetActorLocation() + (GetActorForwardVector() * MoveSpeed * DeltaTime);
-	SetActorLocation(NewLocation);
+	FVector MoveDirection;
+	if (!bHasHitGround)
+	{
+		MoveDirection = GetActorForwardVector() * MoveSpeed * DeltaTime + FVector(0.0f, 0.0f, Velocity.Z);
+	}
+	else
+	{
+		MoveDirection = GetActorForwardVector() * MoveSpeed * DeltaTime;  
+	}
+	FHitResult HitResult;
+	SetActorLocation(GetActorLocation() + MoveDirection, true, &HitResult);
 
-	FRotator NewRotation = GetActorRotation();
-	NewRotation.Pitch += RotationSpeed * DeltaTime;  // X축(Pitch) 회전
-	SetActorRotation(NewRotation);
+	if (HitResult.IsValidBlockingHit())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("바닥과 충돌 감지됨!"));
+        
+		Velocity = FVector(GetActorForwardVector() * MoveSpeed); 
+		bHasHitGround = true;
+	}
+	else
+	{
+		bHasHitGround = false;	
+	}
+	
+
+	FRotator MeshRotation = BoulderMesh->GetRelativeRotation();
+	MeshRotation.Pitch += RotationSpeed * DeltaTime;  // X축 회전 (굴러가는 효과)
+	BoulderMesh->SetRelativeRotation(MeshRotation);
 }
 
+void ARollingTrap::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+						  FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherActor->ActorHasTag("Trap"))
+		return;
+
+	if (!bHasHitGround && OtherActor->ActorHasTag("Ground"))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("바닥과 부딪힘"));
+		bHasHitGround = true;
+	}
+	
+}
+
+void ARollingTrap::OnOverlapWithDestroyBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+										   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	if (OtherActor && OtherActor->ActorHasTag("DestroyBox"))
+	{
+	UE_LOG(LogTemp, Warning, TEXT("RollingTrap collided with DestroyBox: %s"), *OtherActor->GetName());
+		SetActorLocation(StartLocation);
+		Velocity = FVector(0.0f, 0.0f, 0.0f); 
+	}
+}
+
+void ARollingTrap::StartFalling()
+{
+	if (!bCanFall)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RollingTrap 시작됨!"));
+
+		SetActorLocation(StartLocation);
+		Velocity = FVector(0.0f, 0.0f, 0.0f);
+		bHasHitGround = false;  
+        
+		bCanFall = true; 
+		SetActorTickEnabled(true);
+	}
+}

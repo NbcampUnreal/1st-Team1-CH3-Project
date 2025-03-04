@@ -46,5 +46,11 @@ protected:
 	UFUNCTION()
 	void ConvertVisibilityMode();
 	
-	FTimerHandle TestTimer;
+	UFUNCTION()
+	void ConvertTickRate();
+
+	FTimerHandle VisibleTimer;;
+
+private:
+	bool IsSHowHUD;
 };

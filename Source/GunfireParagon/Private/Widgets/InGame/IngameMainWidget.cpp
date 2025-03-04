@@ -9,6 +9,7 @@
 #include "Widgets\InGame\DashEffectWidget.h"
 #include "Player/PlayerCharacter.h"
 #include "Widgets\MinimapTracker.h"
+#include "Actor\Bullet\BulletBase.h"
 
 void UIngameMainWidget::NativeOnInitialized()
 {
@@ -39,7 +40,6 @@ void UIngameMainWidget::NativeOnInitialized()
 		UE_LOG(LogTemp, Warning, TEXT("DashWidget Missing"));
 		return;
 	}
-
 }
 
 void UIngameMainWidget::NativeConstruct()
@@ -53,30 +53,43 @@ void UIngameMainWidget::NativeConstruct()
 			UE_LOG(LogTemp, Warning, TEXT("Current Player in nullptr"));
 			return;
 		}
-		if (CurrentPlayer && !CurrentPlayer->OnHealthChanged.IsBound())
+		if (!CurrentPlayer->OnHealthChanged.IsBound())
 		{
 			CurrentPlayer->OnHealthChanged.AddDynamic(this, &UIngameMainWidget::OnPlayerHealthBinding);
 		}
-		if (CurrentPlayer && !CurrentPlayer->OnShieldChanged.IsBound())
+		if (!CurrentPlayer->OnShieldChanged.IsBound())
 		{
 			CurrentPlayer->OnShieldChanged.AddDynamic(this, &UIngameMainWidget::OnPlayerShieldBinding);
 		}
-		if (CurrentPlayer && !CurrentPlayer->OnAmmoChanged.IsBound())
+		if (!CurrentPlayer->OnAmmoChanged.IsBound())
 		{
 			CurrentPlayer->OnAmmoChanged.AddDynamic(this, &UIngameMainWidget::OnWeaponAmmoBinding);
 		}
-		if (CurrentPlayer && !UMinimapTracker::OnActorLocation.IsBound())
+		if (!UMinimapTracker::OnActorLocation.IsBound())
 		{
 			UMinimapTracker::OnActorLocation.AddDynamic(this, &UIngameMainWidget::OnMinimapUpdated);
 		}
-		if (CurrentPlayer && !CurrentPlayer->OnDashState.IsBound())
+		if (!CurrentPlayer->OnDashState.IsBound())
 		{
 			CurrentPlayer->OnDashState.AddDynamic(this, &UIngameMainWidget::OnPlayerIsDashBinding);
 		}
-		if (CurrentPlayer && !CurrentPlayer->OnDashCoolDown.IsBound())
+		if (!CurrentPlayer->OnDashCoolDown.IsBound())
 		{
 			CurrentPlayer->OnDashCoolDown.AddDynamic(this, &UIngameMainWidget::OnPlayerDashCooldownBinding);
 		}
+		if (!CurrentPlayer->OnWeaponClass.IsBound())
+		{
+			CurrentPlayer->OnWeaponClass.AddDynamic(this, &UIngameMainWidget::OnWeaponTextureBinding);
+		}
+		if (!ABulletBase::OnHitMarker.IsBound())
+		{
+			ABulletBase::OnHitMarker.AddDynamic(this, &UIngameMainWidget::OnHitMarkerBinding);
+		}
+
+		OnPlayerHealthBinding(CurrentPlayer->GetCurrentHealth(), CurrentPlayer->GetMaxHealth());
+		OnPlayerShieldBinding(CurrentPlayer->GetCurrentShield(), CurrentPlayer->GetMaxShield());
+		OnWeaponAmmoBinding(CurrentPlayer->CurrentAmmo, CurrentPlayer->MaxAmmo);
+		OnWeaponTextureBinding(CurrentPlayer->GetCurrentWeaponClass());
 	}
 
 }
@@ -84,6 +97,8 @@ void UIngameMainWidget::NativeConstruct()
 void UIngameMainWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+
+	ABulletBase::OnHitMarker.RemoveDynamic(this, &UIngameMainWidget::OnHitMarkerBinding);
 }
 
 void UIngameMainWidget::OnPlayerHealthBinding(float CurrentHP, float MaxHP)
@@ -112,21 +127,26 @@ void UIngameMainWidget::OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo)
 	WeaponStatusWidget->SetCurrentAmmo(CurrentAmmo, MaxAmmo);
 }
 
+void UIngameMainWidget::OnWeaponTextureBinding(ACGunBase* CurrentWeapon)
+{
+	WeaponStatusWidget->SetCurrentWeaponTexture(CurrentWeapon);
+}
+
 void UIngameMainWidget::OnMinimapUpdated(ACharacter* Target, float Distance)
 {
-	if (Distance <= MaxRenderDistance)
-	{
-		if (!MinimapWidget->ActiveIcons.Contains(Target))
-		{
-			MinimapWidget->AddMinimapIcon(Target);
-		}
-
-		MinimapWidget->UpdateActorIcon(Target, Target->GetActorLocation());
-	}
-	else
+	if (Target->GetCapsuleComponent()->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
 	{
 		MinimapWidget->RemoveMinimapIcon(Target);
 	}
+	else
+	{
+		MinimapWidget->AddMinimapIcon(Target);
+	}
+}
+
+void UIngameMainWidget::OnHitMarkerBinding(bool IsHead)
+{
+	CrossHairWidget->SetAnimationHitMarker(IsHead);
 }
 
 

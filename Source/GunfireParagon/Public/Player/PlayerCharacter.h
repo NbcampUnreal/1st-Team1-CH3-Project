@@ -16,6 +16,7 @@ struct FInputActionValue;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangedPlayerValue, float, CurrentValue, float, MaxValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeOneValue, float, OneValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeBoolValue, bool, OneValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangeCurrentWeapon, ACGunBase*, OneValue);
 
 UCLASS()
 class GUNFIREPARAGON_API APlayerCharacter : public ACharacter
@@ -176,6 +177,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "UI Events")
 	FOnChangedPlayerValue OnAmmoChanged;
 	UPROPERTY(BlueprintAssignable, Category = "UI Events")
+	FOnChangeCurrentWeapon OnWeaponClass;
+
+	UPROPERTY(BlueprintAssignable, Category = "UI Events")
 	FOnChangeBoolValue OnDashState;
 	UPROPERTY(BlueprintAssignable, Category = "UI Events")
 	FOnChangeOneValue OnDashCoolDown;
@@ -184,6 +188,21 @@ public:
 	float CurrentAmmo = 0;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Projectile")
 	float MaxAmmo = 0;
+
+	float GetCurrentHealth() { return CurrentHealth; }
+	float GetMaxHealth() { return MaxHealth; }
+	float GetCurrentShield() { return CurrentShield; }
+	float GetMaxShield() { return MaxShield; }
+	ACGunBase* GetCurrentWeaponClass() { return CurrentWeapon; }
+
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
+
+	void SetCurrentWeaponClass()
+	{
+		if (!IsValid(CurrentWeapon)) return;
+
+		OnWeaponClass.Broadcast(CurrentWeapon);
+	}
+
 	void HideCurrentWeapon();
 };

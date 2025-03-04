@@ -21,17 +21,14 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 
-	//TestCase
-	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-
 	UFUNCTION(BlueprintCallable)
 	void SetCrossHairSpread(float Sperad);
 
 	UFUNCTION(BlueprintCallable)
 	void SetAnimationSpread(float Sperad);
 
-	UFUNCTION()
-	void SetAnimationVisible();
+	UFUNCTION(BlueprintCallable)
+	void SetAnimationHitMarker(bool IsHead);
 protected:
 	// TODO:
 	// 메모리 적으로는 x2의 방식을 사용하게된다. 비효율적
@@ -56,8 +53,14 @@ protected:
 	UImage* AnimationBottom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Spread")
-	float Spread;
+	float Spread = 10.f;
 
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* HitMarkerAnim;
+
+	void SetHitMarkerImage(bool IsHead);
+	void PlayHitMarker();
+	
 private:
 	TMap<UImage*,FVector2D> CrossHairs;
 	TMap<UImage*,FVector2D> Animations;
