@@ -6,6 +6,7 @@
 #include "Actor/Weapon/Gun_Rocket.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "TimerManager.h"
@@ -21,11 +22,29 @@ APlayerCharacter::APlayerCharacter()
 	DefaultWeaponClass = AGun_Rifle::StaticClass();
 
 	Tags.Add("Player");
+
+	bIsDead = false;
+
+	DeathCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("DeathCameraSpringArm"));
+	DeathCameraSpringArm->SetupAttachment(GetCapsuleComponent());
+	DeathCameraSpringArm->TargetArmLength = 500.0f;
+	DeathCameraSpringArm->bUsePawnControlRotation = false;
+	DeathCameraSpringArm->bEnableCameraLag = true;
+	DeathCameraSpringArm->CameraLagSpeed = 5.0f;
+	DeathCameraSpringArm->SetRelativeLocation(FVector(-200.0f, 0.0f, 100.0f));
+	DeathCameraSpringArm->SetRelativeRotation(FRotator(-30.0f, 0.0f, 0.0f));
+
+	DeathCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("DeathCamera"));
+	DeathCamera->SetupAttachment(DeathCameraSpringArm);
+	DeathCamera->FieldOfView = 100.0f;
+	DeathCamera->SetAutoActivate(false);
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay() - 초기 bIsDead 값: %s"), bIsDead ? TEXT("true") : TEXT("false"));
 
 	if (GetMesh())
 	{
@@ -119,6 +138,10 @@ void APlayerCharacter::InitializeCharacter()
 	MeshOffset = GetMesh()->GetRelativeLocation();
 
 	ThirdPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ThirdPersonMesh"));
+	if (!ThirdPersonMesh)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InitializeCharacter() - ThirdPersonMesh 생성 실패"));
+	}
 	ThirdPersonMesh->SetupAttachment(RootComponent);
 	ThirdPersonMesh->SetOwnerNoSee(true);
 	ThirdPersonMesh->bCastDynamicShadow = true;
@@ -323,11 +346,8 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	{
 		UE_LOG(LogTemp, Warning, TEXT("체력이 0 이하가 됨 - 사망 처리 시작"));
 
-		/*if (!bIsDead)
+		if (!bIsDead)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("bIsDead가 false이므로 HandlePlayerDeath() 실행"));
-			bIsDead = true;
-
 			UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
 			if (GameInstance)
 			{
@@ -335,7 +355,8 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 			}
 
 			HandlePlayerDeath();
-		}*/
+			UE_LOG(LogTemp, Warning, TEXT("HandlePlayerDeath() 호출 완료"));
+		}
 	}
 
 	return DamageAmount;
@@ -863,86 +884,82 @@ ACGunBase* APlayerCharacter::GetEquippedGun()
 	return CurrentWeapon;
 }
 
-//void APlayerCharacter::HideFirstPersonMeshAndWeapon()
-//{
-//	if (GetMesh())
-//	{
-//		GetMesh()->SetVisibility(false, true);
-//	}
-//
-//	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
-//	{
-//		CurrentWeapon->GetWeaponMesh()->SetVisibility(false, true);
-//	}
-//}
-//
-//void APlayerCharacter::ShowFirstPersonMeshAndWeapon()
-//{
-//	if (GetMesh())
-//	{
-//		GetMesh()->SetVisibility(true, true);
-//	}
-//
-//	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
-//	{
-//		CurrentWeapon->GetWeaponMesh()->SetVisibility(true, true);
-//	}
-//}
+void APlayerCharacter::HideFirstPersonMeshAndWeapon()
+{
+	if (GetMesh())
+	{
+		GetMesh()->SetVisibility(false, true);
+	}
 
-//void APlayerCharacter::HandlePlayerDeath()
-//{
-//	if (bIsDead) return;
-//
-//	UE_LOG(LogTemp, Warning, TEXT(" HandlePlayerDeath() 실행됨 - Ragdoll 및 숨김 처리 시작"));
-//
-//	bIsDead = true;
-// 
-// 
-//	//  3인칭 메시 Ragdoll 적용
-//	if (ThirdPersonMesh)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("3인칭 메시 Ragdoll 적용 시도"));
-//
-//		ThirdPersonMesh->SetCollisionProfileName(TEXT("Ragdoll"));
-//		ThirdPersonMesh->SetSimulatePhysics(true);
-//		ThirdPersonMesh->SetAllBodiesSimulatePhysics(true);
-//		ThirdPersonMesh->SetAllBodiesPhysicsBlendWeight(1.0f);
-//		ThirdPersonMesh->SetEnableGravity(true);
-//
-//		UE_LOG(LogTemp, Warning, TEXT(" 3인칭 메시 Ragdoll 적용 완료"));
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Error, TEXT(" ThirdPersonMesh가 nullptr입니다."));
-//	}
-//
-//	UE_LOG(LogTemp, Warning, TEXT(" HandlePlayerDeath() 완료 - Ragdoll 및 숨김 처리 완료"));
-//}
+	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+	{
+		CurrentWeapon->GetWeaponMesh()->SetVisibility(false, true);
+	}
+}
 
-//void APlayerCharacter::StartDeathCameraEffect()
-//{
-//	APlayerController* PC = Cast<APlayerController>(GetController());
-//	if (!PC)
-//	{
-//		UE_LOG(LogTemp, Error, TEXT("StartDeathCameraEffect() 실패: PlayerController가 없음"));
-//		return;
-//	}
-//
-//	UE_LOG(LogTemp, Warning, TEXT("카메라 줌아웃 시작"));
-//
-//	FVector CameraLocation = CameraComp->GetComponentLocation();
-//	FVector ZoomOutLocation = CameraLocation - GetActorForwardVector() * 200.0f + FVector(0, 0, 50);
-//
-//	//  즉시 위치 변경 (테스트)
-//	CameraComp->SetWorldLocation(ZoomOutLocation);
-//	UE_LOG(LogTemp, Warning, TEXT("카메라 위치 변경됨: %s"), *ZoomOutLocation.ToString());
-//
-//	//  SetTimer를 사용한 부드러운 줌아웃 유지
-//	FTimerHandle TimerHandle;
-//	GetWorldTimerManager().SetTimer(TimerHandle, [this, ZoomOutLocation]()
-//		{
-//			FVector NewLocation = FMath::VInterpTo(CameraComp->GetComponentLocation(), ZoomOutLocation, GetWorld()->GetDeltaSeconds(), 2.0f);
-//			CameraComp->SetWorldLocation(NewLocation);
-//			UE_LOG(LogTemp, Warning, TEXT("카메라 이동 중... 현재 위치: %s"), *NewLocation.ToString());
-//		}, 0.01f, true, 0.1f);
-//}
+void APlayerCharacter::ShowFirstPersonMeshAndWeapon()
+{
+	if (GetMesh())
+	{
+		GetMesh()->SetVisibility(true, true);
+	}
+
+	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+	{
+		CurrentWeapon->GetWeaponMesh()->SetVisibility(true, true);
+	}
+}
+
+void APlayerCharacter::HandlePlayerDeath()
+{
+	UE_LOG(LogTemp, Warning, TEXT("HandlePlayerDeath() 진입"));
+
+	if (bIsDead)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HandlePlayerDeath() 실행 중단 - 이미 사망한 상태 (bIsDead = true)"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("HandlePlayerDeath() 실행됨 - 플레이어 사망 처리 시작"));
+
+	bIsDead = true;
+
+	//1인칭 메시와 총기 숨기기
+	HideFirstPersonMeshAndWeapon();
+
+	//3인칭 메시 Ragdoll 활성화
+	if (ThirdPersonMesh)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("3인칭 메시 Ragdoll 적용 시작"));
+
+		ThirdPersonMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+		ThirdPersonMesh->SetSimulatePhysics(true);
+		ThirdPersonMesh->SetAllBodiesSimulatePhysics(true);
+		ThirdPersonMesh->SetAllBodiesPhysicsBlendWeight(1.0f);
+		ThirdPersonMesh->SetEnableGravity(true);
+	}
+
+	SwitchToDeathCamera();
+}
+
+void APlayerCharacter::SwitchToDeathCamera()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController && DeathCamera)
+	{
+		// 기존 1인칭 카메라 비활성화
+		if (CameraComp) // 기존 1인칭 카메라가 존재하면
+		{
+			CameraComp->SetActive(false); // 1인칭 카메라 비활성화
+			UE_LOG(LogTemp, Warning, TEXT("1인칭 카메라 비활성화됨"));
+		}
+
+		// 3인칭 카메라 활성화
+		DeathCamera->SetActive(true);
+
+		// 카메라 전환 실행
+		PlayerController->SetViewTargetWithBlend(this, 0.5f, VTBlend_Cubic);
+
+		UE_LOG(LogTemp, Warning, TEXT("사망 시 3인칭 카메라로 전환됨"));
+	}
+}
