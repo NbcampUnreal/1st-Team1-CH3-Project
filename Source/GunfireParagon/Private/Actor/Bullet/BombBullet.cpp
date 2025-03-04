@@ -20,16 +20,6 @@ ABombBullet::ABombBullet()
 	}
 }
 
-void ABombBullet::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void ABombBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
-{
-	Super::Fire(StartLocation, Direction, GunDamage);
-}
-
 void ABombBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
