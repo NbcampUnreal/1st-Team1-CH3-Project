@@ -8,6 +8,7 @@ AGun_Rocket::AGun_Rocket()
     PrimaryActorTick.bCanEverTick = false;
 
     WeaponType = EWeaponType::Rocket;
+    AmmoType = EAmmoType::Bomb;
 
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 

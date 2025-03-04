@@ -90,11 +90,11 @@ ABulletBase* ABulletPool::GetPooledBullet(EAmmoType AmmoType)
 			{
 				Bullet->ProjectileMovement->bSimulationEnabled = true;
 				Bullet->ProjectileMovement->SetUpdatedComponent(Bullet->CollisionComponent);
-				UE_LOG(LogTemp, Warning, TEXT("✅ ProjectileMovement 활성화됨!"));
+				UE_LOG(LogTemp, Warning, TEXT("ProjectileMovement 활성화됨!"));
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("❌ ProjectileMovement가 nullptr 상태!"));
+				UE_LOG(LogTemp, Error, TEXT("ProjectileMovement가 nullptr 상태!"));
 			}
 			
 			return Bullet;
