@@ -12,16 +12,6 @@ APierceBullet::APierceBullet()
 	AmmoType = EAmmoType::Pierce;
 }
 
-void APierceBullet::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void APierceBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
-{
-	Super::Fire(StartLocation, Direction, GunDamage);
-}
-
 void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
