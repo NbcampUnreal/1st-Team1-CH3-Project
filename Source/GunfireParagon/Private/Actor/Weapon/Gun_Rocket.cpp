@@ -10,19 +10,11 @@ AGun_Rocket::AGun_Rocket()
     WeaponType = EWeaponType::Rocket;
     AmmoType = EAmmoType::Bomb;
 
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-
-    if (!WeaponMesh)
-    {
-        WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-        WeaponMesh->SetupAttachment(RootComponent);
-    }
-
-    static ConstructorHelpers::FObjectFinder<USkeletalMesh> RocketMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Test/TestGun/m16-a2-Rocket/source/SKM_m16a21.SKM_m16a21'"));
-    if (RocketMesh.Succeeded())
-    {
-        WeaponMesh->SetSkeletalMesh(RocketMesh.Object);
-    }
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> RifleMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Test/TestGun/super-mega-death-rocket/source/SKM_side1.SKM_side1'"));
+	if (RifleMesh.Succeeded())
+	{
+		WeaponMesh->SetSkeletalMesh(RifleMesh.Object);
+	}
 }
 
 

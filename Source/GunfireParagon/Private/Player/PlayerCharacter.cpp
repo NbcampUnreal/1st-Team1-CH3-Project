@@ -2,6 +2,8 @@
 #include "Player/MyPlayerController.h"
 #include "Actor/Weapon/CGunBase.h"
 #include "Actor/Weapon/Gun_Rifle.h"
+#include "Actor/Weapon/Gun_Shotgun.h"
+#include "Actor/Weapon/Gun_Rocket.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
@@ -655,6 +657,8 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 	{
 		ACGunBase* FoundWeapon = Cast<ACGunBase>(Actor);
 
+		UE_LOG(LogTemp, Warning, TEXT("감지된 무기: %s | 타입: %d"), *FoundWeapon->GetName(), (int32)FoundWeapon->WeaponType);
+
 		if (FoundWeapon &&
 			((Inventory[0] && Inventory[0]->WeaponType == FoundWeapon->WeaponType) ||
 				(Inventory[1] && Inventory[1]->WeaponType == FoundWeapon->WeaponType)))
@@ -666,6 +670,7 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 		return FoundWeapon;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없음"));
 	return nullptr;
 }
 
@@ -808,6 +813,7 @@ void APlayerCharacter::SwitchToSecondaryWeapon()
 	SwitchWeaponSlot(1);
 }
 
+
 //void APlayerCharacter::HandlePlayerDeath()
 //{
 //	if (bIsDead) return;
@@ -820,7 +826,7 @@ void APlayerCharacter::SwitchToSecondaryWeapon()
 //	if (GetMesh())
 //	{
 //		UE_LOG(LogTemp, Warning, TEXT("1인칭 메시 숨기기 시도"));
-//		GetMesh()->SetVisibility(false, true);  //  1인칭 메시 숨김
+//		GetMesh()->SetVisibility(false);  //  1인칭 메시 숨김
 //		GetMesh()->SetOwnerNoSee(true);
 //		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 //		UE_LOG(LogTemp, Warning, TEXT(" 1인칭 메시 숨김 완료"));

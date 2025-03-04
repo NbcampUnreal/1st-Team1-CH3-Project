@@ -6,6 +6,7 @@
 #include "InputAction.h"
 #include "GameMode/FPSGameInstance.h"
 #include "TimerManager.h"
+
 #include "Actor/Weapon/CGunBase.h"
 #include "Components/CapsuleComponent.h"
 #include "PlayerCharacter.generated.h"
@@ -193,6 +194,8 @@ public:
 	float GetMaxHealth() { return MaxHealth; }
 	float GetCurrentShield() { return CurrentShield; }
 	float GetMaxShield() { return MaxShield; }
+	void SetMaxHealth(float amount) { MaxHealth = amount;}
+	void SetMaxShield(float amount) { MaxShield = amount;}
 	ACGunBase* GetCurrentWeaponClass() { return CurrentWeapon; }
 
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);

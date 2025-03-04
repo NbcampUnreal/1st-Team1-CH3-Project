@@ -14,6 +14,13 @@ AGun_Shotgun::AGun_Shotgun()
 	bIsAutoFire = false;
 	Pellets = 6; //  샷건 탄환 개수 설정 (한 번 발사 시 발사될 총알 개수)
 	AmmoType = EAmmoType::Normal;
+	WeaponType = EWeaponType::Shotgun;
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> RifleMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Test/TestGun/simple-old-shotgun/source/SKM_shotgun.SKM_shotgun'"));
+	if (RifleMesh.Succeeded())
+	{
+		WeaponMesh->SetSkeletalMesh(RifleMesh.Object);
+	}
 }
 
 void AGun_Shotgun::BeginPlay()
