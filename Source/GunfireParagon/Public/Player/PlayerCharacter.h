@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 #include "InputAction.h"
 #include "GameMode/FPSGameInstance.h"
@@ -51,10 +53,12 @@ public:
 	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
 	ACGunBase* CurrentWeapon = nullptr;
 	int32 CurrentWeaponSlot = 1;
-	/*UFUNCTION(BlueprintCallable, Category, = "Visibility")
+	UFUNCTION(BlueprintCallable, Category = "Visibility")
 	void HideFirstPersonMeshAndWeapon();
-	UFUNCTION(BlueprintCallable, Category, = "Visibility")
-	void ShowFirstPersonMeshAndWeapon();*/
+	UFUNCTION(BlueprintCallable, Category = "Visibility")
+	void ShowFirstPersonMeshAndWeapon();
+	UFUNCTION(BlueprintCallable)
+	void SwitchToDeathCamera();
 
 
 protected:
@@ -119,10 +123,10 @@ protected:
 	/*UFUNCTION()
 	void StartSprint(const FInputActionValue& Value);
 	UFUNCTION()
-	void StopSprint(const FInputActionValue& Value);
+	void StopSprint(const FInputActionValue& Value);*/
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void HandlePlayerDeath();
-	UFUNCTION(BlueprintCallable, Category = "Player")
+	/*UFUNCTION(BlueprintCallable, Category = "Player")
 	void StartDeathCameraEffect();*/
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -178,6 +182,11 @@ private:
 	UFUNCTION()
 	void StopDash();
 	ACGunBase* FindNearbyDroppedWeapon();
+	UPROPERTY(VisibleAnywhere, Category = "Camera")
+	USpringArmComponent* DeathCameraSpringArm;
+	UPROPERTY(VisibleAnywhere, Category = "Camera")
+	UCameraComponent* DeathCamera;
+
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "UI Events")
