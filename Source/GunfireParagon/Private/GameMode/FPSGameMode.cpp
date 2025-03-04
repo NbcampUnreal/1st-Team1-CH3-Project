@@ -10,6 +10,7 @@
 #include "GameMode/ClearPortalPoint.h"
 #include "GameMode/TrapPortalPoint.h"
 #include "Engine/TargetPoint.h"
+#include "Blueprint/UserWidget.h"
 #include "Player/MyPlayerController.h"
 #include "Player/PlayerCharacter.h"
 #include "AI/BaseEnemy.h"
@@ -20,6 +21,7 @@
 AFPSGameMode::AFPSGameMode()
 {
 	bUseSeamlessTravel = true;
+	bPortalSpawned = false;
 
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = APlayerCharacter::StaticClass();
@@ -52,6 +54,7 @@ void AFPSGameMode::BeginPlay()
 
 	}
 	
+	LoadCardDataFromDataTable();
 	InitializeObjectPool();
 	InitializeBulletPool();
 
@@ -236,11 +239,14 @@ void AFPSGameMode::OnPlayerDead()
 
 void AFPSGameMode::OnStageClear()
 {
+	if (bPortalSpawned) return;
 	SpawnPortal();
 }
 
 void AFPSGameMode::SpawnPortal()
 {
+	bPortalSpawned = true;
+
 	AActor* PortalSpawnPoint = nullptr;
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AClearPortalPoint::StaticClass(), FoundActors);
@@ -398,6 +404,128 @@ void AFPSGameMode::RestorePlayerLocation()
 	}
 }
 
+void AFPSGameMode::LoadCardDataFromDataTable()
+{
+	if (!CardDataTable) return;
+
+	static const FString ContextString(TEXT("PassiveCardContext"));
+	TArray<FCardDataTable*> CardRows;
+	CardDataTable->GetAllRows<FCardDataTable>(ContextString, CardRows);
+
+	for (FCardDataTable* Row : CardRows)
+	{
+		UCardData* NewCard = NewObject<UCardData>();
+		NewCard->CardName = Row->CardName;
+		NewCard->CardDescription = Row->CardDescription;
+		NewCard->Rarity = Row->Rarity;
+		NewCard->CardEffect = Row->CardEffect;
+
+		AllCardPool.Add(NewCard);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Loaded %d cards into AllCardPool"), AllCardPool.Num());
+}
+
+void AFPSGameMode::ShowCardSelectionUI()
+{
+	SetGameState(EGameState::CardSelection);
+	
+	/*
+	if (CardSelectionWidgetClass)
+	{
+		UFPSCardSelectionWidget* CardSelectionWidget = CreateWidget<UFPSCardSelectionWidget>(GetWorld(), CardSelectionWidgetClass);
+		if (CardSelectionWidget)
+		{
+			CardSelectionWidget->AddToViewport();
+			UGameplayStatics::SetGamePaused(GetWorld(), true);
+		}
+
+		 APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			PlayerController->bShowMouseCursor = true;
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(CardSelectionWidget->TakeWidget());
+			PlayerController->SetInputMode(InputMode);
+		}
+	}
+	*/
+}
+
+void AFPSGameMode::ContinueGameAfterCardSelection()
+{
+	SetGameState(EGameState::Playing);
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+}
+
+void AFPSGameMode::SetGameState(EGameState NewState)
+{
+	if (CurrentGameState != NewState)
+	{
+		CurrentGameState = NewState;
+	}
+}
+
+UCardData* AFPSGameMode::GetRandomCard()
+{
+	if (AllCardPool.Num() == 0)
+	{
+		return nullptr;
+	}
+
+	TArray<UCardData*> CommonCards;
+	TArray<UCardData*> RareCards;
+	TArray<UCardData*> LegendaryCards;
+
+	for (UCardData* Card : AllCardPool)
+	{
+		switch (Card->Rarity)
+		{
+		case ECardRarity::Common:
+			CommonCards.Add(Card);
+			break;
+		case ECardRarity::Rare:
+			RareCards.Add(Card);
+			break;
+		case ECardRarity::Legendary:
+			LegendaryCards.Add(Card);
+			break;
+		}
+	}
+
+	float Roll = FMath::FRand();
+
+	if (Roll < 0.6f && CommonCards.Num() > 0)
+	{
+		return CommonCards[FMath::RandRange(0, CommonCards.Num() - 1)];
+	}
+	else if (Roll < 0.95f && RareCards.Num() > 0)
+	{
+		return RareCards[FMath::RandRange(0, RareCards.Num() - 1)];
+	}
+	else if (LegendaryCards.Num() > 0)
+	{
+		return LegendaryCards[FMath::RandRange(0, LegendaryCards.Num() - 1)];
+	}
+
+	return nullptr;
+}
+
+TArray<UCardData*> AFPSGameMode::GetRandomCards(int32 CardCount)
+{
+	TArray<UCardData*> SelectedCards;
+
+	for (int32 i = 0; i < CardCount; i++)
+	{
+		UCardData* RandomCard = GetRandomCard();
+		if (RandomCard)
+		{
+			SelectedCards.Add(RandomCard);
+		}
+	}
+
+	return SelectedCards;
+}
 
 void AFPSGameMode::ClearAllEnemies()
 {
@@ -476,5 +604,10 @@ void AFPSGameMode::ReturnToMainMenu()
 			}
 		}
 	}	
+}
+
+ABulletPool* AFPSGameMode::GetBulletPool()
+{
+	return BulletPoolInstance;
 }
 

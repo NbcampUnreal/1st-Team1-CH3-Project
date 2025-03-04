@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GameMode/FPSGameInstance.h"
@@ -13,10 +13,11 @@
 
 UFPSGameInstance::UFPSGameInstance()
 {
-	MouseSensitivity =
-		PlayerLevel = 1;
+	MouseSensitivity = 
+	PlayerLevel = 1;
 	ExperiencePoints = 0.f;
-	CurrentStageIndex = 0;
+	MaxExp = ((PlayerLevel-1) + 10) * 10;
+	CurrentStageIndex = 0; 
 	PreviousLevelName = TEXT("");
 }
 
@@ -39,7 +40,7 @@ void UFPSGameInstance::StartGame()
 		}
 	}
 
-	// TestÏö©ÏúºÎ°ú ÏùºÎã® ÎßåÎì¶. 5Ï¥àÎí§ 1Ïä§ÌÖåÏù¥ÏßÄÎ°ú Ïù¥Îèô
+
 	FTimerHandle TestTimer;
 	GetTimerManager().SetTimer(
 		TestTimer,
@@ -96,7 +97,7 @@ void UFPSGameInstance::SavePlayerStats(ACharacter* PlayerCharacter)
 		APlayerCharacter* Char = Cast<APlayerCharacter>(PlayerCharacter);
 		if (Char)
 		{
-			//Î≥ÄÏàòÎ™Ö Î™®Î¶Ñ
+			//∫Øºˆ∏Ì ∏∏ß
 			//PlayerLevel = Char->PlayerLevel;
 			//ExperiencePoints = Char->CurrentExperience;
 		}
@@ -110,7 +111,7 @@ void UFPSGameInstance::LoadPlayerStats(ACharacter* PlayerCharacter)
 		APlayerCharacter* Char = Cast<APlayerCharacter>(PlayerCharacter);
 		if (Char)
 		{
-			//Î≥ÄÏàòÎ™Ö Î™®Î¶Ñ
+			//∫Øºˆ∏Ì ∏∏ß
 			//Char->PlayerLevel = PlayerLevel;
 			//Char->CurrentExperience = ExperiencePoints;
 		}
@@ -136,6 +137,8 @@ FVector UFPSGameInstance::GetPlayerLocation() const
 {
 	return StoredPlayerLocation;
 }
+
+
 
 void UFPSGameInstance::SaveMouseSensitivity()
 {
@@ -180,14 +183,12 @@ void UFPSGameInstance::LoadMouseSensitivity()
 void UFPSGameInstance::AddExperiencePoint(float ExpAmount)
 {
 	ExperiencePoints += ExpAmount;
-
-	//hile (PlayerLevel < ExpRequired.Num() - 1 && ExpRequired
+	if (ExperiencePoints >= MaxExp)
+	{
+		PlayerLevel +=	FMath::FloorToInt32(ExperiencePoints / MaxExp);
+		ExperiencePoints = FMath::Fmod(ExperiencePoints, MaxExp);
+	}
 }
-
-void UFPSGameInstance::LevelUp()
-{
-}
-
 
 
 /*

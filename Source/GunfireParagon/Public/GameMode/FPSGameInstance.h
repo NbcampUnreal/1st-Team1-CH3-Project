@@ -29,6 +29,8 @@ public:
 	int32 PlayerLevel;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	float ExperiencePoints;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float MaxExp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
 	int32 CurrentStageIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
@@ -47,8 +49,6 @@ public:
 	void LoadMouseSensitivity();
 	UFUNCTION(BlueprintCallable, Category = "Level System")
 	void AddExperiencePoint(float ExpAmount);
-	UFUNCTION(BlueprintCallable, Category = "Level System")
-	void LevelUp();
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
 	UFUNCTION(BlueprintCallable)

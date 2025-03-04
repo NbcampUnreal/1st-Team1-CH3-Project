@@ -8,8 +8,15 @@
 #include "Actor/BulletPool.h"
 #include "GameMode/ClearPortal.h"
 #include "GameMode/TrapPortal.h"
+#include "GameMode/CardData.h"
 #include "FPSGameMode.generated.h"
 
+UENUM(BlueprintType)
+enum class EGameState : uint8
+{
+	Playing UMETA(DisplayName = "Playing"),
+	CardSelection UMETA(DisplayName = "Card Selection")
+};
 
 UCLASS()
 class GUNFIREPARAGON_API AFPSGameMode : public AGameMode
@@ -27,10 +34,17 @@ public:
 	void SpawnTrapPortals();
 	void SavePlayerLocation();
 	void RestorePlayerLocation();
+	void LoadCardDataFromDataTable();
+	void ShowCardSelectionUI();
+	void ContinueGameAfterCardSelection();
+	void SetGameState(EGameState NewState);
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetPoolInitializationData();
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetEnemySpawnData(int32 StageNumber);
+	UCardData* GetRandomCard();
 
 
+	UFUNCTION(BlueprintCallable)
+	TArray<UCardData*> GetRandomCards(int32 CardCount);
 	UFUNCTION()
 	void OnBossDefeated();
 	UFUNCTION()
@@ -49,7 +63,10 @@ public:
 	void EndGame(bool bPlayWin);
 	UFUNCTION()
 	void ReturnToMainMenu();
+	UFUNCTION()
+	ABulletPool* GetBulletPool(); 
 	
+
 	UPROPERTY()
 	AAIObjectPool* ObjectPoolInstance;
 	UPROPERTY()
@@ -60,11 +77,20 @@ public:
 	UDataTable* AIDataTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Table")
 	UDataTable* EnemySpawnTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Table")
+	UDataTable* CardDataTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Card System")
+	TArray<UCardData*> AllCardPool;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Clear Portal")
 	TSubclassOf<AClearPortal> PortalClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Clear Portal")
 	TSubclassOf<ATrapPortal> TrapPortalClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Game State")
+	EGameState CurrentGameState;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	//TSubclassOf<UFPSCardSelectionWidget> CardSelectionWidgetClass;
 
 	bool bIsObjectPoolReady;
 	bool bIsInTrapLevel;
+	bool bPortalSpawned;
 };
