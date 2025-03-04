@@ -12,11 +12,11 @@ ABulletBase::ABulletBase()
 	{
 		CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 		CollisionComponent->InitSphereRadius(15.0f);
-		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
-		CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-		CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-		CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // 적과 충돌 가능하게
+		// CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		// CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
+		// CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+		// CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+		// CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); 
 
 
 		// 연속 충돌 감지(CCD) 활성화 (고속 총알이 벽을 통과하는 문제 해결)
@@ -53,11 +53,11 @@ void ABulletBase::BeginPlay()
 		ProjectileMovement->Deactivate(); //총알이 풀에서 생성될 때 기본적으로 멈추도록 설정
 	}
 	
-	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
-	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // 벽과 충돌 O
-	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	// CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	// CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
+	// CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	// CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // 벽과 충돌 O
+	// CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABulletBase::OnBulletOverlap);
 	CollisionComponent->OnComponentHit.AddDynamic(this, &ABulletBase::OnBulletHit);

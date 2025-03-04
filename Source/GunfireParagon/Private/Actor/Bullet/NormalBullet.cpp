@@ -23,24 +23,15 @@ void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDama
 
 	if (!ProjectileMovement)
 	{
-		UE_LOG(LogTemp, Error, TEXT("❌ ProjectileMovement가 nullptr!"));
 		return;
 	}
 	if (CollisionComponent)
 	{
 		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		UE_LOG(LogTemp, Warning, TEXT("✅ CollisionComponent가 활성화됨"));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("❌ CollisionComponent가 nullptr!"));
-	}
-	UE_LOG(LogTemp, Warning, TEXT("🚀 Fire() 실행 - 위치: %s, 방향: %s"), *StartLocation.ToString(), *Direction.ToString());
 
-	// ✅ 추가: ProjectileMovement가 비활성화 상태인지 확인
 	if (!ProjectileMovement->bSimulationEnabled)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("⚠️ ProjectileMovement가 비활성화 상태! 다시 활성화함."));
 		ProjectileMovement->bSimulationEnabled = true;
 		ProjectileMovement->SetUpdatedComponent(CollisionComponent);
 	}
@@ -49,15 +40,6 @@ void ANormalBullet::Fire(FVector StartLocation, FVector Direction, float GunDama
 	ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
 	ProjectileMovement->Activate();
 
-	// ✅ 추가: 속도 확인
-	if (ProjectileMovement->Velocity.IsNearlyZero())
-	{
-		UE_LOG(LogTemp, Error, TEXT("❌ Velocity가 (0,0,0)!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("✅ 총알 발사! 속도: %s"), *ProjectileMovement->Velocity.ToString());
-	}
 }
 
 UE_DISABLE_OPTIMIZATION
