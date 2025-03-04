@@ -25,7 +25,6 @@ void AGun_Shotgun::Fire()
 {
 	if (!CanFire()) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("샷건 발사 불가! 탄약 부족 또는 발사 타이머 동작 중"));
 		return;
 	}
 
@@ -60,11 +59,7 @@ void AGun_Shotgun::Fire()
 			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
 			if (Bullet)
 			{
-				Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없습니다!"));
+				Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
 			}
 		}
 	}
@@ -80,15 +75,13 @@ void AGun_Shotgun::Fire()
 			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
 			if (Bullet)
 			{
-				Bullet->Fire(MuzzleSpot, forwardDirection, Damage);
+				Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("사용 가능한 총알이 없습니다!"));
 			}
 		}
 	}
-	//  발사 후 일정 시간 동안 추가 발사 금지 (샷건은 단발 무기)
 	bCanFire = false;
 	GetWorldTimerManager().SetTimer(FireTimer, this, &AGun_Shotgun::SetIsFire, GunDelay-0.01f, false);
 }

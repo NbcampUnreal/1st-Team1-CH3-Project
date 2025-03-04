@@ -9,7 +9,7 @@ AGun_Rifle::AGun_Rifle()
 
     WeaponType = EWeaponType::Rifle;
 
-    AmmoType =EAmmoType::Normal;
+    AmmoType =EAmmoType::Pierce;
     
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 

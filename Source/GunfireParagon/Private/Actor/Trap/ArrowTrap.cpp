@@ -34,7 +34,7 @@ void AArrowTrap::BeginPlay()
 
 void AArrowTrap::ActivateTrap()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ArrowTrap 활성화됨!"));
+	Super::ActivateTrap();
 }
 
 void AArrowTrap::Tick(float DeltaTime)
@@ -78,7 +78,6 @@ void AArrowTrap::OverlapTrapMesh(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	if (OtherActor && OtherActor->ActorHasTag("Player"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("상어가 플레이어와 충돌!"));
 		UGameplayStatics::ApplyPointDamage(OtherActor, DamageAmount, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
 
 		Destroy();

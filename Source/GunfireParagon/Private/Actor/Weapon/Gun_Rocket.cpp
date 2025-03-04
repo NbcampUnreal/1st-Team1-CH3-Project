@@ -36,12 +36,6 @@ void AGun_Rocket::BeginPlay()
         return;
     }
 
-    if (!WeaponMesh->GetSkeletalMeshAsset())
-    {
-    }
-    else
-    {
-    }
 }
 
 

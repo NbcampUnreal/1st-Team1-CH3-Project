@@ -25,9 +25,9 @@ void ABombBullet::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ABombBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
+void ABombBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage,float GunSpeed)
 {
-	Super::Fire(StartLocation, Direction, GunDamage);
+	Super::Fire(StartLocation, Direction, GunDamage,GunSpeed);
 }
 
 void ABombBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -42,26 +42,19 @@ void ABombBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		return;
 	if (OtherActor->ActorHasTag("Bullet"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 다른총알과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
 		return;
 	}
 	if (OtherActor->ActorHasTag("Gun"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 총(Gun)과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
 		return;
 	}
 	if (ExplosionSound.IsValid())
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound.Get(), GetActorLocation());
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("폭발사운드가 없습니다."));
-	}
 	bool IsHead = false;
 	ApplyExplosionDamage();
 	OnHitMarker.Broadcast(IsHead);
-	// 폭발 후 총알을 풀로 반환
 	if (BulletPool)
 	{
 		BulletPool->ReturnBullet(this, AmmoType);
@@ -110,7 +103,6 @@ void ABombBullet::OnBulletHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	if (OtherActor->ActorHasTag("Player")) return;
 
 	
-	UE_LOG(LogTemp, Warning, TEXT("맞은대상: %s"), *OtherActor->GetName());
 	if (BulletPool)
 	{
 		if (ExplosionSound.IsValid())
@@ -120,7 +112,6 @@ void ABombBullet::OnBulletHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 		}
 		BulletPool->ReturnBullet(this, AmmoType);
 		SpawnBulletDecal(Hit);
-		UE_LOG(LogTemp, Warning, TEXT("총알이 벽과 충돌하여 풀로 반환됨"));
 	}
 	
 	

@@ -56,8 +56,6 @@ void ARollingTrap::Tick(float DeltaTime)
 
 	if (HitResult.IsValidBlockingHit())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("바닥과 충돌 감지됨!"));
-        
 		Velocity = FVector(GetActorForwardVector() * MoveSpeed); 
 		bHasHitGround = true;
 	}
@@ -80,7 +78,6 @@ void ARollingTrap::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 
 	if (!bHasHitGround && OtherActor->ActorHasTag("Ground"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("바닥과 부딪힘"));
 		bHasHitGround = true;
 	}
 	
@@ -102,8 +99,6 @@ void ARollingTrap::StartFalling()
 {
 	if (!bCanFall)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("RollingTrap 시작됨!"));
-
 		SetActorLocation(StartLocation);
 		Velocity = FVector(0.0f, 0.0f, 0.0f);
 		bHasHitGround = false;  

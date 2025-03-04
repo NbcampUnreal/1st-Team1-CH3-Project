@@ -38,7 +38,6 @@ void ASharkSpawner::OnEntryTriggered(UPrimitiveComponent* OverlappedComponent, A
 {
 	if (OtherActor && OtherActor->ActorHasTag("Player") && !bIsActive)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("방 입구 트리거 활성화! 상어 스폰 시작"));
 		bIsActive = true;
 		SpawnShark();
 		GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ASharkSpawner::SpawnShark, SpawnInterval, true);
@@ -50,7 +49,6 @@ void ASharkSpawner::OnExitTriggered(UPrimitiveComponent* OverlappedComponent, AA
 {
 	if (OtherActor && OtherActor->ActorHasTag("Player") && bIsActive)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("방 출구 트리거 활성화! 상어가 플레이어를 찾지 못함"));
 
 		bIsActive = false;
 		GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
@@ -78,11 +76,9 @@ void ASharkSpawner::SpawnShark()
 
 	if (ExistingSharks.Num() >= 5)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("상어 스폰 제한 도달! 현재 상어 개수: %d"), ExistingSharks.Num());
 		return;  
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("상어 스폰 시작 (현재 상어 수: %d)"), ExistingSharks.Num());
 
 	FVector SpawnLocation = GetActorLocation() + FVector(0.0f, 0.0f, 50.0f);
 	FRotator SpawnRotation = FRotator::ZeroRotator;
@@ -92,11 +88,4 @@ void ASharkSpawner::SpawnShark()
 
 	AArrowTrap* NewShark = GetWorld()->SpawnActor<AArrowTrap>(SharkClass, SpawnLocation, SpawnRotation, SpawnParams);
 
-	if (!NewShark)
-	{
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("상어 스폰 성공: %s (현재 상어 수: %d)"), *NewShark->GetName(), ExistingSharks.Num() + 1);
-	}
 }

@@ -10,6 +10,15 @@ APierceBullet::APierceBullet()
 	PierceCount = 3;
 	BulletDamage = 50.0f;
 	AmmoType = EAmmoType::Pierce;
+
+	if (!BulletTail)
+	{
+		static ConstructorHelpers::FObjectFinder<UNiagaraSystem> BulletTailFinder(TEXT("/Game/VFX/TakeGame/NS_Projectile_01.NS_Projectile_01"));
+		if (BulletTailFinder.Succeeded())
+		{
+			BulletTail = BulletTailFinder.Object;
+		}
+	}
 }
 
 void APierceBullet::BeginPlay()
@@ -17,9 +26,47 @@ void APierceBullet::BeginPlay()
 	Super::BeginPlay();
 }
 
-void APierceBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage)
+void APierceBullet::Fire(FVector StartLocation, FVector Direction, float GunDamage,float GunSpeed)
 {
-	Super::Fire(StartLocation, Direction, GunDamage);
+	Super::Fire(StartLocation, Direction, GunDamage,GunSpeed);
+	if (BulletTail)
+	{
+		
+		FVector BulletLocation = GetActorLocation();
+		FRotator BulletRotation = GetActorRotation();
+		USceneComponent* RootComp = GetRootComponent();
+		if (!RootComp)
+		{
+			return;
+		}
+		UNiagaraComponent* BulletTailComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			BulletTail,         
+			RootComp,                  
+			NAME_None,           
+			FVector::ZeroVector,   // 상대 위치 (총알 중심)
+			BulletRotation,        // 총알의 회전 값을 사용
+			EAttachLocation::SnapToTarget, // 정확히 부착
+			true                   // 자동 파괴
+		);
+
+		if (BulletTailComp)
+		{
+			BulletTailComp->SetAutoDestroy(true);
+			BulletTailComp->SetVariableFloat(FName("User.Lifetime"), 0.2f);
+
+			FTimerHandle EffectDestroyTimer;
+			GetWorld()->GetTimerManager().SetTimer(EffectDestroyTimer, [BulletTailComp]()
+			{
+				if (BulletTailComp)
+				{
+					BulletTailComp->DestroyComponent();
+				}
+			}, 2.0f, false);
+		}
+
+
+		
+	}
 }
 
 void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -29,17 +76,14 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 
 	if (!OtherActor || OtherActor == this) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("자신충돌했으나 무시함"));
 		return;
 	}
 	if (OtherActor->ActorHasTag("Bullet"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 다른총알과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
 		return;
 	}
 	if (OtherActor->ActorHasTag("Gun"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("총알이 총(Gun)과 충돌했으나 무시됨: %s"), *OtherActor->GetName());
 		return;
 	}
 	
@@ -54,15 +98,12 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		{
 			IsHead = true;
 			FinalDamage *= 2.0f; // 헤드샷 데미지 2배
-			UE_LOG(LogTemp, Warning, TEXT("헤드샷! 데미지: %f"), FinalDamage);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("일반 공격! 데미지: %f"), FinalDamage);
 		}
 		//  ApplyPointDamage 사용 (맞은 위치 포함)
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
-		UE_LOG(LogTemp, Warning, TEXT("총알이 Enemy를 맞춤: %s"), *OtherActor->GetName());
 		OnHitMarker.Broadcast(IsHead);
 		if (PierceCount<=0)
 		{
@@ -70,8 +111,6 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 			{
 				SpawnBulletDecal(SweepResult);
 				BulletPool->ReturnBullet(this, AmmoType);
-				UE_LOG(LogTemp, Warning, TEXT("%s 총알이 %s 맞춤"),*GetName() ,*OtherActor->GetName());
-				UE_LOG(LogTemp, Warning, TEXT("Normal Bullet__풀링으로 반환됨"));
 			}
 			return;
 		}
@@ -81,8 +120,6 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	if (BulletPool)
 	{
 		BulletPool->ReturnBullet(this, AmmoType);
-		UE_LOG(LogTemp, Warning, TEXT("%s 총알이 %s 맞춤"),*GetName() ,*OtherActor->GetName());
-		UE_LOG(LogTemp, Warning, TEXT("Normal Bullet__풀링으로 반환됨"));
 	}
 
 	
