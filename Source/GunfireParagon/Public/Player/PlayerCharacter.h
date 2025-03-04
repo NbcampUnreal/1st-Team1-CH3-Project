@@ -47,10 +47,15 @@ public:
 	void ApplyCardEffect(UCardData* SelectedCard);
 	void ApplyEffectToGun(FCardEffect Effect);
 	ACGunBase* GetEquippedGun();
-	ACGunBase* Inventory[2];
+	ACGunBase* Inventory[2] = { nullptr, nullptr };
 	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
 	ACGunBase* CurrentWeapon = nullptr;
 	int32 CurrentWeaponSlot = 1;
+	/*UFUNCTION(BlueprintCallable, Category, = "Visibility")
+	void HideFirstPersonMeshAndWeapon();
+	UFUNCTION(BlueprintCallable, Category, = "Visibility")
+	void ShowFirstPersonMeshAndWeapon();*/
+
 
 protected:
 	virtual void BeginPlay() override;

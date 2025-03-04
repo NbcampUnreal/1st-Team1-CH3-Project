@@ -61,34 +61,37 @@ void APlayerCharacter::BeginPlay()
 	if (GameInstance)
 	{
 		GameInstance->LoadPlayerStats();
-		//GameInstance->LoadWeaponStats(this);
+		GameInstance->LoadWeaponStats(this);
 		GameInstance->LoadMouseSensitivity();
 	}
 
-	if (DefaultWeaponClass)
+	if (Inventory[0]==nullptr)
 	{
-		ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
-
-		if (DefaultWeapon)
+		if (DefaultWeaponClass)
 		{
-			Inventory[0] = DefaultWeapon;
-			CurrentWeapon = Inventory[0];
+			ACGunBase* DefaultWeapon = GetWorld()->SpawnActor<ACGunBase>(DefaultWeaponClass);
 
-			CurrentWeaponSlot = 0;
+			if (DefaultWeapon)
+			{
+				Inventory[0] = DefaultWeapon;
+				CurrentWeapon = Inventory[0];
 
-			AttachWeaponToHand(CurrentWeapon, 0);
-			CurrentAmmo = CurrentWeapon->GetCurrentAmmo();
-			MaxAmmo = CurrentWeapon->GetMaxAmmo();
-			UE_LOG(LogTemp, Warning, TEXT("기본 무기 장착 완료: %s"), *Inventory[0]->GetName());
+				CurrentWeaponSlot = 0;
+
+				AttachWeaponToHand(CurrentWeapon, 0);
+				CurrentAmmo = CurrentWeapon->GetCurrentAmmo();
+				MaxAmmo = CurrentWeapon->GetMaxAmmo();
+				UE_LOG(LogTemp, Warning, TEXT("기본 무기 장착 완료: %s"), *Inventory[0]->GetName());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("기본 무기 스폰 실패"));
+			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("기본 무기 스폰 실패"));
+			UE_LOG(LogTemp, Error, TEXT("DefaultWeaponClass가 설정되지 않음"));
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("DefaultWeaponClass가 설정되지 않음"));
 	}
 }
 
@@ -860,7 +863,31 @@ ACGunBase* APlayerCharacter::GetEquippedGun()
 	return CurrentWeapon;
 }
 
-
+//void APlayerCharacter::HideFirstPersonMeshAndWeapon()
+//{
+//	if (GetMesh())
+//	{
+//		GetMesh()->SetVisibility(false, true);
+//	}
+//
+//	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+//	{
+//		CurrentWeapon->GetWeaponMesh()->SetVisibility(false, true);
+//	}
+//}
+//
+//void APlayerCharacter::ShowFirstPersonMeshAndWeapon()
+//{
+//	if (GetMesh())
+//	{
+//		GetMesh()->SetVisibility(true, true);
+//	}
+//
+//	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+//	{
+//		CurrentWeapon->GetWeaponMesh()->SetVisibility(true, true);
+//	}
+//}
 
 //void APlayerCharacter::HandlePlayerDeath()
 //{
@@ -869,34 +896,8 @@ ACGunBase* APlayerCharacter::GetEquippedGun()
 //	UE_LOG(LogTemp, Warning, TEXT(" HandlePlayerDeath() 실행됨 - Ragdoll 및 숨김 처리 시작"));
 //
 //	bIsDead = true;
-//
-//	//  1인칭 메시 숨기기
-//	if (GetMesh())
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("1인칭 메시 숨기기 시도"));
-//		GetMesh()->SetVisibility(false);  //  1인칭 메시 숨김
-//		GetMesh()->SetOwnerNoSee(true);
-//		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-//		UE_LOG(LogTemp, Warning, TEXT(" 1인칭 메시 숨김 완료"));
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Error, TEXT(" GetMesh()가 nullptr입니다."));
-//	}
-//
-//	//  현재 들고 있는 무기 숨기기
-//	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("현재 들고 있는 무기 숨기기 시도: %s"), *CurrentWeapon->GetName());
-//		CurrentWeapon->GetWeaponMesh()->SetVisibility(false, true);  //  무기 숨김
-//		CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-//		UE_LOG(LogTemp, Warning, TEXT(" 현재 들고 있는 무기 숨김 완료"));
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Error, TEXT("현재 들고 있는 무기가 nullptr입니다."));
-//	}
-//
+// 
+// 
 //	//  3인칭 메시 Ragdoll 적용
 //	if (ThirdPersonMesh)
 //	{
