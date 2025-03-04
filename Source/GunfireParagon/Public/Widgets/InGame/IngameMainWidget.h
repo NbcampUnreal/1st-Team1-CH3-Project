@@ -49,11 +49,16 @@ protected:
 	//Weapon Status
 	UFUNCTION()
 	void OnWeaponAmmoBinding(float CurrentAmmo, float MaxAmmo);
-
+	
+	UFUNCTION()
+	void OnWeaponTextureBinding(class ACGunBase* CurrentWeapon);
 	//Minimap RenderIcon Update
 	UFUNCTION()
 	void OnMinimapUpdated(ACharacter* Target, float Distance);
 
+	//CrossHairs
+	UFUNCTION()
+	void OnHitMarkerBinding(bool IsHead);
 private:
 	// Minimap Rendering Character Distance
 	float MaxRenderDistance = 1600.f;

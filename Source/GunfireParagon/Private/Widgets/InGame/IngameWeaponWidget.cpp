@@ -6,13 +6,14 @@
 #include "Components\TextBlock.h"
 #include "Components\ProgressBar.h"
 #include "Animation\WidgetAnimation.h"
-#include "Widgets/DataAssets/InGameStateDataAsset.h"
+#include "Widgets\DataAssets\WeaponDataAsset.h"
+#include "Actor\Weapon\CGunBase.h"
 
 void UIngameWeaponWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	if (!CurrentTextures)
+	if (!WeaponDataAssets)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Texture is Missing"));
 	}
@@ -27,7 +28,6 @@ void UIngameWeaponWidget::UpdateAmmoState()
 {
 	if (AmmoTextBlock)
 	{
-		//Setter
 		CurrentAmmo = FMath::Clamp(CurrentAmmo, 0, MaxAmmo);
 
 		FString AmmoString = FString::Printf(TEXT("%d / %d"), CurrentAmmo, MaxAmmo);
@@ -38,6 +38,29 @@ void UIngameWeaponWidget::UpdateAmmoState()
 	{
 		FString GrenadeString = FString::Printf(TEXT("%d"), CurrentGrenade);
 		GrenadeTextBlock->SetText(FText::FromString(GrenadeString));
+	}
+}
+
+void UIngameWeaponWidget::UpdateWeaponTexture(ACGunBase* CurrentWeapon)
+{
+	TSubclassOf<ACGunBase> CurrentWeaponClass = CurrentWeapon->GetClass();
+
+	for (const auto& WeaponData : WeaponDataAssets->WeaponTextures)
+	{
+		if (WeaponData.WeaponClass == CurrentWeaponClass)
+		{
+			if (WeaponTexture && WeaponData.WeaponTexture)
+			{
+				WeaponTexture->SetBrushFromTexture(WeaponData.WeaponTexture);
+			}
+			return;
+		}
+	}
+
+	if (WeaponTexture)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Weapon Texture Not Binding DataAsstes"));
+		WeaponTexture->SetBrushFromTexture(nullptr);
 	}
 }
 
@@ -71,4 +94,15 @@ void UIngameWeaponWidget::SetDashCoolDown(float DashCoolDown)
 	}
 
 	PlayDashCoolDownAnim(DashCoolDown);
+}
+
+void UIngameWeaponWidget::SetCurrentWeaponTexture(ACGunBase* CurrentWeapon)
+{
+	if (!WeaponDataAssets)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RunTime WeaponDataAssets Not Binding."));
+		return;
+	}
+
+	UpdateWeaponTexture(CurrentWeapon);
 }

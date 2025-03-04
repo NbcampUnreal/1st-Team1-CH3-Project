@@ -41,15 +41,10 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* DashCoolDownBar;
 
-	UPROPERTY(EditAnywhere, Category = "Textures")
-	class UInGameStateDataAsset* CurrentTextures;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	class UWeaponDataAsset* WeaponDataAssets;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
-	float DodgeCoolTime;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
-	float SkillCoolTime;
-
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Weapon")
 	int32 CurrentAmmo;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "UITest")
@@ -61,6 +56,7 @@ protected:
 	UWidgetAnimation* DashCoolDownAnim;
 
 	void UpdateAmmoState();
+	void UpdateWeaponTexture(class ACGunBase* CurrentWeapon);
 	void PlayDashCoolDownAnim(float DashCoolDown);
 	
 public:
@@ -69,4 +65,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetDashCoolDown(float DashCoolDown);
+
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentWeaponTexture(class ACGunBase* CurrentWeapon);
 };

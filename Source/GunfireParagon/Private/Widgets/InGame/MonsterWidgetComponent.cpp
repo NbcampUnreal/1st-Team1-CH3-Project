@@ -17,6 +17,7 @@ UMonsterWidgetComponent::UMonsterWidgetComponent()
 	SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetRelativeLocation(FVector(0.f, 0.f, 120.f));
 	bDrawAtDesiredSize = false;
+	IsSHowHUD = false;
 }
 
 void UMonsterWidgetComponent::BeginPlay()
@@ -40,7 +41,8 @@ void UMonsterWidgetComponent::BeginPlay()
 
 	if (ABaseEnemy* Target = Cast<ABaseEnemy>(GetOwner()))
 	{
-		ConvertVisibilityMode();
+		ConvertTickRate();
+		SetVisibility(IsSHowHUD, true);
 		if (!(Target->OnTargetHPChanged.IsBound()))
 		{
 			Target->OnTargetHPChanged.AddDynamic(this, &UMonsterWidgetComponent::UpdateHP);
@@ -59,7 +61,7 @@ void UMonsterWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickType
 
 	UpdateScale(GetPlayerToDistance());
 	UpdateForwardVector();
-	ConvertVisibilityMode();
+	ConvertTickRate();
 }
 
 void UMonsterWidgetComponent::UpdateScale(float Distance)
@@ -75,6 +77,13 @@ void UMonsterWidgetComponent::UpdateHP(float CurrentHP, float MaxHP)
 	{
 		TargetHUD->UpdateHP(CurrentHP, MaxHP);
 	}
+
+	IsSHowHUD = (CurrentHP == MaxHP) ? false : true;
+	SetVisibility(IsSHowHUD, true);
+
+
+	float VisibleDuration = 3.f;
+	GetWorld()->GetTimerManager().SetTimer(VisibleTimer, this, &UMonsterWidgetComponent::ConvertVisibilityMode, VisibleDuration, false);
 }
 
 void UMonsterWidgetComponent::UpdateName(FString TargetName)
@@ -112,10 +121,24 @@ float UMonsterWidgetComponent::GetPlayerToDistance()
 
 void UMonsterWidgetComponent::ConvertVisibilityMode()
 {
+	SetVisibility(false, true);
+
+	if (VisibleTimer.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(VisibleTimer);
+	}
+}
+
+void UMonsterWidgetComponent::ConvertTickRate()
+{
 	ABaseEnemy* Target = Cast<ABaseEnemy>(GetOwner());
 	if (!Target) return;
 
-	bool Visibility = !(Target->bIsDead);
-	SetComponentTickEnabled(Visibility);
-	SetVisibility(Visibility, true);
+	bool IsTargetDead = Target->bIsDead;
+	SetComponentTickEnabled(!IsTargetDead);
+	if (IsTargetDead)
+	{
+		IsSHowHUD = !Target->bIsDead;
+		SetVisibility(IsSHowHUD, true);
+	}
 }

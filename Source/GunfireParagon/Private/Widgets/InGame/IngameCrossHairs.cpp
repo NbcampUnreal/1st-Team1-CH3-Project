@@ -3,6 +3,7 @@
 
 #include "Widgets/InGame/IngameCrossHairs.h"
 #include "Components\Image.h"
+#include "Animation\WidgetAnimation.h"
 
 void UIngameCrossHairs::NativeOnInitialized()
 {
@@ -17,20 +18,11 @@ void UIngameCrossHairs::NativeOnInitialized()
 	Animations.Add(AnimationRight, FVector2D(1,1));
 	Animations.Add(AnimationLeft, FVector2D(-1,-1));
 	Animations.Add(AnimationBottom, FVector2D(-1,1));
-
-	Spread = 50.f;
-	SetAnimationVisible();
 }
 
 void UIngameCrossHairs::NativeConstruct()
 {
 	Super::NativeConstruct();
-}
-
-void UIngameCrossHairs::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
-{
-	Super::NativeTick(MyGeometry, InDeltaTime);
-
 }
 
 void UIngameCrossHairs::SetCrossHairSpread(float Sperad)
@@ -58,13 +50,30 @@ void UIngameCrossHairs::SetAnimationSpread(float Sperad)
 	}
 }
 
-void UIngameCrossHairs::SetAnimationVisible()
+void UIngameCrossHairs::SetAnimationHitMarker(bool IsHead)
 {
-	for (const auto& Pair : Animations)
+	SetHitMarkerImage(IsHead);
+	PlayHitMarker();
+}
+
+void UIngameCrossHairs::SetHitMarkerImage(bool IsHead)
+{
+	FLinearColor SetColor = IsHead ? FLinearColor::Red : FLinearColor::Yellow;
+
+	AnimationRight->SetColorAndOpacity(SetColor);
+	AnimationLeft->SetColorAndOpacity(SetColor);
+	AnimationBottom->SetColorAndOpacity(SetColor);
+	AnimationTop->SetColorAndOpacity(SetColor);
+}
+
+void UIngameCrossHairs::PlayHitMarker()
+{
+	if (!HitMarkerAnim) return;
+
+	if (IsAnimationPlaying(HitMarkerAnim))
 	{
-		if (Pair.Key)
-		{
-			Pair.Key->SetVisibility(ESlateVisibility::Hidden);
-		}
+		StopAnimation(HitMarkerAnim);
 	}
+
+	PlayAnimation(HitMarkerAnim, 0.f, 1,EUMGSequencePlayMode::Forward, 1.f);
 }
