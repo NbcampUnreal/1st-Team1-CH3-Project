@@ -262,6 +262,7 @@ bool ACGunBase::IsAmmoEmpty()
 
 void ACGunBase::SwitchGunSound()
 {
+	
 	switch (WeaponType)
 	{
 	case EWeaponType::Rifle:

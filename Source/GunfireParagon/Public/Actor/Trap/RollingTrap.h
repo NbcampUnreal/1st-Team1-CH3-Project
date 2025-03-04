@@ -2,31 +2,38 @@
 
 #include "CoreMinimal.h"
 #include "TrapBase.h"
-#include "Components//SphereComponent.h"
-#include "Components//SkeletalMeshComponent.h"
 #include "RollingTrap.generated.h"
+
+class USphereComponent;
+class USkeletalMeshComponent;
 
 UCLASS()
 class GUNFIREPARAGON_API ARollingTrap : public ATrapBase
 {
 	GENERATED_BODY()
 
-protected:
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Trap")
-	USphereComponent* DamageCollider; 
+private:
+	UPROPERTY(VisibleAnywhere, Category="Trap")
+	USphereComponent* DamageCollider;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Trap")
-	USkeletalMeshComponent* BoulderMesh;  
+	UPROPERTY(VisibleAnywhere, Category="Trap")
+	USkeletalMeshComponent* BoulderMesh;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Trap")
-	float MoveSpeed = 600.0f; 
+	UPROPERTY(EditAnywhere, Category="Trap")
+	float MoveSpeed = 600.0f;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Trap")
-	float RotationSpeed = 200.0f;  
+	UPROPERTY(EditAnywhere, Category="Trap")
+	float RotationSpeed = 2000.0f;  
 
-	bool bHasHitGround = false;
-
+	UPROPERTY(EditAnywhere, Category="Trap")
+	float GravityScale = 980.0f;  
+	bool bHasHitGround = false;  
+	FVector Velocity;  
 	FVector StartLocation;
+	FTimerHandle DropTimerHandle; 
+	UPROPERTY(EditAnywhere, Category="Trap")
+	float DropInterval = 2.0f;  
+	bool bCanFall = false;
 
 public:
 	ARollingTrap();
@@ -44,4 +51,6 @@ protected:
 	void OnOverlapWithDestroyBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 								 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
 								 bool bFromSweep, const FHitResult& SweepResult);
+
+	void StartFalling();
 };
