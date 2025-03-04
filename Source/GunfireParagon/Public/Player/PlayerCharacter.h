@@ -49,6 +49,8 @@ public:
 	ACGunBase* GetEquippedGun();
 	ACGunBase* Inventory[2];
 	void AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot);
+	ACGunBase* CurrentWeapon = nullptr;
+	int32 CurrentWeaponSlot = 1;
 
 protected:
 	virtual void BeginPlay() override;
@@ -152,8 +154,7 @@ private:
 	ACGunBase* PrimaryWeapon = nullptr;
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	ACGunBase* SecondaryWeapon = nullptr;
-	ACGunBase* CurrentWeapon = nullptr;
-	int32 CurrentWeaponSlot = 1;
+	
 
 	void DropCurrentWeapon(int32 Slot);
 	bool bCanPickupWeapon = true;

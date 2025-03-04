@@ -184,8 +184,8 @@ void UFPSGameInstance::LoadWeaponStats(APlayerCharacter* Player)
 		if (NewPrimaryWeapon)
 		{
 			Player->Inventory[0] = NewPrimaryWeapon;
-			Player->GetCurrentWeaponClass() = NewPrimaryWeapon;
-			Player->GetCurrentWeaponSlot = 0;
+			Player->CurrentWeapon = NewPrimaryWeapon;
+			Player->CurrentWeaponSlot = 0;
 			Player->AttachWeaponToHand(NewPrimaryWeapon, 0);
 		}
 	}
