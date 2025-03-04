@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine\DataTable.h"
+#include "GameMode\CardData.h"
 #include "UIObjectBaseData.generated.h"
 /**
  * 
@@ -14,14 +15,17 @@ struct GUNFIREPARAGON_API FUIObjectBaseData : public FTableRowBase
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName ID;
+	ECardEffectType CardType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString ObjectImagePath;
+	FString CardName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Name;
+	FString Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Description;
+	UTexture2D* Texture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float IncreaseAmount;
 };

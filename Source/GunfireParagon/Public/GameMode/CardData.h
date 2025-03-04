@@ -17,7 +17,8 @@ enum class ECardEffectType : uint8
     ShieldRegeneTimeDecrease UMETA(DisplayName = "Shield Regene Time Decrease"),
     ShieldRateIncrease UMETA(DisplayName = "Shield Rate Increase"),
     MaxHealthIncrease UMETA(DisplayName = "Max Health Increase"),
-    DashCoolTimeDecrease UMETA(DisplayName = "Dash CoolTime Decrese")
+    DashCoolTimeDecrease UMETA(DisplayName = "Dash CoolTime Decrese"),
+    LastIndex UMETA(Hidden) // Rand 시 최대값 탐색용
 };
 
 UENUM(BlueprintType)
@@ -33,7 +34,8 @@ enum class ECardRarity : uint8
 {
     Common UMETA(DisplayName = "Common"),
     Rare UMETA(DisplayName = "Rare"),
-    Legendary UMETA(DisplayName = "Legendary")
+    Legendary UMETA(DisplayName = "Legendary"),
+    LastIndex UMETA(Hidden)
 };
 
 USTRUCT(BlueprintType)
@@ -64,6 +66,21 @@ struct FCardDataTable : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     ECardRarity Rarity;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FCardEffect CardEffect;
+};
+
+USTRUCT(BlueprintType)
+struct FCardPKDataTable : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 PrimaryCardKey;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    ECardEffectType CardType;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FCardEffect CardEffect;

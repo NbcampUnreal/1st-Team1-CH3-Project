@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Widgets\InGame\SelectObjectBaseWidget.h"
+#include "Widgets\UIObjectBaseData.h"
+#include "GameMode\CardData.h"
 #include "CardWidget.generated.h"
 
 /**
@@ -24,6 +26,18 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
+	UFUNCTION()
+	void FindCardByEnum(ECardEffectType CardType, ECardRarity CardGrade);
+
 protected:
+	UFUNCTION()
 	virtual void ActivateObject() override;
+
+	UFUNCTION()
+	void UpdateCardUI(const FUIObjectBaseData& Data);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI DataTable")
+	UDataTable* UICardInfoDataTable;
+
+	int32 GradeValue;
 };

@@ -16,8 +16,7 @@ public class GunfireParagon : ModuleRules
             "AIModule",
             "NavigationSystem",
             "UMG",
-            "Niagara",
-            "AsyncLoadingScreen"});
+            "Niagara"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
