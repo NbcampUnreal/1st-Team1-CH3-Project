@@ -74,7 +74,7 @@ void ABulletBase::BeginPlay()
 	
 }
 
-void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage)
+void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage,float GunSpeed)
 {
 	
 	SetActorLocation(StartLocation);
@@ -88,10 +88,14 @@ void ABulletBase::Fire(FVector StartLocation, FVector Direction, float GunDamage
 	}
 	if (ProjectileMovement)
 	{
-		ProjectileMovement->Velocity = Direction * ProjectileMovement->InitialSpeed;
+
+		ProjectileMovement->StopMovementImmediately();
+        
+		ProjectileMovement->InitialSpeed = GunSpeed;
+		ProjectileMovement->MaxSpeed = GunSpeed;
+
+		ProjectileMovement->Velocity = Direction * GunSpeed;
 		ProjectileMovement->Activate();
-		UE_LOG(LogTemp, Warning, TEXT("총알 발사! 위치: %s, 방향: %s, 속도: %f"),
-			*StartLocation.ToString(), *Direction.ToString(), ProjectileMovement->InitialSpeed);
 	}
 }
 

@@ -25,16 +25,3 @@ AGun_Rifle::AGun_Rifle()
         WeaponMesh->SetSkeletalMesh(RifleMesh.Object);
     }
 }
-
-
-
-void AGun_Rifle::BeginPlay()
-{
-    Super::BeginPlay();
-
-}
-
-void AGun_Rifle::Fire()
-{
-	Super::Fire();
-}
