@@ -56,7 +56,8 @@ private:
 	void MoveTowardsPlayer(float DeltaTime); 
 	AActor* FindPlayer();  
 
-	virtual void OnTrapTriggered(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UFUNCTION()
+	 void OverlapTrapMesh(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 						 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-						 bool bFromSweep, const FHitResult& SweepResult) override;
+						 bool bFromSweep, const FHitResult& SweepResult) ;
 };

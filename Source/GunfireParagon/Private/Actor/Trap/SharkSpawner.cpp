@@ -40,6 +40,7 @@ void ASharkSpawner::OnEntryTriggered(UPrimitiveComponent* OverlappedComponent, A
 	{
 		UE_LOG(LogTemp, Warning, TEXT("방 입구 트리거 활성화! 상어 스폰 시작"));
 		bIsActive = true;
+		SpawnShark();
 		GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ASharkSpawner::SpawnShark, SpawnInterval, true);
 	}
 }
@@ -93,7 +94,6 @@ void ASharkSpawner::SpawnShark()
 
 	if (!NewShark)
 	{
-		UE_LOG(LogTemp, Error, TEXT("상어 스폰 실패: SpawnActor 반환값이 nullptr"));
 	}
 	else
 	{

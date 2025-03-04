@@ -13,8 +13,7 @@ AArrowTrap::AArrowTrap()
 
 	ArrowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArrowMesh"));
 	ArrowMesh->SetupAttachment(RootComponent);
-	ArrowMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));  
-	ArrowMesh->OnComponentBeginOverlap.AddDynamic(this, &AArrowTrap::OnTrapTriggered);  
+	ArrowMesh->OnComponentBeginOverlap.AddDynamic(this, &AArrowTrap::OverlapTrapMesh);
 
 	SpotLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight"));
 	SpotLight->SetupAttachment(RootComponent);
@@ -72,12 +71,16 @@ AActor* AArrowTrap::FindPlayer()
 	return UGameplayStatics::GetPlayerCharacter(GetWorld(), 0); 
 }
 
-void AArrowTrap::OnTrapTriggered(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-                                 bool bFromSweep, const FHitResult& SweepResult)
+void AArrowTrap::OverlapTrapMesh(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+						 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+						 bool bFromSweep, const FHitResult& SweepResult)
+
 {
 	if (OtherActor && OtherActor->ActorHasTag("Player"))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("상어가 플레이어와 충돌!"));
+		UGameplayStatics::ApplyPointDamage(OtherActor, DamageAmount, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());
+
+		Destroy();
 	}
 }
