@@ -22,7 +22,7 @@ ANormalMeleeEnemy::ANormalMeleeEnemy()
 
 void ANormalMeleeEnemy::Attack(const FVector& TargetLocation)
 {
-    if (!bIsAttacking && !bIsDead)
+    if (!bIsAttacking && !bIsDead && bCanAttack)
     {
         if (MeleeAttackMontage)
         {

@@ -23,7 +23,7 @@ void AAIObjectPool::BeginPlay()
 
 void AAIObjectPool::InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClasses)
 {
-	EnemyPools.Empty(); // 기존 풀 초기화
+	EnemyPools.Empty();
 
 	for (const TPair<TSubclassOf<ABaseEnemy>, int32> Pair : EnemyClasses)
 	{
@@ -50,6 +50,7 @@ void AAIObjectPool::InitializePool(TMap<TSubclassOf<ABaseEnemy>, int32> EnemyCla
 		
 			if (NewEnemy->IsValidLowLevelFast())
 			{
+				NewEnemy->SetCanAttack(false);
 				NewEnemy->SetActorHiddenInGame(true);
 				NewEnemy->SetActorEnableCollision(false);
 				NewEnemy->SetActorTickEnabled(false);
@@ -85,9 +86,7 @@ ABaseEnemy* AAIObjectPool::GetPooledAI(ASpawnVolume* SpawnVolume, TSubclassOf<AB
 				{
 					FVector SpawnLocation = SpawnVolume->GetSafeSpawnPoint();
 					Enemy->SetActorLocation(SpawnLocation);
-					// Enemy->SetActorHiddenInGame(false);
-					// Enemy->SetActorEnableCollision(true);
-					// Enemy->SetActorTickEnabled(true);
+					Enemy->SetCanAttack(true);
 					Enemy->ResetEnemy();
 					UE_LOG(LogTemp, Log, TEXT("%s spawned from pool"), *EnemyClass->GetName());
 					return Enemy;

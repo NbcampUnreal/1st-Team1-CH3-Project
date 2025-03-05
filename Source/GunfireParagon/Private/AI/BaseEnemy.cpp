@@ -36,6 +36,7 @@ ABaseEnemy::ABaseEnemy()
 	bIsAttacking = false;
 	bIsUsingSkill = false;
 	bIsDead = false;
+	bCanAttack = false;
 
 	Tags.Add("Monster");
 

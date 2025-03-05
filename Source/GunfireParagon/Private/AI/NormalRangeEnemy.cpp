@@ -22,7 +22,7 @@ ANormalRangeEnemy::ANormalRangeEnemy()
 
 void ANormalRangeEnemy::Attack(const FVector& TargetLocation)
 {
-    if (!bIsAttacking && !bIsDead)
+    if (!bIsAttacking && !bIsDead && bCanAttack)
 	{
         if (RangeAttackMontage)
         {

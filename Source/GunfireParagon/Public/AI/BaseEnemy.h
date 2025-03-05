@@ -17,7 +17,6 @@ public:
 	ABaseEnemy();
 	
 	virtual void BeginPlay() override;
-
 	virtual void Attack(const FVector& TargetLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
@@ -29,6 +28,7 @@ public:
 	void ResetEnemy();
 
 	void UpdateAimPitch();
+	void SetCanAttack(bool bNewState) { bCanAttack = bNewState; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float Damage;
@@ -44,15 +44,17 @@ public:
 	float BaseWalkSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float EXP;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anim")
+	float AimPitch;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsAttacking;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsUsingSkill;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool bIsDead;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anim")
-	float AimPitch;
 
+	bool bCanAttack;
+	
 	FOnSkillMontageEnded OnSkillMontageEnded;
 
 protected:
