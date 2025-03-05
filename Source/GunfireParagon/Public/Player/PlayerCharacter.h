@@ -45,7 +45,6 @@ public:
 	void SwitchToPrimaryWeapon();
 	void SwitchToSecondaryWeapon();
 	bool IsPlayerDead() { return bIsDead; }
-
 	UPROPERTY()
 	TArray<FCardEffect> AppliedCardEffects;
 	void ApplyCardEffect(const FCardEffect& SelectedCard);	// (UCardData* SelectedCard);
@@ -61,7 +60,12 @@ public:
 	void ShowFirstPersonMeshAndWeapon();
 	UFUNCTION(BlueprintCallable)
 	void SwitchToDeathCamera();
-
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void ReloadWeapon();
+	virtual void Jump() override;
+	void EnableMouseControl();
+	void PlayReloadAnimation();
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -84,7 +88,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float ShieldRegenRate = 5.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float ShieldRegenDelay = 3.0f;
+	float ShieldRegenDelay = 5.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
@@ -97,6 +101,10 @@ protected:
 	USkeletalMeshComponent* ThirdPersonMesh;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
 	bool bIsDead = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* JumpSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* ReloadMontage;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
@@ -120,16 +128,13 @@ protected:
 	void IncreaseMouseSensitivity();
 	UFUNCTION()
 	void DecreaseMouseSensitivity();
-	UFUNCTION()
-	void ReloadWeapon();
+	
 	/*UFUNCTION()
 	void StartSprint(const FInputActionValue& Value);
 	UFUNCTION()
 	void StopSprint(const FInputActionValue& Value);*/
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void HandlePlayerDeath();
-	/*UFUNCTION(BlueprintCallable, Category = "Player")
-	void StartDeathCameraEffect();*/
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
@@ -137,6 +142,7 @@ protected:
 	void StartShieldRegen();
 	void RegenerateShield();
 	void SwapWeaponWithDropped(ACGunBase* NewWeapon);
+
 	virtual void Landed(const FHitResult& Hit) override;
 	void DisableFirstPersonShadows();
 
