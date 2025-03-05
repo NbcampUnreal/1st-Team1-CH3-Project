@@ -137,4 +137,15 @@ protected:
 	//총기사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Sounds")
 	TSoftObjectPtr<USoundBase> FireSound;
+
+public:
+	float GetGunDelay()const { return GunDelay; }
+	void SetGunDelay(float amount){ GunDelay = amount;};
+	float GetGunDamage()const { return Damage; }
+	void SetGunDamage(float amount){ Damage = amount;};
+
+
+
+
+	
 };
