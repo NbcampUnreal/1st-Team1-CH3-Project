@@ -34,15 +34,6 @@ void AFPSGameMode::BeginPlay()
 
 	UE_LOG(LogTemp, Warning, TEXT("GameMode BeginPlay() Called"));
 
-	FTimerHandle HudTimer;
-	GetWorld()->GetTimerManager().SetTimer(
-		HudTimer,
-		this,
-		&AFPSGameMode::PlayMainHudShow,
-		0.5,
-		false
-	);
-
 	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
 	if (FPSGameInstance)
 	{
@@ -80,6 +71,19 @@ void AFPSGameMode::BeginPlay()
 
 	}
 	
+	if (FPSGameInstance->CurrentStageIndex != 0)
+	{
+		FTimerHandle HudTimer;
+		GetWorld()->GetTimerManager().SetTimer(
+			HudTimer,
+			this,
+			&AFPSGameMode::PlayMainHudShow,
+			0.5,
+			false
+		);
+	}
+	
+
 	LoadCardDataFromDataTable();
 	InitializeObjectPool();
 	InitializeBulletPool();
