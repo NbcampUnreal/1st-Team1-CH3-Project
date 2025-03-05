@@ -45,7 +45,6 @@ void UCardWidget::FindCardByEnum(ECardEffectType CardType, ECardRarity CardGrade
 
 		if (RowData && RowData->CardType == CardType)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("FindCardByEnum :: Found Matching CardType"));
 			UpdateCardUI(*RowData);
 			return;
 		}
@@ -56,7 +55,6 @@ void UCardWidget::FindCardByEnum(ECardEffectType CardType, ECardRarity CardGrade
 
 void UCardWidget::UpdateCardUI(const FUIObjectBaseData& Data)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UpdateCardUI :: CardType Equal"));
 	if (NameText)
 	{
 		NameText->SetText(FText::FromString(Data.CardName));
@@ -79,4 +77,7 @@ void UCardWidget::UpdateCardUI(const FUIObjectBaseData& Data)
 void UCardWidget::ActivateObject()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Button Test"));
+	// PlayerInstance에게 넘겨주기
+
+	SelectWidget.Broadcast();
 }

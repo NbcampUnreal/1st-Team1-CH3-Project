@@ -31,6 +31,8 @@ protected:
 	ECardEffectType RandCardEffect();
 	ECardRarity RandCardGrade();
 
+	UFUNCTION()
+	void CloseWidget();
 private:
 	TSet<ECardEffectType> UsedEffects;
 	int32 CreateWidgetAmount = 3;

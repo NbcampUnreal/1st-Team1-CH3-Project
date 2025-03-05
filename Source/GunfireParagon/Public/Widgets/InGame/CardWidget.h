@@ -16,6 +16,8 @@ class UImage;
 class UTextBlock;
 class UButton;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectWidget);
+
 UCLASS()
 class GUNFIREPARAGON_API UCardWidget : public USelectObjectBaseWidget
 {
@@ -28,6 +30,9 @@ public:
 
 	UFUNCTION()
 	void FindCardByEnum(ECardEffectType CardType, ECardRarity CardGrade);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnSelectWidget SelectWidget;
 
 protected:
 	UFUNCTION()

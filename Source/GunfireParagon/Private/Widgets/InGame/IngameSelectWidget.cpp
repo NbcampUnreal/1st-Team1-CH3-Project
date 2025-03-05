@@ -51,12 +51,16 @@ void UIngameSelectWidget::PopulateCardWidget()
 	{
 		UCardWidget* CardWidget = CreateWidget<UCardWidget>(this, CardWidgetClass);
 		CardWidget->FindCardByEnum(RandCardEffect(), RandCardGrade());
-		
+
 		if (UHorizontalBoxSlot* CardSlot = Cast<UHorizontalBoxSlot>(HorizontalCardBox->AddChild(CardWidget)))
 		{
 			CardSlot->SetPadding(FMargin(30.f, 0.f));
 			CardSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
 			CardSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+		}
+		if (!CardWidget->SelectWidget.IsBound())
+		{
+			CardWidget->SelectWidget.AddDynamic(this, &UIngameSelectWidget::CloseWidget);
 		}
 	}
 }
@@ -80,4 +84,22 @@ ECardRarity UIngameSelectWidget::RandCardGrade()
 	ECardRarity RandRarity = (ECardRarity)FMath::RandRange(0, (int32)(ECardRarity::LastIndex)-1);
 	UE_LOG(LogTemp, Warning, TEXT("Effect Type : %d"), (int32)RandRarity);
 	return RandRarity;
+}
+
+void UIngameSelectWidget::CloseWidget()
+{
+	UE_LOG(LogTemp, Warning, TEXT("CloseWidget Call Test"));
+	if (GetWorld())
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+		{
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = false;
+		}
+
+	}
+	SetIsFocusable(false);
+	RemoveFromViewport();
 }
