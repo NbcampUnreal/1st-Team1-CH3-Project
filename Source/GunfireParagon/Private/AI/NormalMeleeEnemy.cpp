@@ -78,7 +78,6 @@ void ANormalMeleeEnemy::PerformMeleeAttack(const FVector& TargetLocation)
             if (!AlreadyHitActors.Contains(HitActor))
             {
                 AlreadyHitActors.Add(HitActor);
-                GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Melee Hit: %s"), *HitActor->GetName()));
                 UGameplayStatics::ApplyDamage(HitActor, Damage, GetController(), this, UDamageType::StaticClass());
             }
             

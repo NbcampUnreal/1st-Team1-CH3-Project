@@ -83,7 +83,6 @@ void ANormalRangeEnemy::PerformRangeAttack(const FVector& TargetLocation)
         AActor* HitActor = HitResult.GetActor();
         if (HitActor && HitActor->ActorHasTag("Player"))
         {
-            GEngine->AddOnScreenDebugMessage(2, 2.0f, FColor::Blue, FString::Printf(TEXT("Range Monster Attack Hit Damage %f"), Damage));
             UGameplayStatics::ApplyDamage(HitActor, Damage, GetController(), this, UDamageType::StaticClass());
         }
     }

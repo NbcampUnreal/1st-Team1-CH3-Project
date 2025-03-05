@@ -83,7 +83,6 @@ void ABaseMagicProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 
 		float FinalDamage = Enemy->Damage * DamageMultiplier;
 		UGameplayStatics::ApplyDamage(OtherActor, FinalDamage, GetInstigatorController(), this, UDamageType::StaticClass());
-		GEngine->AddOnScreenDebugMessage(3, 2.0f, FColor::Green, FString::Printf(TEXT("Projectile Attack Hit Damage %f"), FinalDamage));
 	}
 
 	if (HitImpactEffect)
