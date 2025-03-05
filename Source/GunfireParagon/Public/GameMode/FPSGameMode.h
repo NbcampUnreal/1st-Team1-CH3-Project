@@ -43,6 +43,7 @@ public:
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetEnemySpawnData(int32 StageNumber);
 	UCardData* GetRandomCard();
 	void InitializeDropManager();
+	ADropManager* GetDropManager();
 
 
 	UFUNCTION(BlueprintCallable)

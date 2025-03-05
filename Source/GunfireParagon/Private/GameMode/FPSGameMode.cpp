@@ -29,7 +29,7 @@ AFPSGameMode::AFPSGameMode()
 }
 
 void AFPSGameMode::BeginPlay()
-{
+{	
 	Super::BeginPlay();
 
 	UE_LOG(LogTemp, Warning, TEXT("GameMode BeginPlay() Called"));
@@ -57,6 +57,7 @@ void AFPSGameMode::BeginPlay()
 	LoadCardDataFromDataTable();
 	InitializeObjectPool();
 	InitializeBulletPool();
+	InitializeDropManager();
 
 	if (FPSGameInstance)
 	{
@@ -499,6 +500,31 @@ UCardData* AFPSGameMode::GetRandomCard()
 	}
 
 	return nullptr;
+}
+
+void AFPSGameMode::InitializeDropManager()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	if (DropManager)
+	{
+
+		return;
+	}
+
+	if (DropManagerClass)
+	{
+		DropManager = World->SpawnActor<ADropManager>(DropManagerClass, FVector::ZeroVector, FRotator::ZeroRotator);
+
+	}
+}
+
+ADropManager* AFPSGameMode::GetDropManager()
+{
+	return DropManager;
 }
 
 TArray<UCardData*> AFPSGameMode::GetRandomCards(int32 CardCount)
