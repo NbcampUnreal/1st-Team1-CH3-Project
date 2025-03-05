@@ -113,7 +113,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> EndingWidgetClass;
 	
-	bool IsEnd = false;
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> DieAnimWidgetClass;
+
 	void PlayEndingCredit();
+	void PlayDieAnim();
 };

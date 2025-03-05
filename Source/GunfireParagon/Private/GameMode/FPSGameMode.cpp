@@ -670,13 +670,14 @@ void AFPSGameMode::EndGame(bool bPlayWin)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Game Over!"));
-		
+		PlayDieAnim();
+
 		FTimerHandle EndTimerHandle;
 		GetWorldTimerManager().SetTimer(
 			EndTimerHandle,
 			this,
 			&AFPSGameMode::ReturnToMainMenu,
-			5.0f,
+			7.0f,
 			false
 		);
 	}
@@ -722,6 +723,23 @@ void AFPSGameMode::PlayEndingCredit()
 
 		PlayerMainWidget->SetVisibility(ESlateVisibility::Hidden);
 		EndingCredit->AddToViewport();
+	}
+}
+
+void AFPSGameMode::PlayDieAnim()
+{
+	if (!IsValid(DieAnimWidgetClass))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DieWidget Credit is Not Binding BP_GameMode. "));
+		return;
+	}
+
+	UUserWidget* DieAnimWidget = CreateWidget<UUserWidget>(GetWorld(), DieAnimWidgetClass);
+
+	if (DieAnimWidget)
+	{
+		PlayerMainWidget->SetVisibility(ESlateVisibility::Hidden);
+		DieAnimWidget->AddToViewport();
 	}
 }
 
