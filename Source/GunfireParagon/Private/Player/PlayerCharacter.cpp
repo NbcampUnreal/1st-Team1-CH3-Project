@@ -824,11 +824,11 @@ void APlayerCharacter::SwitchToSecondaryWeapon()
 	SwitchWeaponSlot(1);
 }
 
-void APlayerCharacter::ApplyCardEffect(UCardData* SelectedCard)
+void APlayerCharacter::ApplyCardEffect(const FCardEffect& SelectedCard)
 {
-	if (!SelectedCard) return;
+	//if (!SelectedCard) return;
 
-	FCardEffect Effect = SelectedCard->CardEffect;
+	FCardEffect Effect = SelectedCard;//->CardEffect;
 	float AppliedValue = Effect.EffectValues;
 
 	switch (Effect.EffectType)
@@ -857,6 +857,9 @@ void APlayerCharacter::ApplyCardEffect(UCardData* SelectedCard)
 	case ECardEffectType::AttackSpeedIncrease:
 		ApplyEffectToGun(Effect);
 		AppliedCardEffects.Add(Effect);
+		break;
+	case ECardEffectType::ShieldRegeneTimeDecrease:
+		//미구현
 		break;
 	}
 }

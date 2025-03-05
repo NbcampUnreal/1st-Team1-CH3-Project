@@ -46,7 +46,7 @@ public:
 	void SwitchToSecondaryWeapon();
 	UPROPERTY()
 	TArray<FCardEffect> AppliedCardEffects;
-	void ApplyCardEffect(UCardData* SelectedCard);
+	void ApplyCardEffect(const FCardEffect& SelectedCard);	// (UCardData* SelectedCard);
 	void ApplyEffectToGun(FCardEffect Effect);
 	ACGunBase* GetEquippedGun();
 	ACGunBase* Inventory[2] = { nullptr, nullptr };

@@ -51,6 +51,18 @@ struct FCardEffect
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float EffectValues;
+
+    FCardEffect()
+        : EffectType(ECardEffectType::AttackPowerIncrease)
+        , ValueType(EEffectValueType::FlatValue)
+        , EffectValues(0.0f) {
+    }
+
+    FCardEffect(ECardEffectType InEffectType, EEffectValueType InValueType, float InEffectValues)
+        : EffectType(InEffectType)
+        , ValueType(InValueType)
+        , EffectValues(InEffectValues) {
+    }
 };
 
 USTRUCT(BlueprintType)

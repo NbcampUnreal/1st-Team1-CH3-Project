@@ -45,4 +45,8 @@ protected:
 	UDataTable* UICardInfoDataTable;
 
 	int32 GradeValue;
+
+private:
+	ECardEffectType ApplyCardType;
+	float ApplyValue;
 };

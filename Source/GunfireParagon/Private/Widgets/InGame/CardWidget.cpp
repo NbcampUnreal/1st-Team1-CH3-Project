@@ -6,6 +6,8 @@
 #include "Components\TextBlock.h"
 #include "Components\Button.h"
 #include "Engine\DataTable.h"
+#include "Player\PlayerCharacter.h"
+#include "Kismet\GameplayStatics.h"
 
 void UCardWidget::NativeOnInitialized()
 {
@@ -15,6 +17,10 @@ void UCardWidget::NativeOnInitialized()
 	{
 		SelectButton->OnClicked.AddDynamic(this, &UCardWidget::ActivateObject);
 	}
+
+	GradeValue = 0;
+	ApplyCardType = ECardEffectType::AttackPowerIncrease;
+	ApplyValue = 0.f;
 }
 
 void UCardWidget::NativeConstruct()
@@ -46,6 +52,8 @@ void UCardWidget::FindCardByEnum(ECardEffectType CardType, ECardRarity CardGrade
 		if (RowData && RowData->CardType == CardType)
 		{
 			UpdateCardUI(*RowData);
+			ApplyCardType = CardType;
+			ApplyValue = RowData->IncreaseAmount * GradeValue;
 			return;
 		}
 	}
@@ -78,6 +86,12 @@ void UCardWidget::ActivateObject()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Button Test"));
 	// PlayerInstance에게 넘겨주기
+
+	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0)))
+	{
+		FCardEffect ReturnCardEffect(ApplyCardType, EEffectValueType::FlatValue, ApplyValue);
+		PlayerCharacter->ApplyCardEffect(ReturnCardEffect);
+	}
 
 	SelectWidget.Broadcast();
 }
