@@ -460,7 +460,8 @@ bool APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
 	}
 
 	CurrentWeapon->DisableWeaponShadows();
-
+	SetCurrentWeaponClass();
+	SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 	return true;
 }
 
@@ -551,6 +552,8 @@ void APlayerCharacter::AttachWeaponToHand(ACGunBase* NewWeapon, int32 Slot)
 
 	CurrentWeapon = NewWeapon;
 	CurrentWeaponSlot = Slot;
+	SetCurrentWeaponClass();
+	SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 }
 
 void APlayerCharacter::PickupWeaponInput(const FInputActionValue& Value)
@@ -706,7 +709,8 @@ void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 
 		bCanSwitchWeapon = false;
 		GetWorldTimerManager().SetTimer(SwitchWeaponCooldownTimer, this, &APlayerCharacter::ResetWeaponSwitchCooldown,0.3, false);
-
+		SetCurrentWeaponClass();
+		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 		UE_LOG(LogTemp, Warning, TEXT("무기 변경 완료: 1번 무기로 교체 (%s)"), *CurrentWeapon->GetName());
 	}
 	else if (Slot == 1)
@@ -731,7 +735,8 @@ void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 		CurrentWeaponSlot = 1;
 
 		AttachWeaponToHand(CurrentWeapon, 1);
-
+		SetCurrentWeaponClass();
+		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 		UE_LOG(LogTemp, Warning, TEXT("무기 변경 완료: 2번 무기로 교체 (%s)"), *CurrentWeapon->GetName());
 	}
 	else
@@ -810,6 +815,7 @@ void APlayerCharacter::ReloadWeapon()
 			return;
 		}
 		CurrentWeapon->Reload();
+		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 		bCanReload = false;
 		if (ReloadSound)
 		{
@@ -874,6 +880,7 @@ void APlayerCharacter::ApplyCardEffect(const FCardEffect& SelectedCard)
 
 	case ECardEffectType::ShieldAmountIncrease:
 		MaxShield += AppliedValue;
+		OnShieldChanged.Broadcast(CurrentShield, MaxShield);
 		break;
 
 	case ECardEffectType::ShieldRateIncrease:
@@ -882,6 +889,7 @@ void APlayerCharacter::ApplyCardEffect(const FCardEffect& SelectedCard)
 
 	case ECardEffectType::MaxHealthIncrease:
 		MaxHealth += AppliedValue;
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 		break;
 
 	case ECardEffectType::AttackPowerIncrease:

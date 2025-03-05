@@ -101,5 +101,6 @@ void UIngameSelectWidget::CloseWidget()
 
 	}
 	SetIsFocusable(false);
-	RemoveFromViewport();
+	RemoveFromParent();
+	//RemoveFromViewport();
 }
