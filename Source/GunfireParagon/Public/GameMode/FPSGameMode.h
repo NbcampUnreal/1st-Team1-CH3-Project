@@ -107,4 +107,13 @@ public:
 	bool bIsObjectPoolReady;
 	bool bIsInTrapLevel;
 	bool bPortalSpawned;
+
+	// ---------------------------------
+	UIngameMainWidget* PlayerMainWidget;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> EndingWidgetClass;
+	
+	bool IsEnd = false;
+	
+	void PlayEndingCredit();
 };

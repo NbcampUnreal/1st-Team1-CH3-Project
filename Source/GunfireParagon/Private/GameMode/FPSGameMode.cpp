@@ -73,6 +73,10 @@ void AFPSGameMode::BeginPlay()
 	
 	if (FPSGameInstance->CurrentStageIndex != 0)
 	{
+		if (PlayerMainWidget)
+		{
+			PlayerMainWidget->RemoveFromParent();
+		}
 		FTimerHandle HudTimer;
 		GetWorld()->GetTimerManager().SetTimer(
 			HudTimer,
@@ -588,9 +592,18 @@ void AFPSGameMode::InitializeDropManager()
 
 void AFPSGameMode::PlayMainHudShow()
 {
+	//if (PlayerMainHudClass)
+	//{
+	//	UIngameMainWidget* PlayerMainWidget = CreateWidget<UIngameMainWidget>(GetWorld(), PlayerMainHudClass);
+	//	if (PlayerMainWidget)
+	//	{
+	//		PlayerMainWidget->AddToViewport();
+	//	}
+	//}
+
 	if (PlayerMainHudClass)
 	{
-		UIngameMainWidget* PlayerMainWidget = CreateWidget<UIngameMainWidget>(GetWorld(), PlayerMainHudClass);
+		PlayerMainWidget = CreateWidget<UIngameMainWidget>(GetWorld(), PlayerMainHudClass);
 		if (PlayerMainWidget)
 		{
 			PlayerMainWidget->AddToViewport();
@@ -642,16 +655,17 @@ void AFPSGameMode::EndGame(bool bPlayWin)
 {
 	if (bPlayWin)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Game Clear!"));
-		
-		FTimerHandle EndTimerHandle;
-		GetWorldTimerManager().SetTimer(
-			EndTimerHandle,
-			this,
-			&AFPSGameMode::ReturnToMainMenu,
-			5.0f,
-			false
-		);
+		PlayEndingCredit();
+		//UE_LOG(LogTemp, Warning, TEXT("Game Clear!"));
+		//
+		//FTimerHandle EndTimerHandle;
+		//GetWorldTimerManager().SetTimer(
+		//	EndTimerHandle,
+		//	this,
+		//	&AFPSGameMode::ReturnToMainMenu,
+		//	5.0f,
+		//	false
+		//);
 	}
 	else
 	{
@@ -685,5 +699,29 @@ void AFPSGameMode::ReturnToMainMenu()
 ABulletPool* AFPSGameMode::GetBulletPool()
 {
 	return BulletPoolInstance;
+}
+
+void AFPSGameMode::PlayEndingCredit()
+{
+	if (!IsValid(EndingWidgetClass))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Ending Credit is Not Binding BP_GameMode. "));
+		return;
+	}
+	
+	UUserWidget* EndingCredit = CreateWidget<UUserWidget>(GetWorld(), EndingWidgetClass);
+
+	if (EndingCredit)
+	{
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			FInputModeUIOnly UIOnly;
+			PlayerController->SetInputMode(UIOnly);
+		}
+
+		PlayerMainWidget->SetVisibility(ESlateVisibility::Hidden);
+		EndingCredit->AddToViewport();
+	}
 }
 

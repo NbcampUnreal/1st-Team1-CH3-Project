@@ -13,33 +13,33 @@ void ULobbyWidget::NativeOnInitialized()
 void ULobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if (GetWorld())
-	{
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
-		if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-		{
-			FInputModeUIOnly InputMode;
-			PC->SetInputMode(InputMode);
-		}
-		
-	}
+	//if (GetWorld())
+	//{
+	//	//UGameplayStatics::SetGamePaused(GetWorld(), true);
+	//	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	//	{
+	//		FInputModeUIOnly InputMode;
+	//		PC->SetInputMode(InputMode);
+	//	}
+	//	
+	//}
 
-	SetIsFocusable(true);
+	//SetIsFocusable(true);
 }
 
 FReply ULobbyWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-	if (GetWorld())
-	{
-		UGameplayStatics::SetGamePaused(GetWorld(), false);
-		if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-		{
-			FInputModeGameOnly InputMode;
-			PC->SetInputMode(InputMode);
-		}
-		RemoveFromParent();
-	}
+	//if (GetWorld())
+	//{
+	//	//UGameplayStatics::SetGamePaused(GetWorld(), false);
+	//	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	//	{
+	//		FInputModeGameOnly InputMode;
+	//		PC->SetInputMode(InputMode);
+	//	}
+	//	RemoveFromParent();
+	//}
 
-	SetIsFocusable(false);
+	//SetIsFocusable(false);
 	return FReply::Handled();
 }

@@ -1015,10 +1015,10 @@ void APlayerCharacter::EnableMouseControl()
 	{
 		PlayerController->SetIgnoreMoveInput(true);
 		PlayerController->SetIgnoreLookInput(true);
-
+		
 		PlayerController->bShowMouseCursor = true;
 		PlayerController->SetInputMode(FInputModeUIOnly());
-
+		
 		UE_LOG(LogTemp, Warning, TEXT("마우스 UI 조작 활성화됨"));
 	}
 }
