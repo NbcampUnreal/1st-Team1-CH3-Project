@@ -18,7 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 
 
-AFPSGameMode::AFPSGameMode()
+AFPSGameMode::AFPSGameMode()	
 {
 	bUseSeamlessTravel = true;
 	bPortalSpawned = false;
@@ -34,9 +34,26 @@ void AFPSGameMode::BeginPlay()
 
 	UE_LOG(LogTemp, Warning, TEXT("GameMode BeginPlay() Called"));
 
+	FTimerHandle HudTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		HudTimer,
+		this,
+		&AFPSGameMode::PlayMainHudShow,
+		0.5,
+		false
+	);
+
 	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
 	if (FPSGameInstance)
 	{
+		if (FPSGameInstance->CurrentStageIndex == 0)
+		{
+			ULobbyWidget* LobbyWidget = CreateWidget<ULobbyWidget>(GetWorld(), LobbyWidgetClass);
+			if (LobbyWidget)
+			{
+				LobbyWidget->AddToViewport();
+			}
+		}
 		FString PreviousLevel = FPSGameInstance->GetPreviousLevel();
 		bIsInTrapLevel = FPSGameInstance->bIsInTrapLevel;
 		if (bIsInTrapLevel)
@@ -44,6 +61,15 @@ void AFPSGameMode::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("BeginPlay() - Returning from TrapLevel, Restoring Player Location."));
 			RestorePlayerLocation();
 			FPSGameInstance->bIsInTrapLevel = false;
+
+			if (CardSelectionWidgetClass)
+			{
+				UIngameSelectWidget* CardSelectionWidget = CreateWidget<UIngameSelectWidget>(GetWorld(), CardSelectionWidgetClass);
+				if (CardSelectionWidget)
+				{
+					CardSelectionWidget->AddToViewport();
+				}
+			}
 		}
 		else
 		{
@@ -231,7 +257,18 @@ void AFPSGameMode::OnPlayerDead()
 
 void AFPSGameMode::OnStageClear()
 {
+	/*
+	if (CardSelectionWidgetClass)
+	{
+		UIngameSelectWidget* CardSelectionWidget = CreateWidget<UIngameSelectWidget>(GetWorld(), CardSelectionWidgetClass);
+		if (CardSelectionWidget)
+		{
+			CardSelectionWidget->AddToViewport();
+		}
+	}
+	*/
 	if (bPortalSpawned) return;
+	
 	SpawnPortal();
 }
 
@@ -279,14 +316,24 @@ void AFPSGameMode::TravelToLevel(FName LevelName)
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
+	
+	APlayerController* PlayerController = Cast<APlayerController>(World->GetFirstPlayerController());
+	if (!PlayerController) return;
 
+	AMyPlayerController* FPSPlayerController = Cast<AMyPlayerController>(PlayerController);
+	if (!FPSPlayerController) return;
+	
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FPSPlayerController->GetPawn());
+	if (!PlayerCharacter) return;
+	
 	UFPSGameInstance* FPSGameInstance = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
-	if (FPSGameInstance)
+	if (FPSGameInstance && PlayerCharacter)
 	{
 		FString CurrentLevel = World->GetMapName();
 		CurrentLevel.RemoveFromStart(World->StreamingLevelsPrefix);
 		FPSGameInstance->SetPreviousLevel(CurrentLevel);
 		FPSGameInstance->SaveMouseSensitivity();
+		FPSGameInstance->SaveWeaponStats(PlayerCharacter);
 		UE_LOG(LogTemp, Warning, TEXT("Saved Previous Level: %s"), *CurrentLevel);
 	}
 	SavePlayerLocation();
@@ -421,17 +468,16 @@ void AFPSGameMode::ShowCardSelectionUI()
 {
 	SetGameState(EGameState::CardSelection);
 	
-	/*
 	if (CardSelectionWidgetClass)
 	{
-		UFPSCardSelectionWidget* CardSelectionWidget = CreateWidget<UFPSCardSelectionWidget>(GetWorld(), CardSelectionWidgetClass);
+		UIngameSelectWidget* CardSelectionWidget = CreateWidget<UIngameSelectWidget>(GetWorld(), CardSelectionWidgetClass);
 		if (CardSelectionWidget)
 		{
 			CardSelectionWidget->AddToViewport();
 			UGameplayStatics::SetGamePaused(GetWorld(), true);
 		}
 
-		 APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 		if (PlayerController)
 		{
 			PlayerController->bShowMouseCursor = true;
@@ -440,7 +486,6 @@ void AFPSGameMode::ShowCardSelectionUI()
 			PlayerController->SetInputMode(InputMode);
 		}
 	}
-	*/
 }
 
 void AFPSGameMode::ContinueGameAfterCardSelection()
@@ -502,6 +547,22 @@ UCardData* AFPSGameMode::GetRandomCard()
 	return nullptr;
 }
 
+TArray<UCardData*> AFPSGameMode::GetRandomCards(int32 CardCount)
+{
+	TArray<UCardData*> SelectedCards;
+
+	for (int32 i = 0; i < CardCount; i++)
+	{
+		UCardData* RandomCard = GetRandomCard();
+		if (RandomCard)
+		{
+			SelectedCards.Add(RandomCard);
+		}
+	}
+
+	return SelectedCards;
+}
+
 void AFPSGameMode::InitializeDropManager()
 {
 	UWorld* World = GetWorld();
@@ -518,29 +579,24 @@ void AFPSGameMode::InitializeDropManager()
 	if (DropManagerClass)
 	{
 		DropManager = World->SpawnActor<ADropManager>(DropManagerClass, FVector::ZeroVector, FRotator::ZeroRotator);
+	}
+}
 
+void AFPSGameMode::PlayMainHudShow()
+{
+	if (PlayerMainHudClass)
+	{
+		UIngameMainWidget* PlayerMainWidget = CreateWidget<UIngameMainWidget>(GetWorld(), PlayerMainHudClass);
+		if (PlayerMainWidget)
+		{
+			PlayerMainWidget->AddToViewport();
+		}
 	}
 }
 
 ADropManager* AFPSGameMode::GetDropManager()
 {
 	return DropManager;
-}
-
-TArray<UCardData*> AFPSGameMode::GetRandomCards(int32 CardCount)
-{
-	TArray<UCardData*> SelectedCards;
-
-	for (int32 i = 0; i < CardCount; i++)
-	{
-		UCardData* RandomCard = GetRandomCard();
-		if (RandomCard)
-		{
-			SelectedCards.Add(RandomCard);
-		}
-	}
-
-	return SelectedCards;
 }
 
 void AFPSGameMode::ClearAllEnemies()

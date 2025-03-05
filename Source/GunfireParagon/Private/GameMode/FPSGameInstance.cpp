@@ -14,17 +14,18 @@
 UFPSGameInstance::UFPSGameInstance()
 {
 	StoredPlayerLocation = FVector::ZeroVector;
-	MouseSensitivity = 1000;
+	MouseSensitivity = 1;
 	PlayerLevel = 1;
 	ExperiencePoints = 0.f;
 	MaxExp = 100;
 	CurrentStageIndex = 0; 
-	PreviousLevelName = TEXT("");
+	PreviousLevelName = TEXT("");	
 }
 
 void UFPSGameInstance::Init()
 {
 	Super::Init();
+
 	StartGame();
 }
 
@@ -41,15 +42,15 @@ void UFPSGameInstance::StartGame()
 		}
 	}
 
-
 	FTimerHandle TestTimer;
 	GetTimerManager().SetTimer(
 		TestTimer,
 		this,
 		&UFPSGameInstance::LoadNextStage,
-		5.0f,
+		3.0f,
 		false
 	);
+	
 }
 
 
@@ -91,11 +92,15 @@ void UFPSGameInstance::LoadNextStage()
 
 void UFPSGameInstance::GotoMainMenu()
 {
+	StartGame();
+	
+	/*
 	CurrentStageIndex = 0;
 	if (StageMapNames.IsValidIndex(CurrentStageIndex))
 	{
 		UGameplayStatics::OpenLevel(this, StageMapNames[CurrentStageIndex]);
 	}
+	*/
 }
 
 
@@ -244,15 +249,30 @@ void UFPSGameInstance::LoadMouseSensitivity()
 void UFPSGameInstance::AddExperiencePoint(float ExpAmount)
 {
 	ExperiencePoints += ExpAmount;
+
 	if (ExperiencePoints >= MaxExp)
 	{
-		PlayerLevel +=	FMath::FloorToInt32(ExperiencePoints / MaxExp);
-		ExperiencePoints = FMath::Fmod(ExperiencePoints, MaxExp);
-
-		MaxHP = 100 + (PlayerLevel * 10);
-		MaxShield = 50 + (PlayerLevel * 5);
-		MaxExp = ((PlayerLevel - 1) + 10) * 10;
+		PlayerLevelUp();
+		if (CardSelectionWidgetClass)
+		{
+			UIngameSelectWidget* CardSelectionWidget = CreateWidget<UIngameSelectWidget>(GetWorld(), CardSelectionWidgetClass);
+			if (CardSelectionWidget)
+			{
+				CardSelectionWidget->AddToViewport();
+				ExperiencePoints = 0;
+				return;
+			}
+		}
 		LoadPlayerStats();
 	}
 }
 
+void UFPSGameInstance::PlayerLevelUp()
+{
+	PlayerLevel += FMath::FloorToInt32(ExperiencePoints / MaxExp);
+	ExperiencePoints = FMath::Fmod(ExperiencePoints, MaxExp);
+
+	MaxHP = 100 + (PlayerLevel * 10);
+	MaxShield = 50 + (PlayerLevel * 5);
+	MaxExp = ((PlayerLevel - 1) + 10) * 10;
+}

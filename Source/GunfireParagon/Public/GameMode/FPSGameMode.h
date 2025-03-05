@@ -10,6 +10,9 @@
 #include "GameMode/ClearPortal.h"
 #include "GameMode/TrapPortal.h"
 #include "GameMode/CardData.h"
+#include "Widgets/InGame/IngameSelectWidget.h"
+#include "Widgets/InGame/IngameMainWidget.h"
+#include "Widgets/Lobby/LobbyWidget.h"
 #include "FPSGameMode.generated.h"
 
 UENUM(BlueprintType)
@@ -43,6 +46,7 @@ public:
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetEnemySpawnData(int32 StageNumber);
 	UCardData* GetRandomCard();
 	void InitializeDropManager();
+	void PlayMainHudShow();
 	ADropManager* GetDropManager();
 
 
@@ -93,8 +97,12 @@ public:
 	TSubclassOf<ATrapPortal> TrapPortalClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Game State")
 	EGameState CurrentGameState;
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
-	//TSubclassOf<UFPSCardSelectionWidget> CardSelectionWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UIngameSelectWidget> CardSelectionWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UIngameMainWidget> PlayerMainHudClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<ULobbyWidget> LobbyWidgetClass;
 
 	bool bIsObjectPoolReady;
 	bool bIsInTrapLevel;

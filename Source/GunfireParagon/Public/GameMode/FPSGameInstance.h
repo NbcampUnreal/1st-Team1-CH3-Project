@@ -6,6 +6,9 @@
 #include "Engine/GameInstance.h"
 #include "AIObjectPool.h"
 #include "Actor/Weapon/CGunBase.h"
+#include "Widgets/InGame/IngameSelectWidget.h"
+#include "Widgets/InGame/IngameMainWidget.h"
+#include "Widgets/Lobby/LobbyWidget.h"
 #include "FPSGameInstance.generated.h"
 
 class APlayerCharacter;
@@ -26,10 +29,12 @@ public:
 	FVector GetPlayerLocation() const;
 	void SaveWeaponStats(APlayerCharacter* Player);
 	void LoadWeaponStats(APlayerCharacter* Player);
+	void PlayerLevelUp();
 
 	bool bIsInTrapLevel = false;
 	TSubclassOf<ACGunBase> PrimaryWeaponClass;
 	TSubclassOf<ACGunBase> SecondaryWeaponClass;
+	UIngameMainWidget* PlayerMainHud;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;
@@ -51,8 +56,15 @@ public:
 	FVector StoredPlayerLocation;
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "Mouse")
 	float MouseSensitivity;
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UIngameSelectWidget> CardSelectionWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UIngameMainWidget> PlayerMainHudClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<ULobbyWidget> LobbyWidgetClass;
 	
+
+
 	UFUNCTION(BlueprintCallable, Category = "Mouse")
 	void SaveMouseSensitivity();
 	UFUNCTION(BlueprintCallable, Category = "Mouse")
