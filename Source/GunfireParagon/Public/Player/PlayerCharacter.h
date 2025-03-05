@@ -44,6 +44,8 @@ public:
 	void SwitchWeaponSlot(int32 Slot);
 	void SwitchToPrimaryWeapon();
 	void SwitchToSecondaryWeapon();
+	bool IsPlayerDead() { return bIsDead; }
+
 	UPROPERTY()
 	TArray<FCardEffect> AppliedCardEffects;
 	void ApplyCardEffect(const FCardEffect& SelectedCard);	// (UCardData* SelectedCard);
