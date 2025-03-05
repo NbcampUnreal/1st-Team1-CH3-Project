@@ -341,6 +341,11 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 			{
 				GameInstance->SavePlayerStats(this);
 			}
+			AFPSGameMode* GameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+			if (GameMode)
+			{
+				GameMode->EndGame(false);
+			}
 
 			HandlePlayerDeath();
 			UE_LOG(LogTemp, Warning, TEXT("HandlePlayerDeath() 호출 완료"));
