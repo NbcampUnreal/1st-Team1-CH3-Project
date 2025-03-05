@@ -69,7 +69,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
@@ -105,6 +105,8 @@ protected:
 	USoundBase* JumpSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* ReloadMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* ReloadSound;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
@@ -145,6 +147,12 @@ protected:
 
 	virtual void Landed(const FHitResult& Hit) override;
 	void DisableFirstPersonShadows();
+	bool bCanSwitchWeapon = true;
+	FTimerHandle SwitchWeaponCooldownTimer;
+	void ResetWeaponSwitchCooldown();
+	void ResetReload();
+	bool bCanReload = true;
+	FTimerHandle ReloadTimerHandle;
 
 private:
 	void InitializeCharacter();
@@ -163,7 +171,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	float DashCoolDown = 1.5f;
 
-	bool bCanSwitchWeapon = true;
 	UPROPERTY()
 	TArray<ACGunBase*> DroppedWeapons;
 

@@ -114,17 +114,6 @@ void APlayerCharacter::BeginPlay()
 	}
 }
 
-
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (!CurrentWeapon)
-	{
-	}
-}
-
-
 void APlayerCharacter::InitializeCharacter()
 {
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -676,9 +665,9 @@ ACGunBase* APlayerCharacter::FindNearbyDroppedWeapon()
 			UE_LOG(LogTemp, Warning, TEXT("이미 소지한 무기 카테고리와 동일: %d → 줍기 불가"), (int32)FoundWeapon->WeaponType);
 			continue;
 		}
-
 		return FoundWeapon;
 	}
+
 
 	UE_LOG(LogTemp, Warning, TEXT("주울 수 있는 무기가 없음"));
 	return nullptr;
@@ -709,6 +698,9 @@ void APlayerCharacter::SwitchWeaponSlot(int32 Slot)
 		CurrentWeaponSlot = 0;
 
 		AttachWeaponToHand(CurrentWeapon, 0);
+
+		bCanSwitchWeapon = false;
+		GetWorldTimerManager().SetTimer(SwitchWeaponCooldownTimer, this, &APlayerCharacter::ResetWeaponSwitchCooldown,0.3, false);
 
 		UE_LOG(LogTemp, Warning, TEXT("무기 변경 완료: 1번 무기로 교체 (%s)"), *CurrentWeapon->GetName());
 	}
@@ -803,9 +795,30 @@ void APlayerCharacter::ReloadWeapon()
 {
 	if (CurrentWeapon)
 	{
+		if (!bCanReload)
+		{
+			return;
+		}
+
+		if (CurrentAmmo == MaxAmmo)
+		{
+			return;
+		}
 		CurrentWeapon->Reload();
+		bCanReload = false;
+		if (ReloadSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, GetActorLocation());
+		}
+		
 		PlayReloadAnimation();
+		GetWorldTimerManager().SetTimer(ReloadTimerHandle, this, &APlayerCharacter::ResetReload, 1.6f, false);
 	}
+}
+
+void APlayerCharacter::ResetReload()
+{
+	bCanReload = true;
 }
 
 void APlayerCharacter::Landed(const FHitResult& Hit)
@@ -887,11 +900,11 @@ void APlayerCharacter::ApplyEffectToGun(FCardEffect Effect)
 
 	if (Effect.EffectType == ECardEffectType::AttackPowerIncrease)
 	{
-		EquippedGun->SetGunDamage(GetGunDamage() + AppliedValue);
+		EquippedGun->SetGunDamage(EquippedGun->GetGunDamage() + AppliedValue);
 	}
 	else if (Effect.EffectType == ECardEffectType::AttackSpeedIncrease)
 	{
-		EquippedGun->SetGunDelay(GetGunDelay() * (1.0f - (AppliedValue * 0.01f)));
+		EquippedGun->SetGunDelay(EquippedGun->GetGunDelay() * (1.0f - (AppliedValue * 0.01f)));
 	}
 }
 
@@ -1004,4 +1017,9 @@ void APlayerCharacter::PlayReloadAnimation()
 	{
 		AnimInstance->Montage_Play(ReloadMontage);
 	}
+}
+
+void APlayerCharacter::ResetWeaponSwitchCooldown()
+{
+	bCanSwitchWeapon = true;
 }

@@ -11,8 +11,7 @@ AGun_Rifle::AGun_Rifle()
 
     AmmoType =EAmmoType::Normal;
 
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-
+    
    
 
     static ConstructorHelpers::FObjectFinder<USkeletalMesh> RifleMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Test/TestGun/m16-a2-rifle/source/SKM_m16a21.SKM_m16a21'"));

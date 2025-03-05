@@ -36,7 +36,6 @@ ACGunBase::ACGunBase()
 
 	SwitchGunSound(WeaponType);
 	
-	
 }
 
 
@@ -89,33 +88,40 @@ void ACGunBase::BeginPlay()
 			}
 		}
 	}
-
+	if (DropEffect)
+	{
+		DropEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			DropEffect,
+			WeaponMesh,
+			NAME_None,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::SnapToTarget,
+			true
+		);
+	}
 	SetIsDrop(true);
-
 }
+
 void ACGunBase::SetIsDrop(bool isDrop)
 {
 	bISDrop = isDrop;
 	if (bISDrop)
 	{
-		if (DropEffect)
+		if (DropEffectComp)
 		{
-			DropEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
-				DropEffect,
-				WeaponMesh,
-				NAME_None,
-				FVector::ZeroVector,
-				FRotator::ZeroRotator,  
-				EAttachLocation::SnapToTarget,  
-				true	
-			);
+			DropEffectComp->Activate(isDrop);
 		}
 	}
 	else
 	{
-		DropEffectComp->DestroyComponent();
+		if (DropEffectComp)
+		{
+			DropEffectComp->Deactivate();
+			DropEffectComp->SetVisibility(false);
+		}
 	}
-		
+	
 }
 
 void ACGunBase::Fire()
