@@ -41,6 +41,12 @@
 ## Player
 
 ## AIMonster
+<details>
+<summary>Enemy AI UML Class Diagram</summary>
+  
+  ![Enemy AI](https://github.com/user-attachments/assets/9b2bd2c0-862f-47c0-8fb5-28ad9cb03b6c)
+
+</details>
 
 ## Actor
 
