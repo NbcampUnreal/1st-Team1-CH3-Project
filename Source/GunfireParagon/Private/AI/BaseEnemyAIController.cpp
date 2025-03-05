@@ -1,5 +1,6 @@
 #include "AI/BaseEnemyAIController.h"
 #include "AI/BaseEnemy.h"
+#include "Player/PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -95,7 +96,16 @@ void ABaseEnemyAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	AActor* TargetPlayer = Cast<AActor>(BBComp->GetValueAsObject("TargetPlayer"));
+	APlayerCharacter* TargetPlayer = Cast<APlayerCharacter>(BBComp->GetValueAsObject("TargetPlayer"));
+
+	if (TargetPlayer && TargetPlayer->IsPlayerDead())
+	{
+		BBComp->ClearValue("TargetPlayer");
+		BBComp->ClearValue("PlayerLocation");
+		BBComp->SetValueAsBool("HasSpottedPlayer", false);
+		return;
+	}
+
 	if (TargetPlayer && BBComp->GetValueAsBool("HasSpottedPlayer"))
 	{
 		FVector PlayerLocation = TargetPlayer->GetActorLocation();
