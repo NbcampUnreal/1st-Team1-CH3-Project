@@ -1,17 +1,18 @@
 #include "AI/BaseEnemy.h"
 #include "AI/BaseEnemyAIController.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Engine/DamageEvents.h"
-#include "BehaviorTree/BehaviorTreeComponent.h" 
-#include "BehaviorTree/BTTaskNode.h"  
+#include "Actor/Trap/DropManager.h"
+#include "GameMode/FPSGameMode.h"
+#include "GameMode/FPSGameState.h"
+#include "GameMode/FPSGameInstance.h"
+#include "GameMode/AIObjectPool.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/DamageEvents.h"
 #include "Perception/AISense_Damage.h"
+#include "BehaviorTree/BTTaskNode.h"  
+#include "BehaviorTree/BehaviorTreeComponent.h" 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "GameMode/FPSGameState.h"
-#include "GameMode/AIObjectPool.h"
-#include "GameMode/FPSGameInstance.h"
-
 
 ABaseEnemy::ABaseEnemy()
 {
@@ -21,10 +22,8 @@ ABaseEnemy::ABaseEnemy()
 	USkeletalMeshComponent* SkeletalMesh = GetMesh();
 	if (SkeletalMesh)
 	{
-		SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		SkeletalMesh->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel2);
-		//SkeletalMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-		//SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 	}
 
 	Damage = 20.0f;
@@ -202,6 +201,17 @@ void ABaseEnemy::OnDeath()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
 	}
+
+	AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (FPSGameMode)
+	{
+		ADropManager* DropManager = FPSGameMode->GetDropManager();
+		if (DropManager)
+		{
+			FVector DieLocation = GetActorLocation();
+			DropManager->RandomItemDrop(DieLocation);
+		}
+	}
 	
 	AFPSGameState* FPSGameState = Cast<AFPSGameState>(GetWorld()->GetGameState());
 	if (FPSGameState)
@@ -262,15 +272,6 @@ void ABaseEnemy::SetDeathState()
 	// 물리 속도 초기화 
 	MeshComp->SetPhysicsLinearVelocity(FVector::ZeroVector);
 	MeshComp->SetSimulatePhysics(true);
-
-	//// 충격 적용 
-	//FVector ImpulseDirection = GetActorRotation().Vector() * -1.0f;
-	//ImpulseDirection.Normalize();
-
-	//float ImpulseStrength = 20.0f;  
-	//FVector FinalImpulse = ImpulseDirection * ImpulseStrength;
-
-	//MeshComp->AddImpulseToAllBodiesBelow(FinalImpulse);
 }
 
 void ABaseEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -283,5 +284,4 @@ void ABaseEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 		OnSkillMontageEnded.Clear();
 	}
 }
-
 
