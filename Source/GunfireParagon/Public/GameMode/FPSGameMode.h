@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "AIObjectPool.h"
 #include "Actor/BulletPool.h"
+#include "Actor/Trap/DropManager.h"
 #include "GameMode/ClearPortal.h"
 #include "GameMode/TrapPortal.h"
 #include "GameMode/CardData.h"
@@ -41,6 +42,7 @@ public:
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetPoolInitializationData();
 	TMap<TSubclassOf<ABaseEnemy>, int32> GetEnemySpawnData(int32 StageNumber);
 	UCardData* GetRandomCard();
+	void InitializeDropManager();
 
 
 	UFUNCTION(BlueprintCallable)
@@ -66,7 +68,10 @@ public:
 	UFUNCTION()
 	ABulletPool* GetBulletPool(); 
 	
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropManager")
+	ADropManager* DropManager;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropManager")
+	TSubclassOf<ADropManager> DropManagerClass;
 	UPROPERTY()
 	AAIObjectPool* ObjectPoolInstance;
 	UPROPERTY()
