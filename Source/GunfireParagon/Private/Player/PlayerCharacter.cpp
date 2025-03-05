@@ -144,7 +144,6 @@ void APlayerCharacter::InitializeCharacter()
 	}
 	ThirdPersonMesh->SetupAttachment(RootComponent);
 	ThirdPersonMesh->SetOwnerNoSee(true);
-	ThirdPersonMesh->bCastDynamicShadow = true;
 	ThirdPersonMesh->bCastHiddenShadow = true;
 	ThirdPersonMesh->CastShadow = true;
 }
@@ -805,6 +804,7 @@ void APlayerCharacter::ReloadWeapon()
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->Reload();
+		PlayReloadAnimation();
 	}
 }
 
@@ -812,6 +812,19 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	JumpCount = 0;
+}
+
+void APlayerCharacter::Jump()
+{
+	if (CanJump())
+	{
+		Super::Jump();
+
+		if (JumpSound)
+		{
+			UGameplayStatics::SpawnSound2D(this, JumpSound);
+		}
+	}
 }
 
 void APlayerCharacter::SwitchToPrimaryWeapon()
@@ -943,6 +956,8 @@ void APlayerCharacter::HandlePlayerDeath()
 	}
 
 	SwitchToDeathCamera();
+
+	EnableMouseControl();
 }
 
 void APlayerCharacter::SwitchToDeathCamera()
@@ -964,5 +979,29 @@ void APlayerCharacter::SwitchToDeathCamera()
 		PlayerController->SetViewTargetWithBlend(this, 0.5f, VTBlend_Cubic);
 
 		UE_LOG(LogTemp, Warning, TEXT("사망 시 3인칭 카메라로 전환됨"));
+	}
+}
+
+void APlayerCharacter::EnableMouseControl()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->SetIgnoreMoveInput(true);
+		PlayerController->SetIgnoreLookInput(true);
+
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->SetInputMode(FInputModeUIOnly());
+
+		UE_LOG(LogTemp, Warning, TEXT("마우스 UI 조작 활성화됨"));
+	}
+}
+
+void APlayerCharacter::PlayReloadAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
 	}
 }
