@@ -15,6 +15,16 @@ AGun_Rocket::AGun_Rocket()
 	{
 		WeaponMesh->SetSkeletalMesh(RifleMesh.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sound/RocketFire.RocketFire"));
+	if (SoundAsset.Succeeded())
+	{
+        UE_LOG(LogTemp, Error, TEXT("로켓 사운드 불러오지못함"));
+		FireSound = SoundAsset.Object;
+	}
+
+	
+	SwitchGunSound(WeaponType);
 }
 
 

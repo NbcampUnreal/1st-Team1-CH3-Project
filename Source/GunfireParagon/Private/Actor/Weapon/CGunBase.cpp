@@ -34,7 +34,7 @@ ACGunBase::ACGunBase()
 		}
 	}
 
-	SwitchGunSound();
+	SwitchGunSound(WeaponType);
 	
 	
 }
@@ -224,10 +224,10 @@ bool ACGunBase::IsAmmoEmpty()
 	return CurrentAmmo <= 0;
 }
 
-void ACGunBase::SwitchGunSound()
+void ACGunBase::SwitchGunSound(EWeaponType WeaponClass)
 {
 	
-	switch (WeaponType)
+	switch (WeaponClass)
 	{
 	case EWeaponType::Rifle:
 		{

@@ -10,5 +10,10 @@ AGun_Sniper::AGun_Sniper()
 	
 	AmmoType = EAmmoType::Pierce;
 	WeaponType = EWeaponType::Sniper;
+
+	
+	
+	
+	SwitchGunSound(WeaponType);
 }
 

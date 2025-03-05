@@ -21,6 +21,15 @@ AGun_Shotgun::AGun_Shotgun()
 	{
 		WeaponMesh->SetSkeletalMesh(RifleMesh.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sound/buckyTap.buckyTap"));
+    			if (SoundAsset.Succeeded())
+    			{
+    				FireSound = SoundAsset.Object;
+    			}
+
+	
+	SwitchGunSound(WeaponType);
 }
 
 void AGun_Shotgun::BeginPlay()
@@ -53,6 +62,11 @@ void AGun_Shotgun::Fire()
 		}
 	}
 
+	if (FireSound.IsValid())
+	{
+		
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound.Get(), GetActorLocation());
+	}
 	//  샷건 탄환 여러 개 발사
 	if ( CurrentAmmo<Pellets)
 	{
@@ -74,6 +88,8 @@ void AGun_Shotgun::Fire()
 	{
 		for (int i = 0; i < Pellets; i++)
 		{
+        UE_LOG(LogTemp, Error, TEXT("BulletCount"));
+        //UE_LOG(LogTemp, Error, TEXT("한번에나가는 탄약: %i",Pellts));
 			// 총알 퍼짐 방향 설정
 			FVector forwardDirection = GetAimDirection();
 			forwardDirection = SpreadDirection(forwardDirection);
@@ -84,10 +100,8 @@ void AGun_Shotgun::Fire()
 			{
 				Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
 			}
-			else
-			{
-			}
 		}
+	
 	}
 	bCanFire = false;
 	GetWorldTimerManager().SetTimer(FireTimer, this, &AGun_Shotgun::SetIsFire, GunDelay-0.01f, false);

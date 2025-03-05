@@ -5,7 +5,6 @@
 #include "Actor/Bullet/BulletBase.h"
 #include "NiagaraComponent.h"
 #include "Sound/SoundBase.h"
-#include "NiagaraFunctionLibrary.h"  
 #include "CGunBase.generated.h"
 
 class ABulletPool;
@@ -63,7 +62,7 @@ protected:
 	void SetIsFire(); 
 	//탄창이 비었는지 확인
 	bool IsAmmoEmpty() ;
-	void SwitchGunSound();
+	void SwitchGunSound(EWeaponType WeaponClass);
 
 	
 	
@@ -94,7 +93,7 @@ protected:
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
     float GunDelay = 0.2f;
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
-	float GunSpread = 80.0f;
+	float GunSpread = 200.0f;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
 	float GunSpeed = 100.0f;
 
@@ -131,8 +130,10 @@ protected:
 	//드롭이펙트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	UNiagaraSystem* DropEffect;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	UNiagaraComponent* DropEffectComp;
+	
 
 	//총기사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Sounds")

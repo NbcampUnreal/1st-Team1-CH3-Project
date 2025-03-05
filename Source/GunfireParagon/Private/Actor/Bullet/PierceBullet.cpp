@@ -77,8 +77,6 @@ void APierceBullet::Fire(FVector StartLocation, FVector Direction, float GunDama
 void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Super::OnBulletOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
 	if (!OtherActor || OtherActor == this) 
 	{
 		return;
@@ -94,7 +92,7 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	
 	float FinalDamage = BulletDamage;
 	
-	if (OtherActor->ActorHasTag("Enemy"))
+	if (OtherActor->ActorHasTag("Monster"))
 	{
 		bool IsHead = false;
 		PierceCount--;

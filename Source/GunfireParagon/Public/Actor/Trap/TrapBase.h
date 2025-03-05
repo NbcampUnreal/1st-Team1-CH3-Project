@@ -18,7 +18,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Trap")
 	bool bIsActive = true; 
 
-
+	
 public:
 	ATrapBase();
 
@@ -38,3 +38,6 @@ protected:
 	virtual void ApplyDamage(AActor* Target);
 
 };
+
+
+
