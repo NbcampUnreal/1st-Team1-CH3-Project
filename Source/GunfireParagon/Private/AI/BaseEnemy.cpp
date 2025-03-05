@@ -190,11 +190,10 @@ void ABaseEnemy::PlayHitReaction()
 
 void ABaseEnemy::OnDeath()
 {
-	if (!bIsDead)
-	{
-		bIsDead = true;
-	}
+	if (bIsDead) return;
+	bIsDead = true;
 
+	UE_LOG(LogTemp, Error, TEXT("On Death Called!!"));
 	SetActorTickEnabled(false);
 	SetDeathState();
 
