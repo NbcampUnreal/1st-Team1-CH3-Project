@@ -50,11 +50,24 @@ void ABombBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	}
 	if (ExplosionSound.IsValid())
 	{
+		
+		FVector BombLocation = GetActorLocation();
+		FRotator BombRocation = GetActorRotation();
 		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound.Get(), GetActorLocation());
+
+		UNiagaraComponent* BombEffectComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(), 
+		BombEffect,
+		BombLocation,
+		BombRocation,
+		FVector(0, 0, 0)
+		);
+		
 	}
 	bool IsHead = false;
 	ApplyExplosionDamage();
 	OnHitMarker.Broadcast(IsHead);
+	
 	if (BulletPool)
 	{
 		BulletPool->ReturnBullet(this, AmmoType);
@@ -63,6 +76,11 @@ void ABombBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		Destroy();
 	}
+}
+
+void ABombBullet::ExplosionEtc()
+{
+	
 }
 
 void ABombBullet::ApplyExplosionDamage()

@@ -13,11 +13,13 @@ APierceBullet::APierceBullet()
 
 	if (!BulletTail)
 	{
+		
 		static ConstructorHelpers::FObjectFinder<UNiagaraSystem> BulletTailFinder(TEXT("/Game/VFX/TakeGame/NS_Projectile_01.NS_Projectile_01"));
 		if (BulletTailFinder.Succeeded())
 		{
 			BulletTail = BulletTailFinder.Object;
 		}
+		
 	}
 }
 
@@ -35,10 +37,12 @@ void APierceBullet::Fire(FVector StartLocation, FVector Direction, float GunDama
 		FVector BulletLocation = GetActorLocation();
 		FRotator BulletRotation = GetActorRotation();
 		USceneComponent* RootComp = GetRootComponent();
+		
 		if (!RootComp)
 		{
 			return;
 		}
+		
 		UNiagaraComponent* BulletTailComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			BulletTail,         
 			RootComp,                  
@@ -48,6 +52,7 @@ void APierceBullet::Fire(FVector StartLocation, FVector Direction, float GunDama
 			EAttachLocation::SnapToTarget, // 정확히 부착
 			true                   // 자동 파괴
 		);
+		
 
 		if (BulletTailComp)
 		{
@@ -98,9 +103,6 @@ void APierceBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		{
 			IsHead = true;
 			FinalDamage *= 2.0f; // 헤드샷 데미지 2배
-		}
-		else
-		{
 		}
 		//  ApplyPointDamage 사용 (맞은 위치 포함)
 		UGameplayStatics::ApplyPointDamage(OtherActor, FinalDamage, GetVelocity(), SweepResult, nullptr, this, UDamageType::StaticClass());

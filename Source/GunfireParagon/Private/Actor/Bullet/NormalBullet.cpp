@@ -72,9 +72,6 @@ void ANormalBullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AA
 			}
 			IsHead = true;
 		}
-		else
-		{
-		}
 		//탄흔
 		SpawnBulletDecal(SweepResult);
 		//  ApplyPointDamage 사용 (맞은 위치 포함)

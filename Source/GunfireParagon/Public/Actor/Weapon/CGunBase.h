@@ -40,6 +40,9 @@ public:
 	virtual void Reload();
 
 	bool bISDrop = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Data")
+	int32 WeaponDataKey = 1001;
 
 	void SetIsDrop(bool isDrop);
 
@@ -71,12 +74,13 @@ protected:
 
 	// Ammo 관련 Player에게 전달해야하는 값들이 존재. Getter 생성했습니다. 필요시 해당 Type,CallName,ReturnValue 유지 상태의 리팩토링 부탁드립니다.
 public:
+	
 	UFUNCTION()
 	float GetCurrentAmmo() { return CurrentAmmo; }
-
+	
 	UFUNCTION()
 	float GetMaxAmmo() { return MaxAmmo; }
-
+	
 	UFUNCTION(BlueprintCallable)
 	void DisableWeaponShadows();
 	
@@ -90,7 +94,7 @@ protected:
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
     float GunDelay = 0.2f;
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
-	float GunSpread = 5.0f;
+	float GunSpread = 80.0f;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
 	float GunSpeed = 100.0f;
 
@@ -123,9 +127,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	UNiagaraSystem* MuzzleFlashEffect;
 protected:
-	// 무기 데이터 키 (DataTable에서 찾을 Key)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Data")
-	int32 WeaponDataKey = 1001; // 기본값 :NormalRifle
 	
 	//드롭이펙트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
