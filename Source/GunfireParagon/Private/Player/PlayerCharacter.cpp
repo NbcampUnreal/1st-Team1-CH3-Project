@@ -887,11 +887,11 @@ void APlayerCharacter::ApplyEffectToGun(FCardEffect Effect)
 
 	if (Effect.EffectType == ECardEffectType::AttackPowerIncrease)
 	{
-		//EquippedGun->GetDamage() += AppliedValue;
+		EquippedGun->SetGunDamage(GetGunDamage() + AppliedValue);
 	}
 	else if (Effect.EffectType == ECardEffectType::AttackSpeedIncrease)
 	{
-		//EquippedGun->GetGunDelay() *= (1.0f + AppliedValue * 0.01f);
+		EquippedGun->SetGunDelay(GetGunDelay() * (1.0f - (AppliedValue * 0.01f)));
 	}
 }
 
