@@ -74,7 +74,7 @@ void ASharkSpawner::SpawnShark()
 	TArray<AActor*> ExistingSharks;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), SharkClass, ExistingSharks);
 
-	if (ExistingSharks.Num() >= 5)
+	if (ExistingSharks.Num() >= 10)
 	{
 		return;  
 	}
