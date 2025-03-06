@@ -75,7 +75,7 @@ void APlayerCharacter::BeginPlay()
 	GetMesh()->SetSimulatePhysics(false);
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 
-	SetPlayerStatus(MaxHealth, MaxShield);
+	
 
 	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
 	if (GameInstance)
@@ -84,6 +84,7 @@ void APlayerCharacter::BeginPlay()
 		GameInstance->LoadWeaponStats(this);
 		GameInstance->LoadMouseSensitivity();
 	}
+	SetPlayerStatus(MaxHealth, MaxShield);
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 
 	if (Inventory[0]==nullptr)

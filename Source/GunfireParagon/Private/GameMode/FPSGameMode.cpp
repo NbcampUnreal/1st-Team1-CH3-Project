@@ -69,15 +69,14 @@ void AFPSGameMode::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("BeginPlay() - Returning from TrapLevel, Restoring Player Location."));
 			RestorePlayerLocation();
 			FPSGameInstance->bIsInTrapLevel = false;
-
-			if (CardSelectionWidgetClass)
-			{
-				UIngameSelectWidget* CardSelectionWidget = CreateWidget<UIngameSelectWidget>(GetWorld(), CardSelectionWidgetClass);
-				if (CardSelectionWidget)
-				{
-					CardSelectionWidget->AddToViewport();
-				}
-			}
+			FTimerHandle HudTimer;
+			GetWorld()->GetTimerManager().SetTimer(
+				HudTimer,
+				this,
+				&AFPSGameMode::ShowCardSelectionUI,
+				0.2,
+				false
+			);
 		}
 		else
 		{
@@ -471,16 +470,6 @@ void AFPSGameMode::ShowCardSelectionUI()
 		if (CardSelectionWidget)
 		{
 			CardSelectionWidget->AddToViewport();
-			UGameplayStatics::SetGamePaused(GetWorld(), true);
-		}
-
-		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-		if (PlayerController)
-		{
-			PlayerController->bShowMouseCursor = true;
-			FInputModeUIOnly InputMode;
-			InputMode.SetWidgetToFocus(CardSelectionWidget->TakeWidget());
-			PlayerController->SetInputMode(InputMode);
 		}
 	}
 }
