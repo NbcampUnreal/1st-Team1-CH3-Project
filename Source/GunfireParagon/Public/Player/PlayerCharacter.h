@@ -211,7 +211,7 @@ private:
 	USpringArmComponent* DeathCameraSpringArm;
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	UCameraComponent* DeathCamera;
-
+	bool bIsReloading = false;
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "UI Events")

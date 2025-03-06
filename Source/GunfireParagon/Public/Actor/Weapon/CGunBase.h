@@ -54,6 +54,8 @@ public:
 	
 	//총기 딜레이에 따라 발사 가능 여부 확인
 	bool CanFire()const ;
+	//나중에 바인딩할때 마우스 떼면 그만 쏘도록
+	void StopFire();
 
 protected:
 	
@@ -65,8 +67,7 @@ protected:
 	virtual void BeginPlay() override;
 
 
-	//나중에 바인딩할때 마우스 떼면 그만 쏘도록
-	void StopFire();
+	
 	void SetIsFire(); 
 	//탄창이 비었는지 확인
 	bool IsAmmoEmpty()const ;

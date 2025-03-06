@@ -413,10 +413,15 @@ void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float&
 
 void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 {
+	if (!CurrentWeapon || bIsDead)
+	{
+		return;
+	}
+	
 	if (!CurrentWeapon)
 		return;
 
-	if (!CurrentWeapon->GetCanFire()) //재장전 중이면 발사 금지
+	if (!CurrentWeapon->CanFire() || bIsReloading) //재장전 중이면 발사 금지
 	{
 		return;
 	}
@@ -831,9 +836,12 @@ void APlayerCharacter::ReloadWeapon()
 		{
 			return;
 		}
+
+		bIsReloading = true;
 		CurrentWeapon->Reload();
 		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
 		bCanReload = false;
+
 		if (ReloadSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, ReloadSound, GetActorLocation());
@@ -847,6 +855,7 @@ void APlayerCharacter::ReloadWeapon()
 void APlayerCharacter::ResetReload()
 {
 	bCanReload = true;
+	bIsReloading = false;
 }
 
 void APlayerCharacter::Landed(const FHitResult& Hit)
@@ -982,6 +991,8 @@ void APlayerCharacter::HandlePlayerDeath()
 	UE_LOG(LogTemp, Warning, TEXT("HandlePlayerDeath() 실행됨 - 플레이어 사망 처리 시작"));
 
 	bIsDead = true;
+
+	StopFireWeapon(FInputActionValue());
 
 	//1인칭 메시와 총기 숨기기
 	HideFirstPersonMeshAndWeapon();
