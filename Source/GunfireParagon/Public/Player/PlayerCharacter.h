@@ -109,6 +109,9 @@ protected:
 	UAnimMontage* ReloadMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundBase* ReloadSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* FireMontage;
+
 
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
@@ -123,6 +126,8 @@ protected:
 	UFUNCTION()
 	void FireWeapon(const FInputActionValue& Value);
 	UFUNCTION()
+	void StopFireWeapon(const FInputActionValue& Value);
+	UFUNCTION()
 	void PickupWeapon();
 	UFUNCTION()
 	void PickupWeaponInput(const FInputActionValue& Value);
@@ -132,6 +137,8 @@ protected:
 	void IncreaseMouseSensitivity();
 	UFUNCTION()
 	void DecreaseMouseSensitivity();
+	
+
 	
 	/*UFUNCTION()
 	void StartSprint(const FInputActionValue& Value);
@@ -155,6 +162,7 @@ protected:
 	void ResetReload();
 	bool bCanReload = true;
 	FTimerHandle ReloadTimerHandle;
+	bool bIsFiring = false;
 
 private:
 	void InitializeCharacter();

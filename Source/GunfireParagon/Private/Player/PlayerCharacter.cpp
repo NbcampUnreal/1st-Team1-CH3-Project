@@ -155,6 +155,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			BIND_INPUT_ACTION(JumpAction, ETriggerEvent::Completed, StopJump);
 			BIND_INPUT_ACTION(DashAction, ETriggerEvent::Triggered, Dash);
 			BIND_INPUT_ACTION(FireAction, ETriggerEvent::Triggered, FireWeapon);
+			BIND_INPUT_ACTION(FireAction, ETriggerEvent::Completed, StopFireWeapon);
 			BIND_INPUT_ACTION(ReloadAction, ETriggerEvent::Triggered, ReloadWeapon);
 			BIND_INPUT_ACTION(SwitchToPrimaryWeaponAction, ETriggerEvent::Triggered, SwitchToPrimaryWeapon);
 			BIND_INPUT_ACTION(SwitchToSecondaryWeaponAction, ETriggerEvent::Triggered, SwitchToSecondaryWeapon);
@@ -264,6 +265,10 @@ void APlayerCharacter::Dash(const FInputActionValue& value)
 	UE_LOG(LogTemp, Warning, TEXT("대시 실행: 방향 = %s, 속도 = %f"), *DashDirection.ToString(), DashSpeed);
 }
 
+void APlayerCharacter::StopFireWeapon(const FInputActionValue& Value)
+{
+	bIsFiring = false;
+}
 
 void APlayerCharacter::StopDash()
 {
@@ -408,12 +413,26 @@ void APlayerCharacter::SetAmmoState(const float& UpdateCurrentAmmo, const float&
 
 void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 {
-	if (CurrentWeapon)
+	if (!CurrentWeapon)
+		return;
+
+	//if (!CurrentWeapon->GetCanFire()) //재장전 중이면 발사 금지
+	//{
+	//	return;
+	//}
+
+	CurrentWeapon->Fire();
+	SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireMontage && !AnimInstance->Montage_IsPlaying(FireMontage))
 	{
-		CurrentWeapon->Fire();
-		SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
+		AnimInstance->Montage_Play(FireMontage);
 	}
 }
+
+
+
 
 
 bool APlayerCharacter::EquipWeapon(ACGunBase* NewWeapon, int32 Slot)
@@ -1034,3 +1053,4 @@ void APlayerCharacter::ResetWeaponSwitchCooldown()
 {
 	bCanSwitchWeapon = true;
 }
+
