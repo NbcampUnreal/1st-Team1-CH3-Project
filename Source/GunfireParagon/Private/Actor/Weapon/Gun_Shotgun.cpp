@@ -47,62 +47,84 @@ void AGun_Shotgun::Fire()
 	//  발사 후 탄약 감소
 	CurrentAmmo-=Pellets;
 
-	if (GunMesh && GunMesh->DoesSocketExist(TEXT("Muzzle")))
+	if (WeaponMesh && WeaponMesh->DoesSocketExist(TEXT("Muzzle")))
 	{
-		MuzzleSpot = GunMesh->GetSocketLocation(TEXT("Muzzle"));
+		MuzzleSpot = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
 		
 		if (MuzzleFlashEffect)
 		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-				GetWorld(), 
-				MuzzleFlashEffect,  // 머즐 플래시 이펙트
-				MuzzleSpot,          // 위치 (총구)
-				GunMesh->GetSocketRotation(TEXT("Muzzle")) // 총구 회전 방향
+			FRotator MuzzleRotation = WeaponMesh->GetSocketRotation(TEXT("Muzzle")) - WeaponMesh->GetComponentRotation();
+			MuzzleRotation.Yaw -= 90.0f; // Y축 정렬 보정
+			UNiagaraComponent* MuzzleEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+				MuzzleFlashEffect,           // 나이아가라 시스템
+				WeaponMesh,                  // 부모: 무기 메쉬
+				TEXT("Muzzle"),              // 소켓 이름
+				FVector::ZeroVector,         // 상대 위치 (소켓 기준)
+				MuzzleRotation,              // 초기 회전값 (부모 회전 제거)
+				EAttachLocation::SnapToTarget, // 부모 위치 & 소켓에 정확히 부착
+				true                         // 자동 파괴
 			);
-		}
-	}
 
-	if (FireSound.IsValid())
-	{
+			if (MuzzleEffectComp)
+			{
+				MuzzleEffectComp->SetAutoDestroy(true); 
+				MuzzleEffectComp->SetVariableFloat(FName("User.Lifetime"), 0.2f);
+				FTimerHandle EffectDestroyTimer;
+				GetWorld()->GetTimerManager().SetTimer(EffectDestroyTimer, [MuzzleEffectComp]()
+				{
+					if (MuzzleEffectComp)
+					{
+						MuzzleEffectComp->DestroyComponent();
+					}
+				}, 0.2f, false);
+			}
+		}
+
+
 		
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound.Get(), GetActorLocation());
-	}
-	//  샷건 탄환 여러 개 발사
-	if ( CurrentAmmo<Pellets)
-	{
-		for (int i = 0; i < CurrentAmmo; i++)
+		FVector AimDirection = GetAimDirection();
+
+		
+		if (FireSound.IsValid())
 		{
-			// 총알 퍼짐 방향 설정
-			FVector forwardDirection = GetAimDirection();
-			forwardDirection = SpreadDirection(forwardDirection);
-	
-			//  총알을 풀에서 가져오기
-			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
-			if (Bullet)
+		
+			UGameplayStatics::PlaySoundAtLocation(this, FireSound.Get(), GetActorLocation());
+		}
+		//  샷건 탄환 여러 개 발사
+		if ( CurrentAmmo<Pellets)
+		{
+			for (int i = 0; i < CurrentAmmo; i++)
 			{
-				Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
+				// 총알 퍼짐 방향 설정
+	
+				FVector forwardDirection = SpreadDirection(AimDirection);
+				//  총알을 풀에서 가져오기
+				ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
+				if (Bullet)
+				{
+					Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
+				}
 			}
 		}
-	}
-	else
-	{
-		for (int i = 0; i < Pellets; i++)
+		else
 		{
-        UE_LOG(LogTemp, Error, TEXT("BulletCount"));
-        //UE_LOG(LogTemp, Error, TEXT("한번에나가는 탄약: %i",Pellts));
-			// 총알 퍼짐 방향 설정
-			FVector forwardDirection = GetAimDirection();
-			forwardDirection = SpreadDirection(forwardDirection);
-	
-			//  총알을 풀에서 가져오기
-			ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
-			if (Bullet)
+			for (int i = 0; i < Pellets; i++)
 			{
-				Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
+				UE_LOG(LogTemp, Error, TEXT("BulletCount"));
+				//UE_LOG(LogTemp, Error, TEXT("한번에나가는 탄약: %i",Pellts));
+				
+				FVector forwardDirection = SpreadDirection(AimDirection);
+				//  총알을 풀에서 가져오기
+				ABulletBase* Bullet = BulletPool->GetPooledBullet(EAmmoType::Normal);
+				if (Bullet)
+				{
+					Bullet->Fire(MuzzleSpot, forwardDirection, Damage,GunSpeed);
+				}
+				DrawDebugLine(GetWorld(), MuzzleSpot, MuzzleSpot + (forwardDirection * 1000.0f), FColor::Red, false, 1.0f, 0, 1.0f);
 			}
-		}
 	
+		}
+		bCanFire = false;
+		GetWorldTimerManager().SetTimer(FireTimer, this, &AGun_Shotgun::SetIsFire, GunDelay-0.01f, false);
 	}
-	bCanFire = false;
-	GetWorldTimerManager().SetTimer(FireTimer, this, &AGun_Shotgun::SetIsFire, GunDelay-0.01f, false);
 }

@@ -93,7 +93,7 @@ protected:
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
     float GunDelay = 0.2f;
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
-	float GunSpread = 200.0f;
+	float GunSpread = 5.0f;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "GunStatus")
 	float GunSpeed = 100.0f;
 

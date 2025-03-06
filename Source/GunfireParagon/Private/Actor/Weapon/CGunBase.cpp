@@ -346,8 +346,11 @@ FVector ACGunBase::SpreadDirection(const FVector OriginDirection) const
 	float RandomYaw = FMath::RandRange(-GunSpread, GunSpread);
 	float RandomPitch = FMath::RandRange(-GunSpread, GunSpread);
 
-	FRotator SpreadRotation = FRotator(RandomPitch, RandomYaw, 0.0f);
-	return SpreadRotation.RotateVector(OriginDirection);
+	// 원래 방향을 기준으로 랜덤 회전 적용
+	FRotator SpreadRotation(RandomPitch, RandomYaw, 0.0f);
+	FVector SpreadDirection = SpreadRotation.RotateVector(OriginDirection);
+    
+	return SpreadDirection.GetSafeNormal(); // 정규화된 방향 반환
 }
 
 
