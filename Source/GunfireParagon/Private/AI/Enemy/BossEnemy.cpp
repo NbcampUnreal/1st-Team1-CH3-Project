@@ -20,7 +20,7 @@ ABossEnemy::ABossEnemy()
     CurrentHealth = MaxHealth;
     LastKnownPlayerLocation = FVector::ZeroVector;
     TeleportLocation = FVector::ZeroVector;
-    EXP = 100.0f;
+    EXP = 0.0f;
     bUsedHealSkill = false;
 
     GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
