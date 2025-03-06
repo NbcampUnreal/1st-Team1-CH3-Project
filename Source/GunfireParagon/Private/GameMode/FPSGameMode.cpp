@@ -45,6 +45,23 @@ void AFPSGameMode::BeginPlay()
 				LobbyWidget->AddToViewport();
 			}
 		}
+
+		if (FPSGameInstance->CurrentStageIndex != 0)
+		{
+			if (PlayerMainWidget)
+			{
+				PlayerMainWidget->RemoveFromParent();
+			}
+			FTimerHandle HudTimer;
+			GetWorld()->GetTimerManager().SetTimer(
+				HudTimer,
+				this,
+				&AFPSGameMode::PlayMainHudShow,
+				0.5,
+				false
+			);
+		}
+
 		FString PreviousLevel = FPSGameInstance->GetPreviousLevel();
 		bIsInTrapLevel = FPSGameInstance->bIsInTrapLevel;
 		if (bIsInTrapLevel)
@@ -68,26 +85,8 @@ void AFPSGameMode::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("BeginPlay() - Normal level transition, skipping RestorePlayerLocation()."));
 			SpawnTrapPortals();
 		}
-
 	}
 	
-	if (FPSGameInstance->CurrentStageIndex != 0)
-	{
-		if (PlayerMainWidget)
-		{
-			PlayerMainWidget->RemoveFromParent();
-		}
-		FTimerHandle HudTimer;
-		GetWorld()->GetTimerManager().SetTimer(
-			HudTimer,
-			this,
-			&AFPSGameMode::PlayMainHudShow,
-			0.5,
-			false
-		);
-	}
-	
-
 	LoadCardDataFromDataTable();
 	InitializeObjectPool();
 	InitializeBulletPool();
@@ -97,7 +96,7 @@ void AFPSGameMode::BeginPlay()
 	{
 		int32 CurrentStageIndex = FPSGameInstance->CurrentStageIndex;
 
-		if (CurrentStageIndex <= 10)
+		if (CurrentStageIndex <= 5)
 		{
 			SpawnEnemiesForStage(CurrentStageIndex);
 		}

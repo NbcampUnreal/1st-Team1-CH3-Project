@@ -51,18 +51,57 @@ void ATrapPortal::OnPortalOverlap(
 		{
 			if (PortalType == ETrapPortalTypes::TravelToTrap)
 			{
-				FPSGameMode->TravelToLevel("Stage_Trap_01");
+				if (PortalSound)
+				{
+					UGameplayStatics::PlaySound2D(this, PortalSound);
+				}
 
+				FTimerHandle StageLoadTimerHandle;
+				GetWorld()->GetTimerManager().SetTimer(
+					StageLoadTimerHandle,
+					this,
+					&ATrapPortal::TravelToTravel,
+					2.0f,
+					false
+				);
 			}
 			else if (PortalType == ETrapPortalTypes::ReturnToStage)
 			{
-				FPSGameMode->ReturnToPreviousLevel();
+				if (PortalSound)
+				{
+					UGameplayStatics::PlaySound2D(this, PortalSound);
+				}
+
+				FTimerHandle StageLoadTimerHandle;
+				GetWorld()->GetTimerManager().SetTimer(
+					StageLoadTimerHandle,
+					this,
+					&ATrapPortal::ReturnToStage,
+					2.0f,
+					false
+				);
 			}
 		}
 	}
+}
 
-	
-	
+void ATrapPortal::TravelToTravel()
+{
+	AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>((GetWorld()->GetAuthGameMode()));
+	if (FPSGameMode)
+	{
+
+		FPSGameMode->TravelToLevel("Stage_Trap_01");
+	}
+}
+
+void ATrapPortal::ReturnToStage()
+{
+	AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>((GetWorld()->GetAuthGameMode()));
+	if (FPSGameMode)
+	{
+		FPSGameMode->ReturnToPreviousLevel();
+	}
 }
 
 

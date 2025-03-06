@@ -24,8 +24,11 @@ public:
 	UStaticMeshComponent* PortalMesh;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal")
 	UBoxComponent* CollisionBox;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Portal")
 	UParticleSystemComponent* PortalEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Portal")
+	USoundBase* PortalSound;
+
 
 	UFUNCTION()
 	void OnPortalOverlap(

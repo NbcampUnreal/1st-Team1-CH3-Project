@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Player/PlayerCharacter.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameMode/FPSGameInstance.h"
 
 
@@ -43,11 +44,26 @@ void AClearPortal::OnPortalOverlap(
 		return;
 	}
 
-	APlayerCharacter* FPSCharacter = Cast<APlayerCharacter>(OtherActor);
-	if (FPSCharacter && FPSCharacter->IsA(APlayerCharacter::StaticClass()))
+	if (!bHasActivated)
 	{
-		bHasActivated = true;
-		LoadNextStage();
+		APlayerCharacter* FPSCharacter = Cast<APlayerCharacter>(OtherActor);
+		if (FPSCharacter && FPSCharacter->IsA(APlayerCharacter::StaticClass()))
+		{
+			bHasActivated = true;
+			if (PortalSound)
+			{
+				UGameplayStatics::PlaySound2D(this, PortalSound);
+			}
+
+			FTimerHandle StageLoadTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				StageLoadTimerHandle,
+				this,
+				&AClearPortal::LoadNextStage,
+				2.3f,
+				false
+			);
+		}
 	}
 }
 

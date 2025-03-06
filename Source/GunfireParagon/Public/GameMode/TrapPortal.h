@@ -29,6 +29,8 @@ public:
 	UParticleSystemComponent* PortalEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal")
 	ETrapPortalTypes PortalType;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Portal")
+	USoundBase* PortalSound;
 
 	UFUNCTION()
 	void OnPortalOverlap(
@@ -40,5 +42,6 @@ public:
 		const FHitResult& SweepResult
 	);
 
-
+	void TravelToTravel();
+	void ReturnToStage();
 };
