@@ -44,7 +44,11 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay() - 초기 bIsDead 값: %s"), bIsDead ? TEXT("true") : TEXT("false"));
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->bShowMouseCursor = false;
+	}
 
 	if (GetMesh())
 	{
@@ -1011,7 +1015,7 @@ void APlayerCharacter::HandlePlayerDeath()
 
 	SwitchToDeathCamera();
 
-	EnableMouseControl();
+	EnableMouseControlForUI();
 }
 
 void APlayerCharacter::SwitchToDeathCamera()
@@ -1036,20 +1040,32 @@ void APlayerCharacter::SwitchToDeathCamera()
 	}
 }
 
-void APlayerCharacter::EnableMouseControl()
+void APlayerCharacter::EnableMouseControl(const FInputModeDataBase& InputMode)
 {
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		PlayerController->SetIgnoreMoveInput(true);
 		PlayerController->SetIgnoreLookInput(true);
-		
+
 		PlayerController->bShowMouseCursor = true;
-		PlayerController->SetInputMode(FInputModeUIOnly());
-		
-		UE_LOG(LogTemp, Warning, TEXT("마우스 UI 조작 활성화됨"));
+		PlayerController->SetInputMode(InputMode); 
 	}
 }
+
+
+void APlayerCharacter::EnableMouseControlForUI()
+{
+	FInputModeUIOnly InputMode; 
+	EnableMouseControl(InputMode);
+}
+
+
+void APlayerCharacter::EnableMouseControlForGame()
+{
+	FInputModeGameOnly InputMode;
+	EnableMouseControl(InputMode);
+}
+
 
 void APlayerCharacter::PlayReloadAnimation()
 {

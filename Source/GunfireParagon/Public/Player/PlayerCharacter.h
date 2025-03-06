@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
 #include "InputAction.h"
 #include "GameMode/FPSGameInstance.h"
@@ -64,7 +65,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void ReloadWeapon();
 	virtual void Jump() override;
-	void EnableMouseControl();
 	void PlayReloadAnimation();
 	
 
@@ -163,6 +163,7 @@ protected:
 	bool bCanReload = true;
 	FTimerHandle ReloadTimerHandle;
 	bool bIsFiring = false;
+	void EnableMouseControl(const FInputModeDataBase& InputMode);
 
 private:
 	void InitializeCharacter();
@@ -250,7 +251,8 @@ public:
 	ACGunBase* GetCurrentWeaponClass() { return CurrentWeapon;}
 	int32 GetCurrentWeaponSlot() { return CurrentWeaponSlot;}
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
-
+	void EnableMouseControlForUI();
+	void EnableMouseControlForGame();
 	void SetCurrentWeaponClass()
 	{
 		if (!IsValid(CurrentWeapon)) return;
