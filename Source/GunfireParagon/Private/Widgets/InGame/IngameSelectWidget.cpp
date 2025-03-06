@@ -74,7 +74,6 @@ ECardEffectType UIngameSelectWidget::RandCardEffect()
 	} while (UsedEffects.Contains(EffectType));
 
 	UsedEffects.Add(EffectType);
-	UE_LOG(LogTemp, Warning, TEXT("Effect Type Generated: %d"), (int32)EffectType);
 
 	return EffectType;
 }
@@ -82,13 +81,11 @@ ECardEffectType UIngameSelectWidget::RandCardEffect()
 ECardRarity UIngameSelectWidget::RandCardGrade()
 {
 	ECardRarity RandRarity = (ECardRarity)FMath::RandRange(0, (int32)(ECardRarity::LastIndex)-1);
-	UE_LOG(LogTemp, Warning, TEXT("Effect Type : %d"), (int32)RandRarity);
 	return RandRarity;
 }
 
 void UIngameSelectWidget::CloseWidget()
 {
-	UE_LOG(LogTemp, Warning, TEXT("CloseWidget Call Test"));
 	if (GetWorld())
 	{
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
