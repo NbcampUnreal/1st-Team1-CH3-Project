@@ -198,7 +198,7 @@ void ACGunBase::Fire()
 
 
 
-bool ACGunBase::CanFire() 
+bool ACGunBase::CanFire() const
 {
 	//bCanFire가 false면 발사 불가능 (GunDelay 동안 발사 막기)
 	if (!bCanFire)
@@ -223,10 +223,8 @@ void ACGunBase::SetIsFire()
 	bCanFire = true;
 }
 
-bool ACGunBase::IsAmmoEmpty() 
+bool ACGunBase::IsAmmoEmpty() const
 {
-	//테스트용 리로드
-	Reload();
 	return CurrentAmmo <= 0;
 }
 

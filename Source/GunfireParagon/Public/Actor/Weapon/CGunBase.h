@@ -55,13 +55,13 @@ protected:
 	virtual void BeginPlay() override;
 
 	//총기 딜레이에 따라 발사 가능 여부 확인
-	bool CanFire();
+	bool CanFire()const ;
 
 	//나중에 바인딩할때 마우스 떼면 그만 쏘도록
 	void StopFire();
 	void SetIsFire(); 
 	//탄창이 비었는지 확인
-	bool IsAmmoEmpty() ;
+	bool IsAmmoEmpty()const ;
 	void SwitchGunSound(EWeaponType WeaponClass);
 
 	
@@ -75,10 +75,10 @@ protected:
 public:
 	
 	UFUNCTION()
-	float GetCurrentAmmo() { return CurrentAmmo; }
+	float GetCurrentAmmo()const { return CurrentAmmo; }
 	
 	UFUNCTION()
-	float GetMaxAmmo() { return MaxAmmo; }
+	float GetMaxAmmo()const { return MaxAmmo; }
 	
 	UFUNCTION(BlueprintCallable)
 	void DisableWeaponShadows();
