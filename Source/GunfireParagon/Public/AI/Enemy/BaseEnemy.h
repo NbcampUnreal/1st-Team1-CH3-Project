@@ -77,7 +77,7 @@ protected:
 	USoundBase* DeathSound;
 
 	void PlayHitReaction();
-	void OnDeath();
+	virtual void OnDeath();
 	void ReturnToPool();
 
 	TArray<AActor*> AlreadyHitActors;

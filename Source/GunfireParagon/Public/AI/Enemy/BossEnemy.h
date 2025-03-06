@@ -32,6 +32,7 @@ protected:
 		FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
+	virtual void OnDeath() override;
 
 	UFUNCTION()
 	void FinishTeleport(UAnimMontage* Montage, bool bInterrupted);

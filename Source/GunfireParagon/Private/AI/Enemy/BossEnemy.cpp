@@ -3,6 +3,7 @@
 #include "AI/Projectile/FireballProjectile.h"
 #include "AI/Projectile/MeteorProjectile.h"
 #include "AIController.h"
+#include "GameMode/FPSGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Particles/ParticleSystem.h"
@@ -259,6 +260,18 @@ float ABossEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
     }
 
     return ActualDamage;
+}
+
+void ABossEnemy::OnDeath()
+{
+    if (bIsDead) return;
+    bIsDead = true;
+
+    AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (FPSGameMode)
+    {
+        FPSGameMode->EndGame(true);
+    }
 }
 
 void ABossEnemy::PerformMeleeAttack(const FVector& TargetLocation)
