@@ -37,6 +37,8 @@
 </div>
 
 ## GameMode
+<summary>GameMode UML Diagram</summary>  
+![GameModeUML](https://github.com/user-attachments/assets/4e7303c4-9e41-4588-89bf-7ade03a08a87)
 
 ## Player
 
