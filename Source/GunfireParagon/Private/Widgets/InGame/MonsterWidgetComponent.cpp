@@ -6,7 +6,7 @@
 #include "Kismet\GameplayStatics.h"
 #include "GameFramework\Actor.h"
 #include "GameFramework\Character.h"
-#include "AI\BaseEnemy.h"
+#include "AI\Enemy/BaseEnemy.h"
 
 UMonsterWidgetComponent::UMonsterWidgetComponent()
 {

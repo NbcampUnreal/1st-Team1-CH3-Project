@@ -13,7 +13,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Player/MyPlayerController.h"
 #include "Player/PlayerCharacter.h"
-#include "AI/BaseEnemy.h"
+#include "AI/Enemy/BaseEnemy.h"
 #include "Actor/Bullet/BulletBase.h"
 #include "Kismet/GameplayStatics.h"
 

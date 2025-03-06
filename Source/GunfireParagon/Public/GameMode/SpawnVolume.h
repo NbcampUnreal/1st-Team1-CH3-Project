@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "AIEnemySpawnRaw.h"
-#include "AI/BaseEnemy.h"
+#include "AI/Enemy/BaseEnemy.h"
 #include "SpawnVolume.generated.h"
 
 class UBoxComponent;

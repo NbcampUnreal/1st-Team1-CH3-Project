@@ -2,11 +2,9 @@
 
 #include "GameMode/AIObjectPool.h"
 #include "GameMode/SpawnVolume.h"
-#include "AI/BaseEnemy.h"
-#include "GameMode/SpawnVolume.h"
 #include "Engine/World.h"
-#include "AI/NormalMeleeEnemy.h"
-#include "AI/BaseEnemy.h"
+#include "AI/Enemy/BaseEnemy.h"
+#include "AI/Enemy/NormalMeleeEnemy.h"
 
 
 AAIObjectPool::AAIObjectPool()

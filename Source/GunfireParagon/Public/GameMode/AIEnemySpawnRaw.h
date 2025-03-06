@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "AI/BaseEnemy.h"
+#include "AI/Enemy/BaseEnemy.h"
 #include "AIEnemySpawnRaw.generated.h"
 
 USTRUCT(BlueprintType)
