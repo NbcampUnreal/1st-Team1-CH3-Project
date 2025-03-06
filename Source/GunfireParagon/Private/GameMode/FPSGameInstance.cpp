@@ -177,11 +177,17 @@ void UFPSGameInstance::SaveWeaponStats(APlayerCharacter* Player)
 		if (Player->Inventory[0])
 		{
 			PrimaryWeaponClass = Player->Inventory[0]->GetClass();
+			PrimaryGunDamage = Player->Inventory[0]->GetGunDamage();
+			PrimaryDelay = Player->Inventory[0]->GetGunDelay();
+			PrimaryAmmo = Player->Inventory[0]->GetMaxAmmo();
 		}
 
 		if (Player->Inventory[1])
 		{
 			SecondaryWeaponClass = Player->Inventory[1]->GetClass();
+			SecondGunDamage = Player->Inventory[1]->GetGunDamage();
+			SecondDelay = Player->Inventory[1]->GetGunDelay();
+			SecondAmmo = Player->Inventory[1]->GetMaxAmmo();
 		}
 	}
 }
@@ -202,6 +208,9 @@ void UFPSGameInstance::LoadWeaponStats(APlayerCharacter* Player)
 			Player->CurrentWeapon = NewPrimaryWeapon;
 			Player->CurrentWeaponSlot = 0;
 			Player->AttachWeaponToHand(NewPrimaryWeapon, 0);
+			Player->Inventory[0]->SetGunDamage(PrimaryGunDamage);
+			Player->Inventory[0]->SetGunDelay(PrimaryDelay);
+			Player->Inventory[0]->SetMaxAmmo(PrimaryAmmo);
 		}
 	}
 
@@ -211,6 +220,9 @@ void UFPSGameInstance::LoadWeaponStats(APlayerCharacter* Player)
 		if (NewSecondaryWeapon)
 		{
 			Player->Inventory[1] = NewSecondaryWeapon;
+			Player->Inventory[1]->SetGunDamage(SecondGunDamage);
+			Player->Inventory[1]->SetGunDelay(SecondDelay);
+			Player->Inventory[1]->SetMaxAmmo(SecondAmmo);
 		}
 	}
 }

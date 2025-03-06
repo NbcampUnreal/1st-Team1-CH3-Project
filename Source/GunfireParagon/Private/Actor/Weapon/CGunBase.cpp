@@ -105,13 +105,6 @@ void ACGunBase::BeginPlay()
 		);
 	}
 	SetIsDrop(false);
-
-	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
-	if (GameInstance)
-	{
-		Damage = GameInstance->GunDamage;
-		GunDelay = GameInstance->GunDelay;
-	}
 }
 
 void ACGunBase::SetIsDrop(bool isDrop)

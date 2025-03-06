@@ -35,6 +35,7 @@ public:
 	TSubclassOf<ACGunBase> PrimaryWeaponClass;
 	TSubclassOf<ACGunBase> SecondaryWeaponClass;
 	UIngameMainWidget* PlayerMainHud;
+	
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	int32 PlayerLevel;
@@ -55,9 +56,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	float NormalSpeed = 1000.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
-	float GunDamage = 10;
+	float PrimaryGunDamage = 10;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
-	float GunDelay = 0.2f;
+	float SecondGunDamage = 10;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
+	float PrimaryDelay = 0.2f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
+	float SecondDelay = 0.2f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
+	int32 PrimaryAmmo = 40;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
+	int32 SecondAmmo = 40;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
 	int32 CurrentStageIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")

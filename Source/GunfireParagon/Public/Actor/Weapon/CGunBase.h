@@ -150,12 +150,10 @@ protected:
 
 public:
 	float GetGunDelay()const { return GunDelay; }
-	void SetGunDelay(float amount){ GunDelay = amount;};
+	void SetGunDelay(float amount){ GunDelay = amount; };
 	float GetGunDamage()const { return Damage; }
-	void SetGunDamage(float amount){ Damage = amount;};
+	void SetGunDamage(float amount){ Damage = amount; };
+	void SetMaxAmmo(int32 amount) { MaxAmmo = amount; };
 
 
-
-
-	
 };
