@@ -29,7 +29,7 @@ void ADropManager::BeginPlay()
 FWeaponData* ADropManager::GetRandomWeaponData()
 {
     if (!DataTables)
-    {
+    {   
         UE_LOG(LogTemp, Error, TEXT("DropManager: DataTables is NULL!"));
         return nullptr;
     }
@@ -86,6 +86,8 @@ void ADropManager::RandomItemDrop(FVector SpawnLocation)
     }
 
     SpawnedGun->WeaponDataKey = WeaponData->Key;
+    SpawnedGun->SetWeaponData(WeaponData->Key);
+    SpawnedGun->SetIsDrop(true);
     
     UStaticMeshComponent* GunMeshComp = Cast<UStaticMeshComponent>(SpawnedGun->GetComponentByClass(UStaticMeshComponent::StaticClass()));
     if (GunMeshComp)

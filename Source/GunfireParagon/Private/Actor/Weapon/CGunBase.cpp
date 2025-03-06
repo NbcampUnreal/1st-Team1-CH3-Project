@@ -56,8 +56,8 @@ void ACGunBase::BeginPlay()
 	{
 		BulletPool = GameMode->GetBulletPool();
 	}
-	
-	AFPSDataTables* DataTables = Cast<AFPSDataTables>(UGameplayStatics::GetActorOfClass(GetWorld(), AFPSDataTables::StaticClass()));
+
+	DataTables = Cast<AFPSDataTables>(UGameplayStatics::GetActorOfClass(GetWorld(), AFPSDataTables::StaticClass()));
 
 	if (!DataTables)
 	{
@@ -100,7 +100,7 @@ void ACGunBase::BeginPlay()
 			true
 		);
 	}
-	SetIsDrop(true);
+	SetIsDrop(false);
 }
 
 void ACGunBase::SetIsDrop(bool isDrop)
@@ -108,6 +108,18 @@ void ACGunBase::SetIsDrop(bool isDrop)
 	bISDrop = isDrop;
 	if (bISDrop)
 	{
+		if (DropEffect)
+		{
+			DropEffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+				DropEffect,
+				WeaponMesh,
+				NAME_None,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::SnapToTarget,
+				true
+			);
+		}
 		if (DropEffectComp)
 		{
 			DropEffectComp->Activate(isDrop);
@@ -284,6 +296,41 @@ void ACGunBase::Reload()
 
 	// 탄창을 가득 채움
 	CurrentAmmo = MaxAmmo;
+}
+
+void ACGunBase::SetWeaponData(float Weaponkey)
+{
+	if (!DataTables)
+	{
+		DataTables = GetWorld()->SpawnActor<AFPSDataTables>();
+	}
+	if (DataTables)
+	{
+		FWeaponData* WeaponData = DataTables->GetWeaponDataByKey(WeaponDataKey);
+		if (WeaponData)
+		{
+			Damage = WeaponData->AttackPower;
+			GunDelay = WeaponData->GunDelay;
+			MaxAmmo = WeaponData->MaxAmmo;
+			GunSpeed = WeaponData->AttackSpeed;
+			CurrentAmmo = MaxAmmo;
+			DropEffect = Cast<UNiagaraSystem>(WeaponData->DropEffectPath.TryLoad());
+			
+
+			if (WeaponData->DropEffectPath.IsValid())
+			{
+				FString AssetPath = WeaponData->DropEffectPath.ToString();
+
+				UObject* LoadedObject = StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr, *AssetPath);
+				if (LoadedObject)
+				{
+					DropEffect = Cast<UNiagaraSystem>(LoadedObject);
+				}
+			}
+		}
+	}
+	
+	SetIsDrop(bISDrop);
 }
 
 FVector ACGunBase::GetAimDirection() const

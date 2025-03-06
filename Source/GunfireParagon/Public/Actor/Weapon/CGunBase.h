@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FPSDataTables.h"
 #include "GameFramework/Actor.h"
 #include "Actor/Bullet/BulletBase.h"
 #include "NiagaraComponent.h"
@@ -37,6 +38,10 @@ public:
 	USkeletalMeshComponent* WeaponMesh;
 	//탄창을 재장전
 	virtual void Reload();
+
+	AFPSDataTables* DataTables;
+	// 무기데이터 키값을 받아서 데이터 재정립하는 함수
+	void SetWeaponData(float Weaponkey);
 
 	bool bISDrop = false;
 	
