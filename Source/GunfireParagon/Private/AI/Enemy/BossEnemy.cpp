@@ -267,6 +267,14 @@ void ABossEnemy::OnDeath()
     if (bIsDead) return;
     bIsDead = true;
 
+    SetActorTickEnabled(false);
+    SetDeathState();
+
+    if (DeathSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+    }
+
     AFPSGameMode* FPSGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
     if (FPSGameMode)
     {
