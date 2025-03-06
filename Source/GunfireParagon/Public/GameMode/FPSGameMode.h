@@ -109,7 +109,9 @@ public:
 	bool bPortalSpawned;
 
 	// ---------------------------------
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	UIngameMainWidget* PlayerMainWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> EndingWidgetClass;
 	
