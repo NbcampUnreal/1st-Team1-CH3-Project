@@ -27,7 +27,8 @@ class GUNFIREPARAGON_API ACGunBase : public AActor
 	
 public:	
 	ACGunBase();
-
+	~ACGunBase();
+	
 	virtual void Fire();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GunMesh")
 	UStaticMeshComponent* GunMesh;
@@ -50,6 +51,10 @@ public:
 
 	void SetIsDrop(bool isDrop);
 
+	
+	//총기 딜레이에 따라 발사 가능 여부 확인
+	bool CanFire()const ;
+
 protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -59,8 +64,6 @@ protected:
 protected:
 	virtual void BeginPlay() override;
 
-	//총기 딜레이에 따라 발사 가능 여부 확인
-	bool CanFire()const ;
 
 	//나중에 바인딩할때 마우스 떼면 그만 쏘도록
 	void StopFire();

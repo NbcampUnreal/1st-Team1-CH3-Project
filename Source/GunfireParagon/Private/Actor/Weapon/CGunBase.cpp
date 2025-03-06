@@ -8,6 +8,7 @@
 #include "FPSDataTables.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+#include "GameMode/FPSGameInstance.h"
 
 
 ACGunBase::ACGunBase()
@@ -38,7 +39,10 @@ ACGunBase::ACGunBase()
 	
 }
 
-
+ACGunBase::~ACGunBase()
+{
+	
+}
 
 
 void ACGunBase::BeginPlay()
@@ -101,6 +105,13 @@ void ACGunBase::BeginPlay()
 		);
 	}
 	SetIsDrop(false);
+
+	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
+	if (GameInstance)
+	{
+		Damage = GameInstance->GunDamage;
+		GunDelay = GameInstance->GunDelay;
+	}
 }
 
 void ACGunBase::SetIsDrop(bool isDrop)
