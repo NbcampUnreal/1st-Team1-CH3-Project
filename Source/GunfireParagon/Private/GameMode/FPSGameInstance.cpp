@@ -9,6 +9,7 @@
 #include "AI/Enemy/NormalRangeEnemy.h"
 #include "Player/MyPlayerController.h"
 #include "Player/PlayerCharacter.h"
+#include "Actor/Weapon/CGunBase.h"
 #include "Kismet/GameplayStatics.h"
 
 UFPSGameInstance::UFPSGameInstance()
@@ -113,6 +114,10 @@ void UFPSGameInstance::SavePlayerStats(ACharacter* PlayerCharacter)
 		{
 			MaxHP = Char->GetMaxHealth();
 			MaxShield = Char->GetMaxShield();
+			ShieldRegenDelay = Char->GetShieldRegenDelay();
+			ShieldRegenRate = Char->GetShieldRegenRate();
+			NormalSpeed = Char->GetNormalSpeed();
+			DashCoolDown = Char->GetDashCoolDown();
 		}
 	}
 }
@@ -134,6 +139,10 @@ void UFPSGameInstance::LoadPlayerStats()
 				{
 					Char->SetMaxHealth(MaxHP);
 					Char->SetMaxShield(MaxShield);
+					Char->SetShieldRegenDelay(ShieldRegenDelay);
+					Char->SetShieldRegenRate(ShieldRegenRate);
+					Char->SetNormalSpeed(NormalSpeed);
+					Char->SetDashCoolDown(DashCoolDown);
 				}
 			}
 		}

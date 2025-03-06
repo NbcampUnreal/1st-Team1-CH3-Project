@@ -265,16 +265,6 @@ void AFPSGameMode::OnPlayerDead()
 
 void AFPSGameMode::OnStageClear()
 {
-	/*
-	if (CardSelectionWidgetClass)
-	{
-		UIngameSelectWidget* CardSelectionWidget = CreateWidget<UIngameSelectWidget>(GetWorld(), CardSelectionWidgetClass);
-		if (CardSelectionWidget)
-		{
-			CardSelectionWidget->AddToViewport();
-		}
-	}
-	*/
 	if (bPortalSpawned) return;
 	
 	SpawnPortal();
@@ -369,7 +359,7 @@ void AFPSGameMode::ReturnToPreviousLevel()
 }
 
 void AFPSGameMode::SpawnTrapPortals()
-{
+{	
 	UFPSGameInstance* FPSGameInstnace = Cast<UFPSGameInstance>(UGameplayStatics::GetGameInstance(this));
 	if (!FPSGameInstnace) return;
 
@@ -592,15 +582,6 @@ void AFPSGameMode::InitializeDropManager()
 
 void AFPSGameMode::PlayMainHudShow()
 {
-	//if (PlayerMainHudClass)
-	//{
-	//	UIngameMainWidget* PlayerMainWidget = CreateWidget<UIngameMainWidget>(GetWorld(), PlayerMainHudClass);
-	//	if (PlayerMainWidget)
-	//	{
-	//		PlayerMainWidget->AddToViewport();
-	//	}
-	//}
-
 	if (PlayerMainHudClass)
 	{
 		PlayerMainWidget = CreateWidget<UIngameMainWidget>(GetWorld(), PlayerMainHudClass);
@@ -656,16 +637,6 @@ void AFPSGameMode::EndGame(bool bPlayWin)
 	if (bPlayWin)
 	{
 		PlayEndingCredit();
-		//UE_LOG(LogTemp, Warning, TEXT("Game Clear!"));
-		//
-		//FTimerHandle EndTimerHandle;
-		//GetWorldTimerManager().SetTimer(
-		//	EndTimerHandle,
-		//	this,
-		//	&AFPSGameMode::ReturnToMainMenu,
-		//	5.0f,
-		//	false
-		//);
 	}
 	else
 	{

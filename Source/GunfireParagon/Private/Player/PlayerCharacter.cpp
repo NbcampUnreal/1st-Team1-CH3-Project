@@ -73,9 +73,6 @@ void APlayerCharacter::BeginPlay()
 
 	SetPlayerStatus(MaxHealth, MaxShield);
 
-	NormalSpeed = 1000.0f;
-	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
-
 	UFPSGameInstance* GameInstance = Cast<UFPSGameInstance>(GetGameInstance());
 	if (GameInstance)
 	{
@@ -83,6 +80,7 @@ void APlayerCharacter::BeginPlay()
 		GameInstance->LoadWeaponStats(this);
 		GameInstance->LoadMouseSensitivity();
 	}
+	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 
 	if (Inventory[0]==nullptr)
 	{

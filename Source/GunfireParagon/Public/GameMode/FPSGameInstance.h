@@ -46,6 +46,18 @@ public:
 	float MaxShield = 50;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
 	float MaxHP = 100;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float ShieldRegenRate = 5.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float ShieldRegenDelay = 5.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float DashCoolDown = 1.5f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float NormalSpeed = 1000.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
+	float GunDamage = 10;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun Status")
+	float GunDelay = 0.2f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage")
 	int32 CurrentStageIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")

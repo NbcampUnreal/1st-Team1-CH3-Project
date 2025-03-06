@@ -91,6 +91,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float ShieldRegenDelay = 5.0f;
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
@@ -228,8 +229,16 @@ public:
 	float GetMaxHealth() { return MaxHealth; }
 	float GetCurrentShield() { return CurrentShield; }
 	float GetMaxShield() { return MaxShield; }
+	float GetShieldRegenDelay() { return ShieldRegenDelay; }
+	float GetShieldRegenRate() { return ShieldRegenRate; }
+	float GetNormalSpeed() { return NormalSpeed; }
+	float GetDashCoolDown() { return DashCoolDown; }
 	void SetMaxHealth(float amount) { MaxHealth = amount;}
 	void SetMaxShield(float amount) { MaxShield = amount;}
+	void SetShieldRegenDelay(float amount) { ShieldRegenDelay = amount; }
+	void SetShieldRegenRate(float amount) { ShieldRegenRate = amount; }
+	void SetNormalSpeed(float amount) { NormalSpeed = amount; }
+	void SetDashCoolDown(float amount) { DashCoolDown = amount; }
 	ACGunBase* GetCurrentWeaponClass() { return CurrentWeapon;}
 	int32 GetCurrentWeaponSlot() { return CurrentWeaponSlot;}
 	void SetAmmoState(const float& UpdateCurrentAmmo, const float& UpdateMaxAmmo);
