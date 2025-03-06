@@ -416,10 +416,10 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 	if (!CurrentWeapon)
 		return;
 
-	//if (!CurrentWeapon->GetCanFire()) //재장전 중이면 발사 금지
-	//{
-	//	return;
-	//}
+	if (!CurrentWeapon->GetCanFire()) //재장전 중이면 발사 금지
+	{
+		return;
+	}
 
 	CurrentWeapon->Fire();
 	SetAmmoState(CurrentWeapon->GetCurrentAmmo(), CurrentWeapon->GetMaxAmmo());
