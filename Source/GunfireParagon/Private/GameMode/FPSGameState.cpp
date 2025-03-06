@@ -23,7 +23,6 @@ void AFPSGameState::OnEnemyKilled()
 		{
 			if (FPSGameMode)
 			{
-				FPSGameMode->ShowCardSelectionUI();
 				FPSGameMode->OnStageClear();	
 			}
 		}

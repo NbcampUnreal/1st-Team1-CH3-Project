@@ -258,6 +258,7 @@ void UFPSGameInstance::LoadMouseSensitivity()
 void UFPSGameInstance::AddExperiencePoint(float ExpAmount)
 {
 	ExperiencePoints += ExpAmount;
+	UE_LOG(LogTemp, Warning, TEXT("Player Level: %d, Exp: %f / %f"), PlayerLevel, ExperiencePoints, MaxExp);
 
 	if (ExperiencePoints >= MaxExp)
 	{
@@ -268,7 +269,6 @@ void UFPSGameInstance::AddExperiencePoint(float ExpAmount)
 			if (CardSelectionWidget)
 			{
 				CardSelectionWidget->AddToViewport();
-				ExperiencePoints = 0;
 				return;
 			}
 		}
@@ -278,8 +278,13 @@ void UFPSGameInstance::AddExperiencePoint(float ExpAmount)
 
 void UFPSGameInstance::PlayerLevelUp()
 {
-	PlayerLevel += FMath::FloorToInt32(ExperiencePoints / MaxExp);
-	ExperiencePoints = FMath::Fmod(ExperiencePoints, MaxExp);
+	int32 LevelsGained = FMath::FloorToInt32(ExperiencePoints / MaxExp);
+
+	if (LevelsGained > 0) 
+	{
+		PlayerLevel += LevelsGained;
+		ExperiencePoints = ExperiencePoints - (LevelsGained * MaxExp); 
+	}
 
 	MaxHP = 100 + (PlayerLevel * 10);
 	MaxShield = 50 + (PlayerLevel * 5);
