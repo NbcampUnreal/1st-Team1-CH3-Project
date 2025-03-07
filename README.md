@@ -122,7 +122,7 @@
       | -- AI
         | -- AIController
           | -- BaseEnemyAIController // Perception, Pov, OnPossess등을 사용한 AI 행동 제어 관련 컨트롤러
-          | -- BossAIController // BossEnemy만의 특정로직을 추가한 AI 행동 제어 관련 컨트롤러
+          | -- BossAIController // BossEnemy만의 특정 로직을 추가한 AI 행동 제어 관련 컨트롤러
         | -- Enemy
           | -- BaseEnemy // AI관련 공통 로직을 구현한 상위 클래스
           | -- BossEnemy // BaseEnemy 기반의 하위 클래스, 보스 AI Character, 게임 클리어 조건
@@ -131,12 +131,12 @@
           | -- NormalMeleeEnemy // 근거리 공격 AI Character
           | -- NormalRangeEnemy // 원거리 공격 AI Character
         | -- AnimNotify
-          | -- AnimNotify_... // AI에게 적용할 ABP 클래스 내 몽타주와 연동한 Notify 관련 설정
+          | -- AnimNotify_... // AI의 공격 관련 애니메이션 몽타주와 연동한 Notify 관련 설정
         | -- BT
-          | -- BTT_... // 
-          | -- BTD_... // BehaviorTree를 사용한 AI 행동 설정에 대한 C++ 기반의 클래스 구현
+          | -- BTT_... // BehaviorTree에 사용할 C++ 기반의 커스텀 Task 클래스
+          | -- BTD_... // Task 노드 실행 조건을 결정하는 C++ 기반의 Decorator 클래스
         | -- Projectile
-          | -- Projectiles... // 보스 및 원거리 AI들에 대한 원거리 공격 Projectile 클래스 관리
+          | -- Projectiles... // 보스 및 원거리 공격 AI들이 사용할 Projectile 클래스
 
     | -- Content
       | -- Blueprint
@@ -144,15 +144,16 @@
           | -- Enemy
             | -- BossEnemy
               | -- AI
-                | -- EQS // 언리얼 엔진 내 EQS시스템을 활용한 텔레포트 기능 구현
+                | -- EQS // 언리얼 엔진 내 EQS 시스템을 활용해 주변 환경 탐색 후 조건에 맞는 최적의 데이터 생성
         | -- Cinematic
           | -- Trigger Volume를 활용한 시네마틱 연출 구현
 
 ### AI
  - Enemy
-   - BB/BT 내 시퀀스에 설정된 행동을 실행하는 로직 구현
-   - ABP, Montage Notify를 활용한 애니메이션 로직 구현
-   - Aim Offset를 사용한 특정 Bone 이내 Z축 Rotation을 변경, Range Attack 구현
+   - BB/BT를 사용해, 현재 AI의 상태에 적합한 시퀀스를 선택해 자연스러운 행동을 실행하는 로직 구현
+   - ABP, Montage Notify, 델리게이트를 사용해 애니메이션과 실제 공격 로직 연동
+   - Aim Offset를 사용해 특정 Bone을 따라 Z축 Rotation을 변경, 더 정밀한 AI의 Range Attack 구현
+   - Player Character의 현재 이동 방향과 속도를 고려한 예측 사격 구현
  - Cinematic
    - Trigger Volume 및 Level Blueprint를 활용한 시네마틱 연출 구현 
               
