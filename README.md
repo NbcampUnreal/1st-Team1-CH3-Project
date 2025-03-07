@@ -42,12 +42,12 @@
   
     | -- Source
       | -- Player
-        | -- PlayerCharacter.h
-        | -- MyPlayerController.h
+        | -- PlayerCharacter.h // 플레이어 캐릭터의 상태 및 무기 장착, 입력 처리
+        | -- MyPlayerController.h // 플레이어 입력 및 마우스 감도 조정, UI 모드 전환 관리
 
     | -- Content
       | -- Blueprnits
-        | -- ABP_PlayerCharacter
+        | -- ABP_PlayerCharacter // 플레이어 애니메이션 블루프린트, 1인칭 및 3인칭 애니메이션 관리
 
 ### Player
 - C++ 기반의 플레이어 로직 설계
