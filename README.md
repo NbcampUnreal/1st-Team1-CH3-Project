@@ -30,11 +30,11 @@
 
 ### Desctiption Part / Email or Blog Link <br>
 - Single Player FPS Rogue-Like
-- Player   : 이찬민 / https://velog.io/@chanmin60/posts <br>
-- Actor    : 강창훈 / rkdckdgns97@gmail.com <br>
-- GameMode : 정혜창 / https://velog.io/@hch9097/posts <br>
-- AI       : 김동현 / https://dong-grae.tistory.com/ <br>
-- UI       : 김건우 / https://dong-grae.tistory.com/ <br>
+- Player   : 이찬민 / [개발블로그](https://velog.io/@chanmin60/posts) <br>
+- Actor    : 강창훈 / [이메일 주소](rkdckdgns97@gmail.com) <br>
+- GameMode : 정혜창 / [개발블로그](https://velog.io/@hch9097/posts) <br>
+- AI       : 김동현 / [개발블로그](https://dong-grae.tistory.com/) <br>
+- UI       : 김건우 / [개발블로그](https://mynameiskgws.tistory.com/) <br>
 
 ## Project Part Directory And Main Features <br>
 <details>
