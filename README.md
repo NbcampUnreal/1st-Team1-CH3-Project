@@ -113,12 +113,15 @@
 ### GameMode
  - EnemyObjectPool
    - ObjectPooling 및 DataTable을 사용한 재사용성 및 최적화 기반의 설계
+   - SpawnVolum을 활용하여 안전한 위치 생성, 에디터내 스폰 위치 변경
  - GameMode && GameInstance
    - 레벨 전환 시 런타임 환경에서 동적으로 생성하는 기능 구현 및 게임 진행시 영구적 데이터 관리
    - 공통 로직들을 함수화한 객체지향적 설계
    - 런타임 내 전체적인 GameFlow 관리
  - Portal
    - Overlap, Timer를 사용한 레벨 전환 설계
+   - TargetPoint를 활용하여 에디터내 편리한 설계
+   - EnumClass를 활용한 TrapPortal 클래스 재사용, 코드 간결화
 </details>
 
 <details>
