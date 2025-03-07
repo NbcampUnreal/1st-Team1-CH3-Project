@@ -14,15 +14,188 @@
 
 <br>
 
-## 프로젝트 소개
-프로젝트 이름 <br>
-프로젝트 소개 관련 내용 <br>
-주요 기능 요약 Img <br>
+## 기술 스택
+[![My Skills](https://skillicons.dev/icons?i=cpp,visualstudio,git,github,unreal,notion&theme=light)](https://skillicons.dev)
 
 <br>
 
-## 기술 스택
-[![My Skills](https://skillicons.dev/icons?i=cpp,visualstudio,git,github,unreal,notion&theme=light)](https://skillicons.dev)
+## 프로젝트 소개
+### Project : Gunfire Paragon <br>
+### Duration : 2025.02.17 ~ 2025.03.07 <br>
+### Project Convention <br>
+- Code   : PascalCase
+- Git    : Rebase And Merge
+- Directory && Commit && Unreal
+- Wiki https://github.com/NbcampUnreal/1st-Team1-CH3-Project/wiki
+
+### Desctiption Part / Email or Blog Link <br>
+- Single Player FPS Rogue-Like
+- Player   : 이찬민 / https://velog.io/@chanmin60/posts <br>
+- Actor    : 강창훈 / rkdckdgns97@gmail.com <br>
+- GameMode : 정혜창 / https://velog.io/@hch9097/posts <br>
+- AI       : 김동현 / https://dong-grae.tistory.com/ <br>
+- UI       : 김건우 / https://dong-grae.tistory.com/ <br>
+
+## Project Part Directory And Main Features <br>
+<details>
+  <summary> Player </summary>
+  
+    | -- Source
+      | -- Player
+        | -- PlayerCharacter.h
+        | -- MyPlayerController.h
+
+    | -- Content
+      | -- Blueprnits
+        | -- ABP_PlayerCharacter
+
+### Player
+- C++ 기반의 플레이어 로직 설계
+  - Enhanced Input System을 사용한 입력 액션
+  - CharacterMovement Component을 사용한 캐릭터 로직 설계
+  - Tick을 사용하지 않은 이벤트 기반의 플레이어 로직 구현
+  - GameInstance와 연동한 레벨 전환시 플레이어 정보 저장/불러오기 기능
+
+</details>
+
+<details>
+  <summary> Actor </summary>
+
+    | -- Source
+      | -- Actor
+        | -- BulletPool // ObjectPooling 기법을 사용하여 BulletBase Class들을 재사용하는 최적화 구현
+        | -- Bullet
+          | -- BulletBase // Projectile 공통적인 기능을 구현한 AActor를 상속한 상위 클래스
+          | -- BombBullet // Overlap시 범위 공격을 가하는 Bullet
+          | -- NormalBullet // 기본적인 Bullet
+          | -- PierceBullet // 특정 횟수만큼 Monster를 관통하는 Bullet
+        | -- Trap
+          | -- TrapBase // 함정 활성화, 충돌, 데미지 등의 공통 로직을 구현한 클래스
+          | -- SpikeTrap // 특정 시간마다 돌출되는 바닥 설치형 함정
+          | -- RollingTrap // 특정 시간마다 바닥으로 굴러오는 함정
+          | -- ArrowTrap // MoveToActor를 활용한 유도형 함정
+          | -- MovingSpotLight // 플레이어를 따라다니는 스포트라이트
+          | -- SharkSpawner // Arrow형 Trap을 최적화를 위해 구현한 스포너
+        | -- Weapon
+          | -- CGunBase // Fire, Ovelap, Speed 무기 공통기능을 구현한 상위 클래스
+          | -- Gun_Rifle // NoramlBullet를 발사하는 무기
+          | -- Gun_Rocket // BombBullet를 발사하는 무기
+          | -- Gun_Shotgun // NormalBullet를 동시에 Pellets수만큼 발사하는 무기
+          | -- Gun_Sniper // PierceBullet를 발사하는 무기
+
+### Actor 
+ - BulletPool
+   - ObjectPooling 기법을 사용한 Bullet 클래스 관련 재사용성 중심의 최적화 설계
+ - Bullet && Weapon && Trap
+   - 객체지향의 특징 다형성 및 추상화를 통한 높은응집도, 낮은 결합성, 확장성 향상
+          
+</details>
+
+<details>
+  <summary> GameMode </summary>
+
+    | -- Source
+      | -- GameMode
+        | -- FPSGameMode  // 레벨 전환시마다 실행되는 로직 관리
+        | -- FPSGameInstance  // 게임 종료시까지 유지되어야하는 데이터 관리
+        | -- AIEnemySpawnObjectPool // ObjectPooling 기법을 사용한 AI Sapwn 재사용성 및 최적화 설계
+        | -- SpawnVolume // WeaponDrop, EnemySpawn을 담당하는 C++ 기반의 스폰 불륨
+        | -- TrapPortal  // 함정반 포탈 관련 클래스
+        | -- ClearPortal // 클리어 포탈 관련 클래스
+        | -- DataTables   // 레벨 전환시마다 생성되는 Enemy, Instance에 저장할 데이터등 SRP를 지향한 데이터테이블
+
+### GameMode
+ - EnemyObjectPool
+   - ObjectPooling 및 DataTable을 사용한 재사용성 및 최적화 기반의 설계
+ - GameMode && GameInstance
+   - 레벨 전환 시 런타임 환경에서 동적으로 생성하는 기능 구현 및 게임 진행시 영구적 데이터 관리
+   - 공통 로직들을 함수화한 객체지향적 설계
+   - 런타임 내 전체적인 GameFlow 관리
+ - Portal
+   - Overlap, Timer를 사용한 레벨 전환 설계
+</details>
+
+<details>
+  <summary> AI </summary>
+
+    | -- Source
+      | -- AI
+        | -- AIController
+          | -- BaseEnemyAIController // Perception, Pov, OnPossess등을 사용한 AI 행동 제어 관련 컨트롤러
+          | -- BossAIController // BossEnemy만의 특정로직을 추가한 AI 행동 제어 관련 컨트롤러
+        | -- Enemy
+          | -- BaseEnemy // AI관련 공통 로직을 구현한 상위 클래스
+          | -- BossEnemy // BaseEnemy 기반의 하위 클래스, 보스 AI Character, 게임 클리어 조건
+          | -- EliteMeleeEnemy // 특정 레벨마다 등장하는 근거리 공격 AI Character
+          | -- EliteRangeEnemy // 특정 레벨마다 등장하는 원거리 공격 AI Character
+          | -- NormalMeleeEnemy // 근거리 공격 AI Character
+          | -- NormalRangeEnemy // 원거리 공격 AI Character
+        | -- AnimNotify
+          | -- AnimNotify_... // AI에게 적용할 ABP 클래스 내 몽타주와 연동한 Notify 관련 설정
+        | -- BT
+          | -- BTT_... // 
+          | -- BTD_... // BehaviorTree를 사용한 AI 행동 설정에 대한 C++ 기반의 클래스 구현
+        | -- Projectile
+          | -- Projectiles... // 보스 및 원거리 AI들에 대한 원거리 공격 Projectile 클래스 관리
+
+    | -- Content
+      | -- Blueprint
+        | -- AI
+          | -- Enemy
+            | -- BossEnemy
+              | -- AI
+                | -- EQS // 언리얼 엔진 내 EQS시스템을 활용한 텔레포트 기능 구현
+        | -- Cinematic
+          | -- Trigger Volume를 활용한 시네마틱 연출 구현
+
+### AI
+ - Enemy
+   - BB/BT 내 시퀀스에 설정된 행동을 실행하는 로직 구현
+   - ABP, Montage Notify를 활용한 애니메이션 로직 구현
+   - Aim Offset를 사용한 특정 Bone 이내 Z축 Rotation을 변경, Range Attack 구현
+ - Cinematic
+   - Trigger Volume 및 Level Blueprint를 활용한 시네마틱 연출 구현 
+              
+</details>
+
+<details>
+  <summary> UI </summary>
+
+    | -- Source
+      | -- Widgets
+        | -- DataAssets
+          | -- DataAsset/DataTable // DA/DT를 활용한 데이터 관리, SRP 원칙을 지향한 각각의 데이터 분리 및 불필요한 메모리 할당 방지
+        | -- InGame
+          | -- IngameMainWidget // MVVM패턴 기반의 VM을 담당하는 위젯 클래스. 델리게이트 기반의 이벤트 수신, View에게 데이터 전달
+          | -- IngameMiniampWidget // 미니맵 관련 View 위젯
+          | -- IngameMiniampIcon // 미니맵에 렌더링할 Icon관련 위젯
+          | -- IngamePlayerStatus // 플레이어 체력, 실드, 텍스처등 관련된 View 위젯
+          | -- IngameWeaponWidget // 장착중인 무기 관련 View 위젯
+          | -- IngameCrossHairs // 플레이어 조준점 및 히트마커 관련 View 위젯
+          | -- IngameTargetHUD // WidgetComponent에게 전송받은 데이터를 사용한 View 위젯. Enemy의 체력 관련 담당 위젯
+          | -- IngameSelectWidget // SelectObjectBaseWidget 기반의 클래스들을 관리하는 VM 위젯 클래스
+          | -- SelectObjectBaseWidget // 레벨업/레벨 클리어/상점 방문 등 공통 로직 및 프로퍼티들을 설정한 상위 클래스
+          | -- CardWidget // 레벨업/레벨 클리어 경우 보여줄 능력치 강화 관련 위젯
+        | -- Lobby
+          | -- LobbyWidget // NativeOnKeyDown을 활용한 PressAnyKey 기능 구현, GameMode와 연동한 게임 시작시 레벨 변경 관리
+        | -- Utility
+          | -- MinimapTracker   // ActorComponent를 활용한 월드 배치 Monster 3D좌표를 Widget에게 전송하는 컴포넌트
+          | -- MonsterWidgetComponent  // WidgetComponent를 활용한 Enemy의 현재 상태를 보여주는 HUD 관련 MVC기반의 Controller
+
+    | -- Plugin
+      | -- ASync Loading Screen Plugin
+        | -- 비동기 로딩 스크린방식의 플러그인을 활용한 비동기 로딩 연출
+        | -- 인트로 영상 기능 추가
+
+### UI
+ - UI
+   - GameMode/Instance등과 유연한 연동을 하기위한 UUserWidget 기반의 C++ 생성, WBP 디자이너탭을 활용한 디자인
+   - MVVM,MVC 패턴을 적용한 낮은결합성 및 확장성 보장
+   - 객체지향 추상화 및 다형성을 적용한 특정 클래스 구조 설계
+   - 특정 조건에 연출되는 2D Animation 구현
+   - 델리게이트를 사용한 이벤트 기반의 로직, 옵저버 패턴 적용 및 최적화 설계
+</details>
+
 
 <br>
 
