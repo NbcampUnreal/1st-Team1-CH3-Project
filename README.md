@@ -106,10 +106,10 @@
           | -- TrapPortalType // TrapPortalPoint 의 Type을 지정해주는 EnumClass
         | -- ClearPortal // 클리어 포탈 관련 클래스
           | -- ClearPortalPoint // ClearPortal의 위치 생성기
-      | -- DataTables   // 레벨 전환시마다 생성되는 Enemy, Instance에 저장할 데이터등 SRP를 지향한 데이터테이블
-        | -- InitializeTable // ObjectPooling Initialize 를 위한 DataTable
-        | -- GetPoolForStageTable // Satge마다 적 종류, 개체수를 저장한 DataTable
-        | -- CardDataTable // 패시브카드의 타입, 레어도, 적용값을 저장한 DataTable
+        | -- DataTables   // 레벨 전환시마다 생성되는 Enemy, Instance에 저장할 데이터등 SRP를 지향한 데이터테이블
+          | -- InitializeTable // ObjectPooling Initialize 를 위한 DataTable
+          | -- GetPoolForStageTable // Satge마다 적 종류, 개체수를 저장한 DataTable
+          | -- CardDataTable // 패시브카드의 타입, 레어도, 적용값을 저장한 DataTable
 ### GameMode
  - EnemyObjectPool
    - ObjectPooling 및 DataTable을 사용한 재사용성 및 최적화 기반의 설계
