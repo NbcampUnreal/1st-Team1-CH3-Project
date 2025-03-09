@@ -20,6 +20,7 @@ class GUNFIREPARAGON_API UIngameCrossHairs : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	UFUNCTION(BlueprintCallable)
 	void SetCrossHairSpread(float Sperad);

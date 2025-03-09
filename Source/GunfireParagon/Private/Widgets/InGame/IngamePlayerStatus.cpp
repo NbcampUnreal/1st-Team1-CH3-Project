@@ -14,6 +14,7 @@ void UIngamePlayerStatus::NativeOnInitialized()
 	if (!CurrentTextures)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Texture DataAsset Is Missing"));
+		// return; // PlayerBase 기반의 확장된 하위 클래스들이 존재할 경우에는 DA를 사용할 계획. 현재는 사용하지 않는 DA이기때문에 Return하지않았습니다.
 	}
 }
 
@@ -22,6 +23,18 @@ void UIngamePlayerStatus::NativeConstruct()
 	Super::NativeConstruct();
 
 	UpdatePlayerState();
+}
+
+void UIngamePlayerStatus::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	ShieldBar = nullptr;
+	ShieldTextBlock = nullptr;
+	HPBar = nullptr;
+	HPTextBlock = nullptr;
+	CurrentPlayerTexture = nullptr;
+	CurrentTextures = nullptr;
 }
 
 void UIngamePlayerStatus::UpdatePlayerState()

@@ -22,7 +22,7 @@ class GUNFIREPARAGON_API UIngamePlayerStatus : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
-
+	virtual void NativeDestruct() override;
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ShieldBar;

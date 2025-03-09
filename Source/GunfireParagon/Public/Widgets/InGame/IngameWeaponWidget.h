@@ -21,7 +21,7 @@ class GUNFIREPARAGON_API UIngameWeaponWidget : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
-
+	virtual void NativeDestruct() override;
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* AmmoTextBlock;

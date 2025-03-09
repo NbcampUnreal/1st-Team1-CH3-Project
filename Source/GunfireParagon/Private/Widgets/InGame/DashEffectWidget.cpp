@@ -21,6 +21,7 @@ void UDashEffectWidget::NativeConstruct()
 void UDashEffectWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+	DashImage = nullptr;
 }
 
 void UDashEffectWidget::ConvertVisibility(bool IsDash)

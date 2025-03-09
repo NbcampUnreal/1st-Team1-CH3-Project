@@ -53,8 +53,6 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* TimeTextBlock;
 
-
-	// TODO : Monster Texture, Potal Texture, Player Texture 고려해보기. 각각의 위젯클래스로 구현할건지 어떻게 할건지
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Textures")
 	class UInGameMinimapDataAsset* CurrentTextures;
 

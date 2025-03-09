@@ -24,6 +24,16 @@ void USelectObjectBaseWidget::NativeConstruct()
 void USelectObjectBaseWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+
+	if (SelectButton && SelectButton->OnClicked.IsBound())
+	{
+		SelectButton->OnClicked.RemoveDynamic(this, &USelectObjectBaseWidget::OnClickedSelectButton);
+		SelectButton = nullptr;
+	}
+
+	ObjectImage = nullptr;
+	NameText = nullptr;
+	DescriptionText = nullptr;
 }
 
 void USelectObjectBaseWidget::OnClickedSelectButton()

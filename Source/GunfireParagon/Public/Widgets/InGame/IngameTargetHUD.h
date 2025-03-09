@@ -22,7 +22,7 @@ class GUNFIREPARAGON_API UIngameTargetHUD : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
-
+	virtual void NativeDestruct() override;
 	
 	UFUNCTION()
 	void UpdateHP(float Current, float Max);

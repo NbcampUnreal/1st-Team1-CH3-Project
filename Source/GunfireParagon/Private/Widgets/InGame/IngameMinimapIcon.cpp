@@ -13,6 +13,13 @@ void UIngameMinimapIcon::NativeConstruct()
 
 }
 
+void UIngameMinimapIcon::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	IconImage = nullptr;
+}
+
 void UIngameMinimapIcon::SetWorldLocation(FVector2D RenderPosition)
 {
 	SetRenderTranslation(RenderPosition);

@@ -36,6 +36,24 @@ void UIngameSelectWidget::NativeConstruct()
 void UIngameSelectWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+
+	if (HorizontalCardBox)
+	{
+		for (UWidget* Widget : HorizontalCardBox->GetAllChildren())
+		{
+			if (UCardWidget* CardWidget = Cast<UCardWidget>(Widget))
+			{
+				if (CardWidget->SelectWidget.IsBound())
+				{
+					CardWidget->SelectWidget.RemoveDynamic(this, &UIngameSelectWidget::CloseWidget);
+				}
+			}
+		}
+		HorizontalCardBox->ClearChildren();
+	}
+
+	UsedEffects.Empty();
+	HorizontalCardBox = nullptr;
 }
 
 void UIngameSelectWidget::PopulateCardWidget()
@@ -50,6 +68,8 @@ void UIngameSelectWidget::PopulateCardWidget()
 	for (int i = 0; i < CreateWidgetAmount; i++)
 	{
 		UCardWidget* CardWidget = CreateWidget<UCardWidget>(this, CardWidgetClass);
+		if (!CardWidget) continue;
+
 		CardWidget->FindCardByEnum(RandCardEffect(), RandCardGrade());
 
 		if (UHorizontalBoxSlot* CardSlot = Cast<UHorizontalBoxSlot>(HorizontalCardBox->AddChild(CardWidget)))
@@ -99,5 +119,4 @@ void UIngameSelectWidget::CloseWidget()
 	}
 	SetIsFocusable(false);
 	RemoveFromParent();
-	//RemoveFromViewport();
 }

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Widgets\InGame\SelectObjectBaseWidget.h"
-#include "Widgets\UIObjectBaseData.h"
+#include "Widgets\DataAssets\UIObjectBaseData.h"
 #include "GameMode\CardData.h"
 #include "CardWidget.generated.h"
 

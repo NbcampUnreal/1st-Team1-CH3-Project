@@ -8,7 +8,7 @@
 #include "Widgets\InGame\IngameCrossHairs.h"
 #include "Widgets\InGame\DashEffectWidget.h"
 #include "Player/PlayerCharacter.h"
-#include "Widgets\MinimapTracker.h"
+#include "Widgets\Components\MinimapTracker.h"
 #include "Actor\Bullet\BulletBase.h"
 
 void UIngameMainWidget::NativeOnInitialized()
@@ -98,7 +98,49 @@ void UIngameMainWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
 
-	ABulletBase::OnHitMarker.RemoveDynamic(this, &UIngameMainWidget::OnHitMarkerBinding);
+	if (APlayerCharacter* CurrentPlayer = Cast<APlayerCharacter>(GetOwningPlayerPawn()))
+	{
+		if (CurrentPlayer->OnHealthChanged.IsBound())
+		{
+			CurrentPlayer->OnHealthChanged.RemoveDynamic(this, &UIngameMainWidget::OnPlayerHealthBinding);
+		}
+		if (CurrentPlayer->OnShieldChanged.IsBound())
+		{
+			CurrentPlayer->OnShieldChanged.RemoveDynamic(this, &UIngameMainWidget::OnPlayerShieldBinding);
+		}
+		if (CurrentPlayer->OnAmmoChanged.IsBound())
+		{
+			CurrentPlayer->OnAmmoChanged.RemoveDynamic(this, &UIngameMainWidget::OnWeaponAmmoBinding);
+		}
+		if (CurrentPlayer->OnDashState.IsBound())
+		{
+			CurrentPlayer->OnDashState.RemoveDynamic(this, &UIngameMainWidget::OnPlayerIsDashBinding);
+		}
+		if (CurrentPlayer->OnDashCoolDown.IsBound())
+		{
+			CurrentPlayer->OnDashCoolDown.RemoveDynamic(this, &UIngameMainWidget::OnPlayerDashCooldownBinding);
+		}
+		if (CurrentPlayer->OnWeaponClass.IsBound())
+		{
+			CurrentPlayer->OnWeaponClass.RemoveDynamic(this, &UIngameMainWidget::OnWeaponTextureBinding);
+		}
+	}
+
+	if (UMinimapTracker::OnActorLocation.IsBound())
+	{
+		UMinimapTracker::OnActorLocation.RemoveDynamic(this, &UIngameMainWidget::OnMinimapUpdated);
+	}
+
+	if (ABulletBase::OnHitMarker.IsBound())
+	{
+		ABulletBase::OnHitMarker.RemoveDynamic(this, &UIngameMainWidget::OnHitMarkerBinding);
+	}
+
+	MinimapWidget = nullptr;
+	PlayerStatusWidget = nullptr;
+	WeaponStatusWidget = nullptr;
+	CrossHairWidget = nullptr;
+	DashWidget = nullptr;
 }
 
 void UIngameMainWidget::OnPlayerHealthBinding(float CurrentHP, float MaxHP)
@@ -134,6 +176,8 @@ void UIngameMainWidget::OnWeaponTextureBinding(ACGunBase* CurrentWeapon)
 
 void UIngameMainWidget::OnMinimapUpdated(ACharacter* Target, float Distance)
 {
+	if (!Target) return;
+
 	if (Target->GetCapsuleComponent()->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
 	{
 		MinimapWidget->RemoveMinimapIcon(Target);

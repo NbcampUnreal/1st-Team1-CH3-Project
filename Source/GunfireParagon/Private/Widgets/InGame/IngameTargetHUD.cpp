@@ -16,6 +16,12 @@ void UIngameTargetHUD::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+void UIngameTargetHUD::NativeDestruct()
+{
+	MonsterHPBar = nullptr;
+	MonsterTextBlock = nullptr;
+}
+
 void UIngameTargetHUD::UpdateHP(float Current, float Max)
 {
 	if (MonsterHPBar)

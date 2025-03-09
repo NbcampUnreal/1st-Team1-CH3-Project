@@ -24,14 +24,20 @@ void UInGameMinimap::NativeOnInitialized()
 void UInGameMinimap::NativeConstruct()
 {
 	Super::NativeConstruct();
-	PlayerCharacter = GetWorld()->GetFirstPlayerController()->GetPawn<ACharacter>();
 
 	if (GetWorld())
 	{
-		LevelEntryTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
-	}
+		PlayerCharacter = GetWorld()->GetFirstPlayerController()->GetPawn<ACharacter>();
+		if (!PlayerCharacter)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter is nullptr!"));
+			return;
+		}
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_UpdateTime, this, &UInGameMinimap::UpdatePlayTime, 1.0f, true);
+		LevelEntryTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_UpdateTime, this, &UInGameMinimap::UpdatePlayTime, 1.0f, true);
+	}
 
 	UpdatePlayTime();
 	UpdateLevelName();
@@ -48,6 +54,27 @@ void UInGameMinimap::NativeDestruct()
 {
 	Super::NativeDestruct();
 
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_UpdateTime);
+	}
+
+	for (auto& Elem : ActiveIcons)
+	{
+		if (Elem.Value)
+		{
+			Elem.Value->RemoveFromParent();
+		}
+	}
+	ActiveIcons.Empty();
+
+	RenderCanvas = nullptr;
+	PlayerCharacter = nullptr;
+	MapNameTextBlock = nullptr;
+	TimeTextBlock = nullptr;
+	CurrentTextures = nullptr;
+	PlayerIconTexture = nullptr;
+	EnemyIconTexture = nullptr;
 }
 
 void UInGameMinimap::UpdatePlayTime()
@@ -105,9 +132,7 @@ void UInGameMinimap::RemoveMinimapIcon(ACharacter* Target)
 		if (UIngameMinimapIcon* Icon = *IconPtr)
 		{
 			Icon->SetVisibility(ESlateVisibility::Hidden);
-			//Icon->RemoveFromParent();
 		}
-		//ActiveIcons.Remove(Target);
 	}
 }
 

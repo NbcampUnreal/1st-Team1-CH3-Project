@@ -25,6 +25,25 @@ void UIngameCrossHairs::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+void UIngameCrossHairs::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	CrossHairs.Empty();
+	Animations.Empty();
+
+	CrossHairTop = nullptr;
+	CrossHairRight = nullptr;
+	CrossHairLeft = nullptr;
+	CrossHairBottom = nullptr;
+	AnimationTop = nullptr;
+	AnimationRight = nullptr;
+	AnimationLeft = nullptr;
+	AnimationBottom = nullptr;
+
+	HitMarkerAnim = nullptr;
+}
+
 void UIngameCrossHairs::SetCrossHairSpread(float Sperad)
 {
 	for (const auto& Pair : CrossHairs)

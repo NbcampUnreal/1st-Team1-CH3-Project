@@ -31,6 +31,15 @@ void UCardWidget::NativeConstruct()
 void UCardWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+
+	if (SelectButton && SelectButton->OnClicked.IsBound())
+	{
+		SelectButton->OnClicked.RemoveDynamic(this, &UCardWidget::ActivateObject);
+	}
+
+	SelectWidget.Clear();
+
+	UICardInfoDataTable = nullptr;
 }
 
 void UCardWidget::FindCardByEnum(ECardEffectType CardType, ECardRarity CardGrade)

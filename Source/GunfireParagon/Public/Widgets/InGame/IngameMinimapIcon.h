@@ -16,7 +16,7 @@ class GUNFIREPARAGON_API UIngameMinimapIcon : public UUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
-
+	virtual void NativeDestruct() override;
 public:
 	UFUNCTION()
 	void SetWorldLocation(FVector2D RenderPosition);

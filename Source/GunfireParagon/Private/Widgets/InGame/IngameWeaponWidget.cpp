@@ -24,6 +24,22 @@ void UIngameWeaponWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+void UIngameWeaponWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	AmmoTextBlock = nullptr;
+	GrenadeTextBlock = nullptr;
+	GrenadeTexture = nullptr;
+	WeaponTexture = nullptr;
+	SkillTexture = nullptr;
+	DashCoolDownBar = nullptr;
+
+	DashCoolDownAnim = nullptr;
+
+	WeaponDataAssets = nullptr;
+}
+
 void UIngameWeaponWidget::UpdateAmmoState()
 {
 	if (AmmoTextBlock)
