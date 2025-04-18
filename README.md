@@ -8,9 +8,10 @@
 ## 목적
 - 객체지향과 디자인패턴을 의미있게 적용
 - 원활환 협업을 위한 Wiki 작성된 깃 컨벤션 및 코드컨벤션 적용
-- 코드 가독성 및 확장성을 고려하여 작성
-- Object Polling 및 GC를 통한 최적화된 코드 및 효율적인 메모리 사용
-- 유효성검사 및 로깅을 통한 유지보수성 및 안정성을 향상시킨 코드 작성
+- 템플릿을 활용하여 블루프린트, C++ 을 이용해 게임확장
+- GameSession, RPC, Replecates를 이용하여 Multiplayer Game 환경조성 
+- 멀티플레이 환경에서 작동하기 위해 게임 최적화 적용
+- 유효성검사 및 로깅을 통한 유지보수성 및 안정성을 향상시킨 코드 및 블루프린트 작성
 
 <br>
 
@@ -20,16 +21,16 @@
 <br>
 
 ## 프로젝트 소개
-### Project : Gunfire Paragon <br>
-### Duration : 2025.02.17 ~ 2025.03.07 <br>
+### Project : Gladiators Fantasy <br>
+### Duration : 2025.03.31 ~ 2025.04.18 <br>
 ### Project Convention <br>
 - Code   : PascalCase
 - Git    : Rebase And Merge
 - Directory && Commit && Unreal
-- Wiki https://github.com/NbcampUnreal/1st-Team1-CH3-Project/wiki
+- Wiki https://github.com/NbcampUnreal/1st-Team5-CH4-Project
 
 ### Desctiption Part / Email or Blog Link <br>
-- Single Player FPS Rogue-Like
+- Single Player Hyper Fighting Game
 - Player   : 이찬민 / [개발블로그](https://velog.io/@chanmin60/posts) <br>
 - Actor    : 강창훈 / [이메일 주소](rkdckdgns97@gmail.com) <br>
 - GameMode : 정혜창 / [개발블로그](https://velog.io/@hch9097/posts) <br>
